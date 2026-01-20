@@ -1,0 +1,66 @@
+name: Auth Service CI
+
+on:
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'auth-service/**'
+      - '.github/workflows/auth-service.yml'
+  pull_request:
+    branches: [main, master, develop]
+    paths:
+      - 'auth-service/**'
+      - '.github/workflows/auth-service.yml'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./auth-service
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: auth-service/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+        continue-on-error: false
+
+      - name: Check TypeScript
+        run: npx tsc --noEmit
+        continue-on-error: false
+
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+          DATABASE_URL: postgres://test:test@localhost:5432/test
+          BETTER_AUTH_SECRET: test-secret-for-ci-build-only-min-32-chars
+          BETTER_AUTH_URL: http://localhost:3001
+          BETTER_AUTH_JWT_SECRET: test-jwt-secret-for-ci-min-32-chars
+          AUTH_JWT_SECRET: test-jwt-secret-for-ci-min-32-chars
+          CORS_ORIGINS: http://localhost:3000
+
+      - name: Check build output
+        run: |
+          if [ ! -d ".next" ]; then
+            echo "Build failed: .next directory not found"
+            exit 1
+          fi
+          echo "Build successful"

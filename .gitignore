@@ -1,0 +1,78 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+# Note: .env.example should be committed (template file)
+
+# Java
+*.class
+*.log
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+target/
+.mvn/
+mvnw
+mvnw.cmd
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.npm
+.yarn/
+.next/
+next-env.d.ts
+out/
+dist/
+build/
+.vercel
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+.project
+.classpath
+.settings/
+
+# Docker
+*.log
+
+# MinIO data (persistent storage)
+# Ignore MinIO system files (not needed for serving images)
+data/minio/.minio.sys/
+
+# Always commit bucket directories and their contents (needed for images)
+# These folders should always be tracked in git
+!data/minio/passion-jerseys-products/
+!data/minio/passion-jerseys-invoices/
+!data/minio/passion-jerseys-products/**
+!data/minio/passion-jerseys-invoices/**
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.cache
+
+# Playwright E2E Testing
+e2e/node_modules/
+e2e/playwright-report/
+e2e/test-results/
+e2e/.playwright/
+
+# Digital Ocean App Spec (should not be in git)
+.do/
