@@ -1,0 +1,83 @@
+.resume {
+  min-height: 100vh;
+  background: #141516;
+  padding: 120px 2rem 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .content {
+    color: white;
+  }
+
+  .title {
+    font-size: 3.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+
+    @media (max-width: 768px) {
+      font-size: 2.5rem;
+    }
+  }
+
+  .subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 3rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .resumePreview {
+    margin: 3rem 0;
+    display: flex;
+    justify-content: center;
+
+    .previewBox {
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 3rem 4rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      transition: all 0.3s ease;
+
+      &:hover {
+        border-color: #2a2b2c;
+        background: rgba(42, 43, 44, 0.1);
+      }
+
+      .icon {
+        width: 80px;
+        height: 80px;
+        color: #2a2b2c;
+      }
+
+      p {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+      }
+    }
+  }
+
+  .buttonWrapper {
+    display: inline-block;
+    cursor: pointer;
+    
+    p {
+      color: white;
+      font-weight: 500;
+      font-size: 1rem;
+    }
+  }
+}

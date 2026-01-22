@@ -2,20 +2,18 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { authClient } from "@/lib/auth";
 import { validateEmail } from "@/lib/utils";
 import { formatAuthErrorMessage } from "@/lib/auth";
 import { parseAuthError } from "@shared/lib/auth/parse-error";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { motion } from "framer-motion";
+import styles from "./page.module.scss";
 
 function LoginForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -103,14 +101,12 @@ function LoginForm() {
         result = await authClient.signIn.email({
           email: emailOrUsername.trim(),
           password,
-          rememberMe,
         });
       } else {
         // Sign in with username
         result = await authClient.signIn.username({
           username: emailOrUsername.trim(),
           password,
-          rememberMe,
         });
       }
 
@@ -196,105 +192,94 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-start justify-center bg-gray-50 pt-16 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
-          </h2>
+    <div className={styles.loginPage}>
+      <motion.div 
+        className={styles.loginContainer}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.6, -0.05, 0.01, 0.99] }}
+      >
+        <div className={styles.header}>
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            Welcome
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            Sign in to continue
+          </motion.p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          {error && (
-            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md text-sm">
-              {error}
-            </div>
-          )}
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="emailOrUsername" className="sr-only">
-                Email or Username
-              </label>
-              <Input
+
+        <motion.div 
+          className={styles.formWrapper}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <form onSubmit={handleLogin}>
+            {error && (
+              <motion.div 
+                className={styles.errorMessage}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                {error}
+              </motion.div>
+            )}
+
+            <div className={styles.formGroup}>
+              <label htmlFor="emailOrUsername">Email or Username</label>
+              <input
                 id="emailOrUsername"
                 name="emailOrUsername"
                 type="text"
                 autoComplete="username"
                 required
-                placeholder="Email or Username"
+                placeholder="Enter your email or username"
                 value={emailOrUsername}
                 onChange={(e) => setEmailOrUsername(e.target.value)}
               />
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <Input
+
+            <div className={styles.formGroup}>
+              <label htmlFor="password">Password</label>
+              <input
                 id="password"
                 name="password"
                 type="password"
                 autoComplete="current-password"
                 required
-                placeholder="Password"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-          </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-              />
-              <label
-                htmlFor="remember-me"
-                className="ml-2 block text-sm text-gray-900"
-              >
-                Remember me
-              </label>
-            </div>
-            <div className="text-sm">
-              <Link href="/forgot-password" className="font-medium text-primary hover:text-primary/90">
-                Forgot password?
-              </Link>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <Button
+            <button
               type="submit"
               disabled={loading}
-              className="w-full"
+              className={styles.submitButton}
             >
               {loading ? "Signing in..." : "Sign in"}
-            </Button>
+            </button>
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  Or continue with
-                </span>
-              </div>
+            <div className={styles.divider}>
+              <span>Or continue with</span>
             </div>
 
-            <Button
+            <button
               type="button"
-              variant="outline"
               onClick={async () => {
                 try {
                   const redirectParam = searchParams.get("redirect");
                   const redirectUrl = validateRedirectUrl(redirectParam);
                   
-                  // callbackURL should point to the frontend where user should land after OAuth
                   const callbackURL =
                     typeof window !== "undefined"
                       ? `${window.location.origin}${redirectUrl}`
@@ -309,9 +294,9 @@ function LoginForm() {
                   setError("Failed to sign in with Google. Please try again.");
                 }
               }}
-              className="w-full flex items-center justify-center gap-3"
+              className={styles.googleButton}
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <svg viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -330,16 +315,10 @@ function LoginForm() {
                 />
               </svg>
               Sign in with Google
-            </Button>
-          </div>
-
-          <div className="text-center">
-            <Link href="/signup" className="text-primary hover:text-primary/90 font-medium">
-              Don't have an account? Sign up
-            </Link>
-          </div>
-        </form>
-      </div>
+            </button>
+          </form>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

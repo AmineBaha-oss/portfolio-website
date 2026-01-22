@@ -1,66 +1,94 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { authClient } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
+import styles from './page.module.scss';
+import { useEffect, useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
+import Preloader from '../components/portfolio/Preloader';
+import Navigation from '../components/portfolio/Navigation';
+import Landing from '../components/portfolio/Landing';
+import Skills from '../components/portfolio/Skills';
+import Projects from '../components/portfolio/Projects';
+import WorkExperience from '../components/portfolio/WorkExperience';
+import Education from '../components/portfolio/Education';
+import Resume from '../components/portfolio/Resume';
+import Hobbies from '../components/portfolio/Hobbies';
+import Testimonials from '../components/portfolio/Testimonials';
+import Description from '../components/portfolio/Description';
+import SlidingImages from '../components/portfolio/SlidingImages';
+import Contact from '../components/portfolio/Contact';
 
 export default function HomePage() {
-  const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const session = await authClient.getSession();
-        if (session.data?.session) {
-          setIsAuthenticated(true);
-        }
-      } catch (error) {
-        // Not authenticated
-      } finally {
-        setLoading(false);
-      }
-    };
+    (async () => {
+      const LocomotiveScroll = (await import('locomotive-scroll')).default;
+      
+      const locomotiveScroll = new LocomotiveScroll({
+        lenisOptions: {
+          wrapper: window,
+          content: document.documentElement,
+          lerp: 0.1,
+          duration: 1.2,
+          orientation: 'vertical',
+          gestureOrientation: 'vertical',
+          smoothWheel: true,
+          wheelMultiplier: 1,
+          touchMultiplier: 2,
+          normalizeWheel: true,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        },
+      });
 
-    checkAuth();
+      setTimeout(() => {
+        setIsLoading(false);
+        document.body.style.cursor = 'default';
+        window.scrollTo(0, 0);
+      }, 2000);
+
+      return () => {
+        locomotiveScroll.destroy();
+      };
+    })();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
-  }
-
-  if (isAuthenticated) {
-    router.push("/dashboard");
-    return null;
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center max-w-2xl px-4">
-        <h1 className="text-5xl font-bold mb-4 text-foreground">Portfolio Website</h1>
-        <p className="text-xl text-muted-foreground mb-8">
-          Welcome to your portfolio. Showcase your work and connect with the world.
-        </p>
-        <div className="flex gap-4 justify-center">
-          <Link href="/login">
-            <Button size="lg" className="px-8">
-              Login
-            </Button>
-          </Link>
-          <Link href="/signup">
-            <Button size="lg" variant="outline" className="px-8">
-              Sign Up
-            </Button>
-          </Link>
-        </div>
+    <main className={styles.main}>
+      <AnimatePresence mode='wait'>
+        {isLoading && <Preloader />}
+      </AnimatePresence>
+      
+      {!isLoading && <Navigation />}
+      
+      <div id="home">
+        <Landing />
       </div>
-    </div>
+      <Description />
+      <div id="skills">
+        <Skills />
+      </div>
+      <div id="projects">
+        <Projects />
+      </div>
+      <div id="experience">
+        <WorkExperience />
+      </div>
+      <div id="education">
+        <Education />
+      </div>
+      <div id="resume">
+        <Resume />
+      </div>
+      <div id="hobbies">
+        <Hobbies />
+      </div>
+      <div id="testimonials">
+        <Testimonials />
+      </div>
+      <SlidingImages />
+      <div id="contact">
+        <Contact />
+      </div>
+    </main>
   );
 }
