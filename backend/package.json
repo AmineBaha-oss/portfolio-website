@@ -7,7 +7,9 @@
     "dev": "next dev -p 8080",
     "build": "next build",
     "start": "next start -p 8080",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
     "drizzle-orm": "^0.41.0",
