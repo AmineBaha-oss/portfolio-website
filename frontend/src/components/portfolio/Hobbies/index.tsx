@@ -41,8 +41,8 @@ const hobbies = [
 
 const scaleAnimation = {
     initial: {scale: 0, x:"-50%", y:"-50%"},
-    enter: {scale: 1, x:"-50%", y:"-50%", transition: {duration: 0.4, ease: [0.76, 0, 0.24, 1]}},
-    closed: {scale: 0, x:"-50%", y:"-50%", transition: {duration: 0.4, ease: [0.32, 0, 0.67, 0]}}
+    enter: {scale: 1, x:"-50%", y:"-50%", transition: {duration: 0.4, ease: [0.76, 0, 0.24, 1] as any}},
+    closed: {scale: 0, x:"-50%", y:"-50%", transition: {duration: 0.4, ease: [0.32, 0, 0.67, 0] as any}}
 }
 
 export default function Home() {
@@ -53,12 +53,12 @@ export default function Home() {
   const cursor = useRef(null);
   const cursorLabel = useRef(null);
 
-  let xMoveContainer = useRef(null);
-  let yMoveContainer = useRef(null);
-  let xMoveCursor = useRef(null);
-  let yMoveCursor = useRef(null);
-  let xMoveCursorLabel = useRef(null);
-  let yMoveCursorLabel = useRef(null);
+  const xMoveContainer = useRef<any>(null);
+  const yMoveContainer = useRef<any>(null);
+  const xMoveCursor = useRef<any>(null);
+  const yMoveCursor = useRef<any>(null);
+  const xMoveCursorLabel = useRef<any>(null);
+  const yMoveCursorLabel = useRef<any>(null);
 
   useEffect( () => {
     //Move Container
@@ -72,7 +72,7 @@ export default function Home() {
     yMoveCursorLabel.current = gsap.quickTo(cursorLabel.current, "top", {duration: 0.45, ease: "power3"})
   }, [])
 
-  const moveItems = (x, y) => {
+  const moveItems = (x: number, y: number) => {
     xMoveContainer.current(x)
     yMoveContainer.current(y)
     xMoveCursor.current(x)
@@ -80,7 +80,7 @@ export default function Home() {
     xMoveCursorLabel.current(x)
     yMoveCursorLabel.current(y)
   }
-  const manageModal = (active, index, x, y) => {
+  const manageModal = (active: boolean, index: number, x: number, y: number) => {
     moveItems(x, y)
     setModal({active, index})
   }
