@@ -3,7 +3,7 @@ import React from 'react'
 import styles from './style.module.scss';
 import { useTranslations } from '@/lib/i18n/hooks';
 
-export default function index({index, title, manageModal}) {
+export default function Project({index, title, manageModal}) {
     const { t } = useTranslations();
 
     return (
