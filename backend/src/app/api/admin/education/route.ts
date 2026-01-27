@@ -36,27 +36,22 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { degree, institution, location, description, startDate, endDate, gpa, order } = body;
 
-    // Validation
-    if (!validateNotEmpty(degree)) {
-      return NextResponse.json(
-        { error: "Degree is required" },
-        { status: 400 }
-      );
-    }
-
-    if (!validateNotEmpty(institution)) {
-      return NextResponse.json(
-        { error: "Institution is required" },
-        { status: 400 }
-      );
-    }
-
-    if (!validateNotEmpty(location)) {
-      return NextResponse.json(
-        { error: "Location is required" },
-        { status: 400 }
-      );
-    }
+    const requireBilingual = (val: unknown, name: string) => {
+      if (!val || typeof val !== "object" || !("en" in val)) {
+        return NextResponse.json({ error: `${name} (English) is required` }, { status: 400 });
+      }
+      const o = val as { en?: string; fr?: string };
+      if (!validateNotEmpty(String(o.en ?? ""))) {
+        return NextResponse.json({ error: `${name} (English) is required` }, { status: 400 });
+      }
+      return null;
+    };
+    let err = requireBilingual(degree, "Degree");
+    if (err) return err;
+    err = requireBilingual(institution, "Institution");
+    if (err) return err;
+    err = requireBilingual(location, "Location");
+    if (err) return err;
 
     if (!validateDate(startDate)) {
       return NextResponse.json(
@@ -72,21 +67,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Sanitize
-    const sanitizedDegree = sanitizeText(degree);
-    const sanitizedInstitution = sanitizeText(institution);
-    const sanitizedLocation = sanitizeText(location);
-    const sanitizedDescription = description ? sanitizeText(description) : null;
-    const sanitizedGpa = gpa ? sanitizeText(gpa) : null;
-    const orderValue = order ? parseInt(order, 10) : 0;
+    const toBilingual = (o: { en?: string; fr?: string }) => ({
+      en: sanitizeText(String(o.en ?? "").trim()),
+      fr: sanitizeText(String(o.fr ?? "").trim()),
+    });
+    const toBilingualOpt = (o: { en?: string; fr?: string } | null | undefined) =>
+      o && typeof o === "object" && "en" in o ? toBilingual(o as { en?: string; fr?: string }) : null;
+    const orderValue = order != null ? parseInt(String(order), 10) : 0;
+    const sanitizedGpa = gpa ? sanitizeText(String(gpa)) : null;
 
     const [newEducation] = await db
       .insert(education)
       .values({
-        degree: sanitizedDegree,
-        institution: sanitizedInstitution,
-        location: sanitizedLocation,
-        description: sanitizedDescription,
+        degree: toBilingual(degree as { en?: string; fr?: string }),
+        institution: toBilingual(institution as { en?: string; fr?: string }),
+        location: toBilingual(location as { en?: string; fr?: string }),
+        description: toBilingualOpt(description),
         startDate,
         endDate: endDate || null,
         gpa: sanitizedGpa,

@@ -33,10 +33,10 @@ export const projects = pgTable("projects", {
 // Work Experience Table
 export const workExperience = pgTable("work_experience", {
   id: uuid("id").defaultRandom().primaryKey(),
-  position: text("position").notNull(),
-  company: text("company").notNull(),
-  location: text("location").notNull(),
-  description: text("description").notNull(),
+  position: jsonb("position").$type<{ en: string; fr: string }>().notNull(),
+  company: jsonb("company").$type<{ en: string; fr: string }>().notNull(),
+  location: jsonb("location").$type<{ en: string; fr: string }>().notNull(),
+  description: jsonb("description").$type<{ en: string; fr: string }>().notNull(),
   startDate: date("start_date").notNull(),
   endDate: date("end_date"),
   current: boolean("current").notNull().default(false),
@@ -48,10 +48,10 @@ export const workExperience = pgTable("work_experience", {
 // Education Table
 export const education = pgTable("education", {
   id: uuid("id").defaultRandom().primaryKey(),
-  degree: text("degree").notNull(),
-  institution: text("institution").notNull(),
-  location: text("location").notNull(),
-  description: text("description"),
+  degree: jsonb("degree").$type<{ en: string; fr: string }>().notNull(),
+  institution: jsonb("institution").$type<{ en: string; fr: string }>().notNull(),
+  location: jsonb("location").$type<{ en: string; fr: string }>().notNull(),
+  description: jsonb("description").$type<{ en: string; fr: string }>(),
   startDate: date("start_date").notNull(),
   endDate: date("end_date"),
   gpa: text("gpa"),
@@ -63,8 +63,8 @@ export const education = pgTable("education", {
 // Hobbies Table
 export const hobbies = pgTable("hobbies", {
   id: uuid("id").defaultRandom().primaryKey(),
-  title: text("title").notNull(),
-  description: text("description"),
+  title: jsonb("title").$type<{ en: string; fr: string }>().notNull(),
+  description: jsonb("description").$type<{ en: string; fr: string }>(),
   imageUrl: text("image_url"),
   color: text("color"),
   order: integer("order").notNull().default(0),

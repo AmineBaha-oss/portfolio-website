@@ -1,19 +1,87 @@
 'use client';
 
+import { useState, useEffect, useMemo } from 'react';
 import styles from './style.module.scss';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/lib/i18n/context';
+import { getEducation, type Education } from '@/lib/api/client';
 
-const educationData = [
-  {
-    degree: 'Diplôme d\'études collégiales (DEC) — Computer Science Technology',
-    institution: 'Champlain College Saint-Lambert',
-    period: 'Aug 2023 - Jun 2026 (Expected)',
-    description: 'Techniques de l\'informatique / Computer Science Technology',
-    achievements: ['Software Development', 'Database Design', 'Agile/Scrum methodologies']
-  }
-];
+function formatDate(dateString: string, locale: string): string {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US', { 
+    month: 'short', 
+    year: 'numeric' 
+  });
+}
 
 export default function Education() {
+  const { locale } = useLanguage();
+  const [education, setEducation] = useState<Education[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchEducation = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await getEducation(locale);
+        setEducation(response.education);
+      } catch (err: any) {
+        console.error('Error fetching education:', err);
+        setError(err.message);
+        setEducation([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEducation();
+  }, [locale]);
+
+  const educationData = useMemo(() => {
+    return education.map((edu) => {
+      const period = edu.endDate 
+        ? `${formatDate(edu.startDate, locale)} - ${formatDate(edu.endDate, locale)}`
+        : `${formatDate(edu.startDate, locale)} - ${locale === 'fr' ? 'Présent' : 'Present'}`;
+      
+      // Split description by newlines for achievements, or use as single description
+      const descriptionLines = edu.description ? edu.description.split('\n').filter(line => line.trim()) : [];
+      const description = descriptionLines[0] || '';
+      const achievements = descriptionLines.length > 1 ? descriptionLines.slice(1) : [];
+
+      return {
+        degree: edu.degree,
+        institution: edu.institution,
+        period,
+        description,
+        achievements,
+      };
+    });
+  }, [education, locale]);
+  if (loading) {
+    return (
+      <section id="education" className={styles.education}>
+        <div className={styles.container}>
+          <h2 className={styles.title}>Education</h2>
+          <p className={styles.subtitle}>Loading...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section id="education" className={styles.education}>
+        <div className={styles.container}>
+          <h2 className={styles.title}>Education</h2>
+          <p className={styles.subtitle}>Error loading education. Please try again later.</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="education" className={styles.education}>
       <div className={styles.container}>
@@ -28,7 +96,7 @@ export default function Education() {
         </motion.div>
 
         <div className={styles.educationGrid}>
-          {educationData.map((edu, index) => (
+          {educationData.length > 0 ? educationData.map((edu, index) => (
             <motion.div
               key={index}
               className={styles.educationCard}
@@ -47,7 +115,11 @@ export default function Education() {
                 ))}
               </ul>
             </motion.div>
-          ))}
+          )) : (
+            <p style={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center', padding: '2rem' }}>
+              No education information available.
+            </p>
+          )}
         </div>
       </div>
     </section>

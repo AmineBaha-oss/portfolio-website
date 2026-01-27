@@ -38,41 +38,47 @@ export async function PUT(
       return NextResponse.json({ error: "Education entry not found" }, { status: 404 });
     }
 
+    const toBilingual = (o: { en?: string; fr?: string }) => ({
+      en: sanitizeText(String(o.en ?? "").trim()),
+      fr: sanitizeText(String(o.fr ?? "").trim()),
+    });
+    const requireBilingual = (val: unknown) => {
+      if (!val || typeof val !== "object" || !("en" in val)) return false;
+      return validateNotEmpty(String((val as { en?: string }).en ?? ""));
+    };
+
     // Build update object
     const updateData: any = {};
 
     if (body.degree !== undefined) {
-      if (!validateNotEmpty(body.degree)) {
-        return NextResponse.json(
-          { error: "Degree cannot be empty" },
-          { status: 400 }
-        );
+      if (!requireBilingual(body.degree)) {
+        return NextResponse.json({ error: "Degree (English) is required" }, { status: 400 });
       }
-      updateData.degree = sanitizeText(body.degree);
+      updateData.degree = toBilingual(body.degree as { en?: string; fr?: string });
     }
 
     if (body.institution !== undefined) {
-      if (!validateNotEmpty(body.institution)) {
-        return NextResponse.json(
-          { error: "Institution cannot be empty" },
-          { status: 400 }
-        );
+      if (!requireBilingual(body.institution)) {
+        return NextResponse.json({ error: "Institution (English) is required" }, { status: 400 });
       }
-      updateData.institution = sanitizeText(body.institution);
+      updateData.institution = toBilingual(body.institution as { en?: string; fr?: string });
     }
 
     if (body.location !== undefined) {
-      if (!validateNotEmpty(body.location)) {
-        return NextResponse.json(
-          { error: "Location cannot be empty" },
-          { status: 400 }
-        );
+      if (!requireBilingual(body.location)) {
+        return NextResponse.json({ error: "Location (English) is required" }, { status: 400 });
       }
-      updateData.location = sanitizeText(body.location);
+      updateData.location = toBilingual(body.location as { en?: string; fr?: string });
     }
 
     if (body.description !== undefined) {
-      updateData.description = body.description ? sanitizeText(body.description) : null;
+      if (body.description == null) {
+        updateData.description = null;
+      } else if (typeof body.description === "object" && body.description !== null && "en" in body.description) {
+        updateData.description = toBilingual(body.description as { en?: string; fr?: string });
+      } else {
+        updateData.description = null;
+      }
     }
 
     if (body.startDate !== undefined) {

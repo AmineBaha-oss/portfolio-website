@@ -1,17 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, hobbies } from "@/lib/db";
-import { validateLanguage } from "@/lib/utils/validation";
+import { validateLanguage, extractLanguageFromJsonb } from "@/lib/utils/validation";
 import { asc } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const lang = validateLanguage(searchParams.get("lang")); // For consistency, even though content is single-language
+    const lang = validateLanguage(searchParams.get("lang"));
 
-    const hobbiesList = await db
+    const rows = await db
       .select()
       .from(hobbies)
       .orderBy(asc(hobbies.order));
+
+    const hobbiesList = rows.map((h) => ({
+      ...h,
+      title: extractLanguageFromJsonb(h.title, lang),
+      description: h.description ? extractLanguageFromJsonb(h.description, lang) : null,
+    }));
 
     return NextResponse.json({ hobbies: hobbiesList });
   } catch (error) {

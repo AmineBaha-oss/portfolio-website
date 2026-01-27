@@ -5,8 +5,9 @@ import Project from './components/project';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import Image from 'next/image';
+import Rounded from '@/common/RoundedButton';
 import { useLanguage } from '@/lib/i18n/context';
-import { getHobbies, type Hobby } from '@/lib/api/client';
+import { getProjects } from '@/lib/api/client';
 
 const scaleAnimation = {
     initial: {scale: 0, x:"-50%", y:"-50%"},
@@ -16,46 +17,45 @@ const scaleAnimation = {
 
 export default function Home() {
   const { locale } = useLanguage();
-  const [hobbies, setHobbies] = useState<Array<{ title: string; description: string; src: string; color: string }>>([]);
+  const [projects, setProjects] = useState<Array<{ title: string; src: string; color: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [modal, setModal] = useState({active: false, index: 0})
   const { active, index } = modal;
-  const modalContainer = useRef(null);
-  const cursor = useRef(null);
-  const cursorLabel = useRef(null);
+  const modalContainer = useRef<HTMLDivElement>(null);
+  const cursor = useRef<HTMLDivElement>(null);
+  const cursorLabel = useRef<HTMLDivElement>(null);
 
-  const xMoveContainer = useRef<any>(null);
-  const yMoveContainer = useRef<any>(null);
-  const xMoveCursor = useRef<any>(null);
-  const yMoveCursor = useRef<any>(null);
-  const xMoveCursorLabel = useRef<any>(null);
-  const yMoveCursorLabel = useRef<any>(null);
+  const xMoveContainer = useRef<((value: number) => void) | null>(null);
+  const yMoveContainer = useRef<((value: number) => void) | null>(null);
+  const xMoveCursor = useRef<((value: number) => void) | null>(null);
+  const yMoveCursor = useRef<((value: number) => void) | null>(null);
+  const xMoveCursorLabel = useRef<((value: number) => void) | null>(null);
+  const yMoveCursorLabel = useRef<((value: number) => void) | null>(null);
 
   useEffect(() => {
-    const fetchHobbies = async () => {
+    const fetchProjects = async () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await getHobbies(locale);
-        const mappedHobbies = response.hobbies.map(hobby => ({
-          title: hobby.title,
-          description: hobby.description || '',
-          src: hobby.imageUrl || "background.jpg",
-          color: hobby.color || "#2a2b2c"
+        const response = await getProjects(locale, true);
+        const mappedProjects = response.projects.map(project => ({
+          title: project.title,
+          src: project.imageUrl || "background.jpg",
+          color: project.color || "#2a2b2c"
         }));
-        setHobbies(mappedHobbies);
+        setProjects(mappedProjects);
       } catch (err: any) {
-        console.error('Error fetching hobbies:', err);
+        console.error('Error fetching projects:', err);
         setError(err.message);
-        setHobbies([]);
+        setProjects([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchHobbies();
+    fetchProjects();
   }, [locale]);
 
   useEffect( () => {
@@ -73,7 +73,7 @@ export default function Home() {
     //Move cursor label
     xMoveCursorLabel.current = gsap.quickTo(cursorLabel.current, "left", {duration: 0.45, ease: "power3"})
     yMoveCursorLabel.current = gsap.quickTo(cursorLabel.current, "top", {duration: 0.45, ease: "power3"})
-  }, [hobbies]) // Re-run when hobbies are loaded
+  }, [projects]) // Re-run when projects are loaded
 
   const moveItems = (x: number, y: number) => {
     if (xMoveContainer.current) xMoveContainer.current(x);
@@ -91,10 +91,9 @@ export default function Home() {
   if (loading) {
     return (
       <main className={styles.projects}>
-        <div className={styles.body}>
-          <p style={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center', padding: '2rem' }}>
-            Loading hobbies...
-          </p>
+        <div className={styles.header}>
+          <h2 className={styles.title}>Featured Projects</h2>
+          <p className={styles.subtitle}>Loading...</p>
         </div>
       </main>
     );
@@ -103,10 +102,9 @@ export default function Home() {
   if (error) {
     return (
       <main className={styles.projects}>
-        <div className={styles.body}>
-          <p style={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center', padding: '2rem' }}>
-            Error loading hobbies. Please try again later.
-          </p>
+        <div className={styles.header}>
+          <h2 className={styles.title}>Featured Projects</h2>
+          <p className={styles.subtitle}>Error loading projects. Please try again later.</p>
         </div>
       </main>
     );
@@ -114,22 +112,29 @@ export default function Home() {
 
   return (
   <main onMouseMove={(e) => {moveItems(e.clientX, e.clientY)}} className={styles.projects}>
+    <div className={styles.header}>
+      <h2 className={styles.title}>Featured Projects</h2>
+      <p className={styles.subtitle}>Selected works that showcase my skills and experience</p>
+    </div>
     <div className={styles.body}>
       {
-        hobbies.length > 0 ? hobbies.map( (hobby, index) => {
-          return <Project index={index} title={hobby.title} description={hobby.description} manageModal={manageModal} key={index}/>
+        projects.length > 0 ? projects.map( (project, index) => {
+          return <Project index={index} title={project.title} manageModal={manageModal} key={index}/>
         }) : (
           <p style={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center', padding: '2rem' }}>
-            No hobbies available.
+            No featured projects available.
           </p>
         )
       }
     </div>
+    <Rounded backgroundColor="#2a2b2c">
+      <p>More work</p>
+    </Rounded>
     <>
         <motion.div ref={modalContainer} variants={scaleAnimation} initial="initial" animate={active ? "enter" : "closed"} className={styles.modalContainer}>
             <div style={{top: index * -100 + "%"}} className={styles.modalSlider}>
             {
-                hobbies.map( (project, index) => {
+                projects.map( (project, index) => {
                 const { src, color } = project
                 return <div className={styles.modal} style={{backgroundColor: color}} key={`modal_${index}`}>
                     <Image 

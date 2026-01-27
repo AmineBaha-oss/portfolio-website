@@ -36,34 +36,25 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { position, company, location, description, startDate, endDate, current, order } = body;
 
-    // Validation
-    if (!validateNotEmpty(position)) {
-      return NextResponse.json(
-        { error: "Position is required" },
-        { status: 400 }
-      );
-    }
-
-    if (!validateNotEmpty(company)) {
-      return NextResponse.json(
-        { error: "Company is required" },
-        { status: 400 }
-      );
-    }
-
-    if (!validateNotEmpty(location)) {
-      return NextResponse.json(
-        { error: "Location is required" },
-        { status: 400 }
-      );
-    }
-
-    if (!validateNotEmpty(description)) {
-      return NextResponse.json(
-        { error: "Description is required" },
-        { status: 400 }
-      );
-    }
+    // Validate bilingual objects { en, fr }
+    const requireBilingual = (val: unknown, name: string) => {
+      if (!val || typeof val !== "object" || !("en" in val)) {
+        return NextResponse.json({ error: `${name} (English) is required` }, { status: 400 });
+      }
+      const o = val as { en?: string; fr?: string };
+      if (!validateNotEmpty(String(o.en ?? ""))) {
+        return NextResponse.json({ error: `${name} (English) is required` }, { status: 400 });
+      }
+      return null;
+    };
+    let err = requireBilingual(position, "Position");
+    if (err) return err;
+    err = requireBilingual(company, "Company");
+    if (err) return err;
+    err = requireBilingual(location, "Location");
+    if (err) return err;
+    err = requireBilingual(description, "Description");
+    if (err) return err;
 
     if (!validateDate(startDate)) {
       return NextResponse.json(
@@ -79,21 +70,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Sanitize
-    const sanitizedPosition = sanitizeText(position);
-    const sanitizedCompany = sanitizeText(company);
-    const sanitizedLocation = sanitizeText(location);
-    const sanitizedDescription = sanitizeText(description);
+    const toBilingual = (o: { en?: string; fr?: string }) => ({
+      en: sanitizeText(String(o.en ?? "").trim()),
+      fr: sanitizeText(String(o.fr ?? "").trim()),
+    });
     const isCurrent = current === true;
-    const orderValue = order ? parseInt(order, 10) : 0;
+    const orderValue = order != null ? parseInt(String(order), 10) : 0;
 
     const [newExperience] = await db
       .insert(workExperience)
       .values({
-        position: sanitizedPosition,
-        company: sanitizedCompany,
-        location: sanitizedLocation,
-        description: sanitizedDescription,
+        position: toBilingual(position as { en?: string; fr?: string }),
+        company: toBilingual(company as { en?: string; fr?: string }),
+        location: toBilingual(location as { en?: string; fr?: string }),
+        description: toBilingual(description as { en?: string; fr?: string }),
         startDate,
         endDate: endDate || null,
         current: isCurrent,

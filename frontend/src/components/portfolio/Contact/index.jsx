@@ -30,25 +30,21 @@ export default function Contact() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
+        setSubmitStatus(null);
         
         try {
-            // TODO: Replace with actual API call
-            // await fetch('/api/messages', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(formData)
-            // });
+            const { submitMessage } = await import('@/lib/api/client');
+            await submitMessage(formData);
             
-            setTimeout(() => {
-                setSubmitStatus('success');
-                setFormData({ name: '', email: '', subject: '', message: '' });
-                setIsSubmitting(false);
-                setTimeout(() => setSubmitStatus(null), 5000);
-            }, 1000);
-        } catch (error) {
-            setSubmitStatus('error');
-            setIsSubmitting(false);
+            setSubmitStatus('success');
+            setFormData({ name: '', email: '', subject: '', message: '' });
             setTimeout(() => setSubmitStatus(null), 5000);
+        } catch (error) {
+            console.error('Error submitting message:', error);
+            setSubmitStatus('error');
+            setTimeout(() => setSubmitStatus(null), 5000);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 

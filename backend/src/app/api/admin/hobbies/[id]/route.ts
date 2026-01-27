@@ -41,18 +41,30 @@ export async function PUT(
     // Build update object
     const updateData: any = {};
 
+    const toBilingual = (o: { en?: string; fr?: string }) => ({
+      en: sanitizeText(String(o.en ?? "").trim()),
+      fr: sanitizeText(String(o.fr ?? "").trim()),
+    });
+    const requireBilingual = (val: unknown) => {
+      if (!val || typeof val !== "object" || !("en" in val)) return false;
+      return validateNotEmpty(String((val as { en?: string }).en ?? ""));
+    };
+
     if (body.title !== undefined) {
-      if (!validateNotEmpty(body.title)) {
-        return NextResponse.json(
-          { error: "Title cannot be empty" },
-          { status: 400 }
-        );
+      if (!requireBilingual(body.title)) {
+        return NextResponse.json({ error: "Title (English) is required" }, { status: 400 });
       }
-      updateData.title = sanitizeText(body.title);
+      updateData.title = toBilingual(body.title as { en?: string; fr?: string });
     }
 
     if (body.description !== undefined) {
-      updateData.description = body.description ? sanitizeText(body.description) : null;
+      if (body.description == null) {
+        updateData.description = null;
+      } else if (typeof body.description === "object" && body.description !== null && "en" in body.description) {
+        updateData.description = toBilingual(body.description as { en?: string; fr?: string });
+      } else {
+        updateData.description = null;
+      }
     }
 
     if (body.imageUrl !== undefined) {

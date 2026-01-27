@@ -75,17 +75,7 @@ You should use a migration runner. The generated SQL files in `backend/drizzle/`
 - The `db:push` command directly applies changes (good for dev)
 - For production, consider using a migration runner that tracks applied migrations
 
-## Current Migration
+## Current Migrations
 
-The initial migration is: `backend/drizzle/0000_lean_mantis.sql`
-
-This creates all the base tables:
-- skills
-- projects
-- work_experience
-- education
-- hobbies
-- testimonials
-- contact_messages
-- resumes
-- contact_info
+- **`0000_lean_mantis.sql`** – Creates all base tables (skills, projects, work_experience, education, hobbies, testimonials, contact_messages, resumes, contact_info).
+- **`0001_education_text_to_jsonb.sql`** – Converts education `degree`, `institution`, `location`, `description` from `text` to `jsonb` and backfills existing rows as `{ "en": "<value>", "fr": "<value>" }`. Idempotent (only alters when columns are still text). Run via `npm run db:migrate`; the Docker entrypoint runs it before `db:push`.

@@ -1,17 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, workExperience } from "@/lib/db";
-import { validateLanguage } from "@/lib/utils/validation";
+import { validateLanguage, extractLanguageFromJsonb } from "@/lib/utils/validation";
 import { desc } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const lang = validateLanguage(searchParams.get("lang")); // For consistency, even though content is single-language
+    const lang = validateLanguage(searchParams.get("lang"));
 
-    const experiences = await db
+    const rows = await db
       .select()
       .from(workExperience)
       .orderBy(desc(workExperience.startDate), workExperience.order);
+
+    const experiences = rows.map((e) => ({
+      ...e,
+      position: extractLanguageFromJsonb(e.position, lang),
+      company: extractLanguageFromJsonb(e.company, lang),
+      location: extractLanguageFromJsonb(e.location, lang),
+      description: extractLanguageFromJsonb(e.description, lang),
+    }));
 
     return NextResponse.json({ experiences });
   } catch (error) {

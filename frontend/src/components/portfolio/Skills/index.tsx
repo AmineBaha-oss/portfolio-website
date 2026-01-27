@@ -1,37 +1,73 @@
 'use client';
 
+import { useState, useEffect, useMemo } from 'react';
 import styles from './style.module.scss';
 import { motion } from 'framer-motion';
-
-// Placeholder skills data - will be dynamic from backend later
-const skillsData = [
-  {
-    category: 'Languages',
-    skills: ['Java', 'C#', 'Kotlin', 'PHP', 'JavaScript', 'TypeScript', 'Python', 'SQL', 'HTML/CSS']
-  },
-  {
-    category: 'Back-End',
-    skills: ['Spring Boot', 'ASP.NET MVC', 'Laravel', 'Node.js', 'REST APIs', 'GraphQL', 'JWT']
-  },
-  {
-    category: 'Front-End & Mobile',
-    skills: ['React', 'Next.js', 'Android', 'Tailwind CSS', 'Bootstrap', 'Blade']
-  },
-  {
-    category: 'Databases',
-    skills: ['MySQL', 'PostgreSQL', 'MongoDB', 'SQLite', 'TimescaleDB']
-  },
-  {
-    category: 'DevOps & Tools',
-    skills: ['Docker', 'Git', 'Linux/Bash', 'Gradle', 'Postman', 'Jira', 'VS Code']
-  },
-  {
-    category: 'AI & Data',
-    skills: ['OpenAI API', 'Langchain', 'PDF Processing', 'Audio Processing', 'Prompt Engineering']
-  }
-];
+import { useLanguage } from '@/lib/i18n/context';
+import { getSkills, type Skill } from '@/lib/api/client';
 
 export default function Skills() {
+  const { locale } = useLanguage();
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await getSkills(locale);
+        setSkills(response.skills);
+      } catch (err: any) {
+        console.error('Error fetching skills:', err);
+        setError(err.message);
+        setSkills([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSkills();
+  }, [locale]);
+
+  // Group skills by category
+  const skillsData = useMemo(() => {
+    const grouped: { [key: string]: string[] } = {};
+    skills.forEach((skill) => {
+      if (!grouped[skill.category]) {
+        grouped[skill.category] = [];
+      }
+      grouped[skill.category].push(skill.name);
+    });
+    
+    return Object.entries(grouped).map(([category, skillsList]) => ({
+      category,
+      skills: skillsList,
+    }));
+  }, [skills]);
+  if (loading) {
+    return (
+      <section id="skills" className={styles.skills}>
+        <div className={styles.container}>
+          <h2 className={styles.title}>Skills & Technologies</h2>
+          <p className={styles.subtitle}>Loading...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section id="skills" className={styles.skills}>
+        <div className={styles.container}>
+          <h2 className={styles.title}>Skills & Technologies</h2>
+          <p className={styles.subtitle}>Error loading skills. Please try again later.</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="skills" className={styles.skills}>
       <div className={styles.container}>
@@ -48,7 +84,7 @@ export default function Skills() {
         </motion.div>
 
         <div className={styles.skillsGrid}>
-          {skillsData.map((category, _index) => (
+          {skillsData.length > 0 ? skillsData.map((category, _index) => (
             <motion.div
               key={category.category}
               className={styles.skillCategory}
@@ -77,7 +113,11 @@ export default function Skills() {
                 ))}
               </div>
             </motion.div>
-          ))}
+          )) : (
+            <p style={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center', padding: '2rem' }}>
+              No skills available.
+            </p>
+          )}
         </div>
       </div>
     </section>

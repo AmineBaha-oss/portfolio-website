@@ -2,72 +2,80 @@
 
 import styles from './style.module.scss';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
-
-// Placeholder testimonials - will be fetched from backend (only approved ones)
-const testimonialsData = [
-  {
-    id: 1,
-    name: 'John Doe',
-    role: 'CEO at Tech Corp',
-    company: 'Tech Corp',
-    testimonial: 'Exceptional developer with great attention to detail. Delivered the project on time and exceeded expectations.',
-    rating: 5,
-    status: 'approved'
-  },
-  {
-    id: 2,
-    name: 'Jane Smith',
-    role: 'Product Manager',
-    company: 'Innovation Labs',
-    testimonial: 'Professional, communicative, and highly skilled. A pleasure to work with!',
-    rating: 5,
-    status: 'approved'
-  },
-  {
-    id: 3,
-    name: 'Mike Johnson',
-    role: 'Startup Founder',
-    company: 'StartupXYZ',
-    testimonial: 'Transformed our vision into reality. Highly recommended for any web development project.',
-    rating: 5,
-    status: 'approved'
-  }
-];
+import { useState, useEffect } from 'react';
+import { useLanguage } from '@/lib/i18n/context';
+import { getTestimonials, submitTestimonial, type Testimonial } from '@/lib/api/client';
 
 export default function Testimonials() {
+  const { locale } = useLanguage();
+  const [testimonialsData, setTestimonialsData] = useState<Array<{ id: string; name: string; role: string; company: string; testimonial: string; rating: number; status: string }>>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     role: '',
     company: '',
     testimonial: '',
-    email: ''
+    email: '',
+    rating: 5
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await getTestimonials(locale);
+        const mappedTestimonials = response.testimonials.map(t => ({
+          id: t.id,
+          name: t.name,
+          role: t.position,
+          company: t.company || '',
+          testimonial: t.message,
+          rating: t.rating,
+          status: t.status
+        }));
+        setTestimonialsData(mappedTestimonials);
+      } catch (err: any) {
+        console.error('Error fetching testimonials:', err);
+        setError(err.message);
+        setTestimonialsData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTestimonials();
+  }, [locale]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitSuccess(false);
 
     try {
-      // TODO: Send to backend API
-      // const response = await fetch('/api/testimonials', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // });
+      await submitTestimonial({
+        name: formData.name,
+        position: formData.role,
+        company: formData.company || undefined,
+        email: formData.email,
+        message: formData.testimonial,
+        rating: formData.rating
+      });
       
-      // Placeholder success
+      setSubmitSuccess(true);
+      setFormData({ name: '', role: '', company: '', testimonial: '', email: '', rating: 5 });
       setTimeout(() => {
-        alert('Thank you! Your testimonial has been submitted and is pending admin approval.');
-        setFormData({ name: '', role: '', company: '', testimonial: '', email: '' });
         setShowForm(false);
-        setIsSubmitting(false);
-      }, 1000);
-    } catch (error) {
+        setSubmitSuccess(false);
+      }, 3000);
+    } catch (error: any) {
       console.error('Error submitting testimonial:', error);
       alert('Error submitting testimonial. Please try again.');
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -87,8 +95,17 @@ export default function Testimonials() {
         </motion.div>
 
         <div className={styles.body}>
-          <div className={styles.testimonialsGrid}>
-            {testimonialsData.map((testimonial, index) => (
+          {loading ? (
+            <p style={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center', padding: '2rem' }}>
+              Loading testimonials...
+            </p>
+          ) : error ? (
+            <p style={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center', padding: '2rem' }}>
+              Error loading testimonials. Please try again later.
+            </p>
+          ) : (
+            <div className={styles.testimonialsGrid}>
+              {testimonialsData.length > 0 ? testimonialsData.map((testimonial, index) => (
               <motion.div
                 key={testimonial.id}
                 className={styles.testimonialCard}
@@ -116,8 +133,13 @@ export default function Testimonials() {
                 </div>
                 <p className={styles.quote}>"{testimonial.testimonial}"</p>
               </motion.div>
-            ))}
-          </div>
+              )) : (
+                <p style={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center', padding: '2rem', gridColumn: '1 / -1' }}>
+                  No testimonials available yet.
+                </p>
+              )}
+            </div>
+          )}
 
           <motion.div
             className={styles.submitSection}
@@ -142,6 +164,18 @@ export default function Testimonials() {
               >
                 <h3>Share Your Experience</h3>
                 <p className={styles.formSubtitle}>Your testimonial will be reviewed before being published</p>
+                {submitSuccess && (
+                  <div style={{ 
+                    padding: '1rem', 
+                    background: 'rgba(34, 197, 94, 0.1)', 
+                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                    borderRadius: '8px',
+                    marginBottom: '1rem',
+                    color: '#22c55e'
+                  }}>
+                    Thank you! Your testimonial has been submitted and is pending admin approval.
+                  </div>
+                )}
                 <form className={styles.testimonialForm} onSubmit={handleSubmit}>
                   <div className={styles.formRow}>
                     <div className={styles.formGroup}>
@@ -197,6 +231,32 @@ export default function Testimonials() {
                       required
                       rows={5}
                     />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Rating *</label>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      {[1, 2, 3, 4, 5].map((rating) => (
+                        <button
+                          key={rating}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, rating })}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '1.5rem',
+                            color: formData.rating >= rating ? '#fbbf24' : 'rgba(255, 255, 255, 0.3)',
+                            transition: 'color 0.2s'
+                          }}
+                        >
+                          ★
+                        </button>
+                      ))}
+                      <span style={{ marginLeft: '0.5rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+                        {formData.rating} / 5
+                      </span>
+                    </div>
                   </div>
 
                   <div className={styles.formActions}>

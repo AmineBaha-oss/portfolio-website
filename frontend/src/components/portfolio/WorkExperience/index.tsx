@@ -1,24 +1,87 @@
 'use client';
 
+import { useState, useEffect, useMemo } from 'react';
 import styles from './style.module.scss';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/lib/i18n/context';
+import { getExperience, type WorkExperience } from '@/lib/api/client';
 
-// Placeholder data - will be dynamic from backend later
-const experienceData = [
-  {
-    title: 'Peer Tutor — Computer Science',
-    company: 'Champlain College Saint-Lambert',
-    period: 'Sep 2025 - Dec 2025',
-    description: 'Provided one-on-one and group tutoring in computer science fundamentals.',
-    achievements: [
-      'Tutored in Java, C#, data structures, SQL, and web fundamentals',
-      'Guided debugging, schema design, and exam preparation',
-      'Created practice exercises and reviewed Git workflows and Linux tooling'
-    ]
-  }
-];
+function formatDate(dateString: string, locale: string): string {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US', { 
+    month: 'short', 
+    year: 'numeric' 
+  });
+}
 
 export default function WorkExperience() {
+  const { locale } = useLanguage();
+  const [experiences, setExperiences] = useState<WorkExperience[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchExperiences = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await getExperience(locale);
+        setExperiences(response.experiences);
+      } catch (err: any) {
+        console.error('Error fetching experience:', err);
+        setError(err.message);
+        setExperiences([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExperiences();
+  }, [locale]);
+
+  const experienceData = useMemo(() => {
+    return experiences.map((exp) => {
+      const period = exp.current 
+        ? `${formatDate(exp.startDate, locale)} - Present`
+        : `${formatDate(exp.startDate, locale)} - ${exp.endDate ? formatDate(exp.endDate, locale) : ''}`;
+      
+      // Split description by newlines for achievements, or use as single description
+      const descriptionLines = exp.description ? exp.description.split('\n').filter(line => line.trim()) : [];
+      const description = descriptionLines[0] || '';
+      const achievements = descriptionLines.length > 1 ? descriptionLines.slice(1) : [];
+
+      return {
+        title: exp.position,
+        company: exp.company,
+        period,
+        description,
+        achievements,
+      };
+    });
+  }, [experiences, locale]);
+  if (loading) {
+    return (
+      <section id="experience" className={styles.experience}>
+        <div className={styles.container}>
+          <h2 className={styles.title}>Work Experience</h2>
+          <p className={styles.subtitle}>Loading...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section id="experience" className={styles.experience}>
+        <div className={styles.container}>
+          <h2 className={styles.title}>Work Experience</h2>
+          <p className={styles.subtitle}>Error loading experience. Please try again later.</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="experience" className={styles.experience}>
       <div className={styles.container}>
@@ -35,7 +98,7 @@ export default function WorkExperience() {
         </motion.div>
 
         <div className={styles.timeline}>
-          {experienceData.map((exp, index) => (
+          {experienceData.length > 0 ? experienceData.map((exp, index) => (
             <motion.div
               key={index}
               className={styles.timelineItem}
@@ -57,7 +120,11 @@ export default function WorkExperience() {
                 </ul>
               </div>
             </motion.div>
-          ))}
+          )) : (
+            <p style={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center', padding: '2rem' }}>
+              No work experience available.
+            </p>
+          )}
         </div>
       </div>
     </section>

@@ -1,87 +1,79 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
+import { getMessages, markMessageRead, deleteMessage } from "@/lib/api/admin-client";
 
 export default function MessagesManagementPage() {
-  const [selectedMessage, setSelectedMessage] = useState<number | null>(null);
+  const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
+  const [selectedMessage, setSelectedMessage] = useState<any>(null);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data
-  const messages = [
-    {
-      id: 1,
-      name: "Alice Johnson",
-      email: "alice@example.com",
-      subject: "Website Development Inquiry",
-      message: "Hi, I'm interested in having a website built for my business. Could we discuss the details?",
-      status: "unread",
-      createdAt: "2024-01-22T10:30:00",
-    },
-    {
-      id: 2,
-      name: "Bob Smith",
-      email: "bob@company.com",
-      subject: "Project Collaboration",
-      message: "I saw your portfolio and would love to collaborate on an upcoming project. Are you available?",
-      status: "read",
-      createdAt: "2024-01-21T14:15:00",
-    },
-    {
-      id: 3,
-      name: "Carol White",
-      email: "carol@startup.io",
-      subject: "Freelance Opportunity",
-      message: "We're looking for a developer for a 3-month contract. Interested in discussing?",
-      status: "read",
-      createdAt: "2024-01-20T09:00:00",
-    },
-  ];
+  useEffect(() => {
+    fetchMessages();
+  }, []);
+
+  const fetchMessages = async () => {
+    try {
+      setLoading(true);
+      const response = await getMessages();
+      setMessages(response.messages);
+    } catch (err: any) {
+      alert(err.message || 'Failed to load messages');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMarkRead = async (id: string) => {
+    try {
+      await markMessageRead(id);
+      await fetchMessages();
+    } catch (err: any) {
+      alert(err.message || 'Failed to mark message as read');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this message?')) return;
+    try {
+      await deleteMessage(id);
+      await fetchMessages();
+      if (selectedMessage?.id === id) setSelectedMessage(null);
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete message');
+    }
+  };
+
+  const filteredMessages = filter === 'all' 
+    ? messages 
+    : messages.filter(m => filter === 'unread' ? m.status === 'unread' : m.status === 'read');
 
   const unreadCount = messages.filter(m => m.status === "unread").length;
+
+  if (loading) return <div className={styles.pageContainer}><div className={styles.container}><p>Loading...</p></div></div>;
 
   return (
     <div className={styles.pageContainer}>
       <div className={styles.container}>
-        <motion.div
-          className={styles.header}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+        <motion.div className={styles.header} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className={styles.topBar}>
-            <div className={styles.breadcrumb}>
-              <a href="/dashboard">Dashboard</a>
-              <span>/</span>
-              <span>Messages</span>
-            </div>
-            {unreadCount > 0 && (
-              <span className={`${styles.badge} ${styles.info}`}>
-                {unreadCount} Unread
-              </span>
-            )}
+            <div className={styles.breadcrumb}><a href="/dashboard">Dashboard</a><span>/</span><span>Messages</span></div>
+            {unreadCount > 0 && <span className={`${styles.badge} ${styles.info}`}>{unreadCount} Unread</span>}
           </div>
-
-          <div className={styles.pageTitle}>
-            <h1>Messages</h1>
-            <p>Manage contact form submissions and inquiries</p>
-          </div>
+          <div className={styles.pageTitle}><h1>Messages</h1><p>Manage contact form submissions and inquiries</p></div>
         </motion.div>
 
-        {/* Filter tabs */}
         <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem" }}>
-          <button className={`${styles.button} ${styles.primary}`}>
-            All ({messages.length})
-          </button>
-          <button className={`${styles.button} ${styles.secondary}`}>
-            Unread ({unreadCount})
-          </button>
-          <button className={`${styles.button} ${styles.secondary}`}>
-            Read ({messages.length - unreadCount})
-          </button>
+          <button className={`${styles.button} ${filter === 'all' ? styles.primary : styles.secondary}`} onClick={() => setFilter('all')}>All ({messages.length})</button>
+          <button className={`${styles.button} ${filter === 'unread' ? styles.primary : styles.secondary}`} onClick={() => setFilter('unread')}>Unread ({unreadCount})</button>
+          <button className={`${styles.button} ${filter === 'read' ? styles.primary : styles.secondary}`} onClick={() => setFilter('read')}>Read ({messages.length - unreadCount})</button>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          {messages.map((message, index) => (
+          {filteredMessages.map((message, index) => (
             <motion.div
               key={message.id}
               className={styles.card}
@@ -90,58 +82,28 @@ export default function MessagesManagementPage() {
               transition={{ duration: 0.4, delay: index * 0.05 }}
               style={{
                 cursor: "pointer",
-                background: message.status === "unread" 
-                  ? "rgba(255, 255, 255, 0.04)" 
-                  : "rgba(255, 255, 255, 0.02)",
+                background: message.status === "unread" ? "rgba(255, 255, 255, 0.04)" : "rgba(255, 255, 255, 0.02)",
               }}
-              onClick={() => setSelectedMessage(message.id)}
+              onClick={() => setSelectedMessage(message)}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.5rem" }}>
-                    <h3 style={{ fontSize: "1rem", color: "white", margin: 0, fontWeight: message.status === "unread" ? 600 : 500 }}>
-                      {message.name}
-                    </h3>
-                    {message.status === "unread" && (
-                      <span style={{
-                        width: "8px",
-                        height: "8px",
-                        borderRadius: "50%",
-                        background: "white",
-                      }} />
-                    )}
+                    <h3 style={{ fontSize: "1rem", color: "white", margin: 0, fontWeight: message.status === "unread" ? 600 : 500 }}>{message.name}</h3>
+                    {message.status === "unread" && <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "white" }} />}
                   </div>
-                  
-                  <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.6)", margin: "0 0 0.5rem 0" }}>
-                    {message.email}
-                  </p>
-                  
-                  <p style={{ fontSize: "0.875rem", color: "white", margin: "0 0 0.5rem 0", fontWeight: 500 }}>
-                    {message.subject}
-                  </p>
-                  
-                  <p style={{ 
-                    fontSize: "0.875rem", 
-                    color: "rgba(255, 255, 255, 0.5)", 
-                    margin: 0,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}>
-                    {message.message}
-                  </p>
+                  <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.6)", margin: "0 0 0.5rem 0" }}>{message.email}</p>
+                  <p style={{ fontSize: "0.875rem", color: "white", margin: "0 0 0.5rem 0", fontWeight: 500 }}>{message.subject}</p>
+                  <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.5)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{message.message}</p>
                 </div>
-
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.75rem", marginLeft: "2rem" }}>
-                  <span style={{ fontSize: "0.75rem", color: "rgba(255, 255, 255, 0.4)" }}>
-                    {new Date(message.createdAt).toLocaleDateString()}
-                  </span>
+                  <span style={{ fontSize: "0.75rem", color: "rgba(255, 255, 255, 0.4)" }}>{new Date(message.createdAt).toLocaleDateString()}</span>
                   <div style={{ display: "flex", gap: "0.5rem" }}>
                     <button 
                       className={`${styles.button} ${styles.secondary}`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Mark as read logic
+                        handleMarkRead(message.id);
                       }}
                     >
                       {message.status === "unread" ? "Mark Read" : "Mark Unread"}
@@ -150,7 +112,7 @@ export default function MessagesManagementPage() {
                       className={`${styles.button} ${styles.danger}`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Delete logic
+                        handleDelete(message.id);
                       }}
                     >
                       Delete
@@ -164,8 +126,16 @@ export default function MessagesManagementPage() {
 
         {selectedMessage && (
           <MessageModal 
-            message={messages.find(m => m.id === selectedMessage)!}
+            message={selectedMessage}
             onClose={() => setSelectedMessage(null)}
+            onDelete={() => {
+              handleDelete(selectedMessage.id);
+              setSelectedMessage(null);
+            }}
+            onMarkRead={() => {
+              handleMarkRead(selectedMessage.id);
+              setSelectedMessage(null);
+            }}
           />
         )}
       </div>
@@ -173,75 +143,27 @@ export default function MessagesManagementPage() {
   );
 }
 
-function MessageModal({ message, onClose }: { message: any; onClose: () => void }) {
+function MessageModal({ message, onClose, onDelete, onMarkRead }: { message: any; onClose: () => void; onDelete: () => void; onMarkRead: () => void }) {
   return (
-    <motion.div
-      className={styles.modalOverlay}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      onClick={onClose}
-    >
-      <motion.div
-        className={styles.modalCard}
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        onClick={(e) => e.stopPropagation()}
-      >
+    <motion.div className={styles.modalOverlay} initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={onClose}>
+      <motion.div className={styles.modalCard} initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "2rem" }}>
           <div>
-            <h2 style={{ fontSize: "1.5rem", color: "white", margin: "0 0 0.5rem 0" }}>
-              {message.subject}
-            </h2>
-            <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.6)", margin: 0 }}>
-              From: {message.name} ({message.email})
-            </p>
-            <p style={{ fontSize: "0.75rem", color: "rgba(255, 255, 255, 0.4)", marginTop: "0.25rem" }}>
-              {new Date(message.createdAt).toLocaleString()}
-            </p>
+            <h2 style={{ fontSize: "1.5rem", color: "white", margin: "0 0 0.5rem 0" }}>{message.subject}</h2>
+            <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.6)", margin: 0 }}>From: {message.name} ({message.email})</p>
+            <p style={{ fontSize: "0.75rem", color: "rgba(255, 255, 255, 0.4)", marginTop: "0.25rem" }}>{new Date(message.createdAt).toLocaleString()}</p>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              color: "white",
-              fontSize: "1.5rem",
-              cursor: "pointer",
-              padding: "0.5rem",
-            }}
-          >
-            ×
-          </button>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "white", fontSize: "1.5rem", cursor: "pointer", padding: "0.5rem" }}>×</button>
         </div>
-
-        <div style={{ 
-          padding: "1.5rem", 
-          background: "rgba(255, 255, 255, 0.02)", 
-          borderRadius: "8px",
-          marginBottom: "1.5rem",
-        }}>
-          <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "0.875rem", lineHeight: "1.6", margin: 0 }}>
-            {message.message}
-          </p>
+        <div style={{ padding: "1.5rem", background: "rgba(255, 255, 255, 0.02)", borderRadius: "8px", marginBottom: "1.5rem" }}>
+          <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "0.875rem", lineHeight: "1.6", margin: 0 }}>{message.message}</p>
         </div>
-
         <div style={{ display: "flex", gap: "1rem" }}>
-          <a 
-            href={`mailto:${message.email}`}
-            className={`${styles.button} ${styles.primary}`}
-            style={{ flex: 1, textDecoration: "none", textAlign: "center" }}
-          >
-            Reply via Email
-          </a>
-          <button
-            className={`${styles.button} ${styles.danger}`}
-            onClick={() => {
-              // Delete logic
-              onClose();
-            }}
-          >
-            Delete
-          </button>
+          <a href={`mailto:${message.email}`} className={`${styles.button} ${styles.primary}`} style={{ flex: 1, textDecoration: "none", textAlign: "center" }}>Reply via Email</a>
+          {message.status === "unread" && (
+            <button className={`${styles.button} ${styles.secondary}`} onClick={onMarkRead}>Mark as Read</button>
+          )}
+          <button className={`${styles.button} ${styles.danger}`} onClick={onDelete}>Delete</button>
         </div>
       </motion.div>
     </motion.div>

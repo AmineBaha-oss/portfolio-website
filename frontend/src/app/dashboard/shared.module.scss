@@ -387,6 +387,11 @@
     min-height: 120px;
     resize: vertical;
   }
+
+  select option {
+    background: #0a0a0a;
+    color: white;
+  }
 }
 
 .badge {
@@ -548,6 +553,11 @@
 
   select {
     cursor: pointer;
+
+    option {
+      background: #0a0a0a;
+      color: white;
+    }
   }
 
   input[type="number"] {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import styles from './style.module.scss';
+import LanguageToggle from '../LanguageToggle';
 
 const navItems = [
   { name: 'Home', href: '#home' },
@@ -77,8 +78,11 @@ export default function Navigation() {
           </li>
         ))}
       </ul>
-      <div className={styles.adminLink}>
-        <a href="/login">Login</a>
+      <div className={styles.rightSection}>
+        <LanguageToggle />
+        <div className={styles.adminLink}>
+          <a href="/login">Login</a>
+        </div>
       </div>
     </nav>
   );

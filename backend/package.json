@@ -9,7 +9,9 @@
     "start": "next start -p 8080",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "db:generate": "drizzle-kit generate",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "db:migrate": "tsx src/scripts/run-education-migration.ts",
+    "seed": "tsx src/scripts/seed.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.41.0",
@@ -25,6 +27,7 @@
     "@types/react-dom": "^18.2.18",
     "@types/jsonwebtoken": "^9.0.5",
     "drizzle-kit": "^0.31.4",
+    "tsx": "^4.7.0",
     "typescript": "^5.3.3",
     "eslint": "^8.56.0",
     "eslint-config-next": "^15.0.0"

@@ -38,47 +38,45 @@ export async function PUT(
       return NextResponse.json({ error: "Experience not found" }, { status: 404 });
     }
 
+    const toBilingual = (o: { en?: string; fr?: string }) => ({
+      en: sanitizeText(String(o.en ?? "").trim()),
+      fr: sanitizeText(String(o.fr ?? "").trim()),
+    });
+    const requireBilingual = (val: unknown, name: string) => {
+      if (!val || typeof val !== "object" || !("en" in val)) return false;
+      const o = val as { en?: string; fr?: string };
+      return validateNotEmpty(String(o.en ?? ""));
+    };
+
     // Build update object
     const updateData: any = {};
 
     if (body.position !== undefined) {
-      if (!validateNotEmpty(body.position)) {
-        return NextResponse.json(
-          { error: "Position cannot be empty" },
-          { status: 400 }
-        );
+      if (!requireBilingual(body.position, "Position")) {
+        return NextResponse.json({ error: "Position (English) is required" }, { status: 400 });
       }
-      updateData.position = sanitizeText(body.position);
+      updateData.position = toBilingual(body.position as { en?: string; fr?: string });
     }
 
     if (body.company !== undefined) {
-      if (!validateNotEmpty(body.company)) {
-        return NextResponse.json(
-          { error: "Company cannot be empty" },
-          { status: 400 }
-        );
+      if (!requireBilingual(body.company, "Company")) {
+        return NextResponse.json({ error: "Company (English) is required" }, { status: 400 });
       }
-      updateData.company = sanitizeText(body.company);
+      updateData.company = toBilingual(body.company as { en?: string; fr?: string });
     }
 
     if (body.location !== undefined) {
-      if (!validateNotEmpty(body.location)) {
-        return NextResponse.json(
-          { error: "Location cannot be empty" },
-          { status: 400 }
-        );
+      if (!requireBilingual(body.location, "Location")) {
+        return NextResponse.json({ error: "Location (English) is required" }, { status: 400 });
       }
-      updateData.location = sanitizeText(body.location);
+      updateData.location = toBilingual(body.location as { en?: string; fr?: string });
     }
 
     if (body.description !== undefined) {
-      if (!validateNotEmpty(body.description)) {
-        return NextResponse.json(
-          { error: "Description cannot be empty" },
-          { status: 400 }
-        );
+      if (!requireBilingual(body.description, "Description")) {
+        return NextResponse.json({ error: "Description (English) is required" }, { status: 400 });
       }
-      updateData.description = sanitizeText(body.description);
+      updateData.description = toBilingual(body.description as { en?: string; fr?: string });
     }
 
     if (body.startDate !== undefined) {

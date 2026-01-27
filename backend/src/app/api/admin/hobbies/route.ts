@@ -36,12 +36,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { title, description, imageUrl, color, order } = body;
 
-    // Validation
-    if (!validateNotEmpty(title)) {
-      return NextResponse.json(
-        { error: "Title is required" },
-        { status: 400 }
-      );
+    if (!title || typeof title !== "object" || !("en" in title) || !validateNotEmpty(String((title as { en?: string }).en ?? ""))) {
+      return NextResponse.json({ error: "Title (English) is required" }, { status: 400 });
     }
 
     if (imageUrl && !validateURL(imageUrl)) {
@@ -51,16 +47,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Sanitize
-    const sanitizedTitle = sanitizeText(title);
-    const sanitizedDescription = description ? sanitizeText(description) : null;
-    const orderValue = order ? parseInt(order, 10) : 0;
+    const toBilingual = (o: { en?: string; fr?: string }) => ({
+      en: sanitizeText(String(o.en ?? "").trim()),
+      fr: sanitizeText(String(o.fr ?? "").trim()),
+    });
+    const toBilingualOpt = (o: { en?: string; fr?: string } | null | undefined) =>
+      o && typeof o === "object" && "en" in o ? toBilingual(o as { en?: string; fr?: string }) : null;
+    const orderValue = order != null ? parseInt(String(order), 10) : 0;
 
     const [newHobby] = await db
       .insert(hobbies)
       .values({
-        title: sanitizedTitle,
-        description: sanitizedDescription,
+        title: toBilingual(title as { en?: string; fr?: string }),
+        description: toBilingualOpt(description),
         imageUrl: imageUrl || null,
         color: color || null,
         order: orderValue,

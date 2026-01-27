@@ -73,6 +73,12 @@
     }
   }
 
+  .rightSection {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
   .adminLink {
     a {
       color: white;
