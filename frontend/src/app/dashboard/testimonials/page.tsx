@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
 import { getTestimonials, approveTestimonial, rejectTestimonial, deleteTestimonial } from "@/lib/api/admin-client";
+import { useTranslations } from "@/lib/i18n/hooks";
 
 export default function TestimonialsManagementPage() {
+  const { t } = useTranslations();
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +22,7 @@ export default function TestimonialsManagementPage() {
       const response = await getTestimonials();
       setTestimonials(response.testimonials);
     } catch (err: any) {
-      alert(err.message || 'Failed to load testimonials');
+      alert(err.message || t('dashboard.error'));
     } finally {
       setLoading(false);
     }
@@ -31,27 +33,27 @@ export default function TestimonialsManagementPage() {
       await approveTestimonial(id);
       await fetchTestimonials();
     } catch (err: any) {
-      alert(err.message || 'Failed to approve testimonial');
+      alert(err.message || t('dashboard.error'));
     }
   };
 
   const handleReject = async (id: string) => {
-    if (!confirm('Are you sure you want to reject this testimonial?')) return;
+    if (!confirm(t('dashboardTestimonials.rejectConfirm'))) return;
     try {
       await rejectTestimonial(id);
       await fetchTestimonials();
     } catch (err: any) {
-      alert(err.message || 'Failed to reject testimonial');
+      alert(err.message || t('dashboard.error'));
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this testimonial?')) return;
+    if (!confirm(t('dashboard.deleteConfirm'))) return;
     try {
       await deleteTestimonial(id);
       await fetchTestimonials();
     } catch (err: any) {
-      alert(err.message || 'Failed to delete testimonial');
+      alert(err.message || t('dashboard.error'));
     }
   };
 
@@ -61,24 +63,24 @@ export default function TestimonialsManagementPage() {
 
   const pendingCount = testimonials.filter(t => t.status === "pending").length;
 
-  if (loading) return <div className={styles.pageContainer}><div className={styles.container}><p>Loading...</p></div></div>;
+  if (loading) return <div className={styles.pageContainer}><div className={styles.container}><p>{t('dashboard.loading')}</p></div></div>;
 
   return (
     <div className={styles.pageContainer}>
       <div className={styles.container}>
         <motion.div className={styles.header} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className={styles.topBar}>
-            <div className={styles.breadcrumb}><a href="/dashboard">Dashboard</a><span>/</span><span>Testimonials</span></div>
-            {pendingCount > 0 && <span className={`${styles.badge} ${styles.warning}`}>{pendingCount} Pending Review</span>}
+            <div className={styles.breadcrumb}><a href="/dashboard">{t('dashboard.title')}</a><span>/</span><span>{t('testimonials.title')}</span></div>
+            {pendingCount > 0 && <span className={`${styles.badge} ${styles.warning}`}>{pendingCount} {t('dashboardTestimonials.pendingReview')}</span>}
           </div>
-          <div className={styles.pageTitle}><h1>Testimonials</h1><p>Review and manage client testimonials</p></div>
+          <div className={styles.pageTitle}><h1>{t('testimonials.title')}</h1><p>{t('dashboardTestimonials.subtitle')}</p></div>
         </motion.div>
 
         <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem" }}>
-          <button className={`${styles.button} ${filter === 'all' ? styles.primary : styles.secondary}`} onClick={() => setFilter('all')}>All ({testimonials.length})</button>
-          <button className={`${styles.button} ${filter === 'pending' ? styles.primary : styles.secondary}`} onClick={() => setFilter('pending')}>Pending ({testimonials.filter(t => t.status === "pending").length})</button>
-          <button className={`${styles.button} ${filter === 'approved' ? styles.primary : styles.secondary}`} onClick={() => setFilter('approved')}>Approved ({testimonials.filter(t => t.status === "approved").length})</button>
-          <button className={`${styles.button} ${filter === 'rejected' ? styles.primary : styles.secondary}`} onClick={() => setFilter('rejected')}>Rejected ({testimonials.filter(t => t.status === "rejected").length})</button>
+          <button className={`${styles.button} ${filter === 'all' ? styles.primary : styles.secondary}`} onClick={() => setFilter('all')}>{t('dashboardTestimonials.all')} ({testimonials.length})</button>
+          <button className={`${styles.button} ${filter === 'pending' ? styles.primary : styles.secondary}`} onClick={() => setFilter('pending')}>{t('dashboardTestimonials.pending')} ({testimonials.filter(t => t.status === "pending").length})</button>
+          <button className={`${styles.button} ${filter === 'approved' ? styles.primary : styles.secondary}`} onClick={() => setFilter('approved')}>{t('dashboardTestimonials.approved')} ({testimonials.filter(t => t.status === "approved").length})</button>
+          <button className={`${styles.button} ${filter === 'rejected' ? styles.primary : styles.secondary}`} onClick={() => setFilter('rejected')}>{t('dashboardTestimonials.rejected')} ({testimonials.filter(t => t.status === "rejected").length})</button>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
@@ -99,18 +101,18 @@ export default function TestimonialsManagementPage() {
               <p style={{ color: "rgba(255, 255, 255, 0.7)", fontSize: "0.875rem", lineHeight: "1.6", marginBottom: "1rem" }}>"{testimonial.message}"</p>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "1rem", borderTop: "1px solid rgba(255, 255, 255, 0.08)" }}>
                 <div style={{ fontSize: "0.75rem", color: "rgba(255, 255, 255, 0.4)" }}>
-                  <div>Email: {testimonial.email}</div>
-                  <div>Submitted: {new Date(testimonial.submittedAt).toLocaleDateString()}</div>
+                  <div>{t('dashboardTestimonials.email')}: {testimonial.email}</div>
+                  <div>{t('dashboardTestimonials.submitted')}: {new Date(testimonial.submittedAt).toLocaleDateString()}</div>
                 </div>
                 <div style={{ display: "flex", gap: "0.75rem" }}>
                   {testimonial.status === "pending" && (
                     <>
-                      <button className={`${styles.button} ${styles.primary}`} onClick={() => handleApprove(testimonial.id)}>Approve</button>
-                      <button className={`${styles.button} ${styles.danger}`} onClick={() => handleReject(testimonial.id)}>Reject</button>
+                      <button className={`${styles.button} ${styles.primary}`} onClick={() => handleApprove(testimonial.id)}>{t('dashboardTestimonials.approve')}</button>
+                      <button className={`${styles.button} ${styles.danger}`} onClick={() => handleReject(testimonial.id)}>{t('dashboardTestimonials.reject')}</button>
                     </>
                   )}
                   {testimonial.status !== "pending" && (
-                    <button className={`${styles.button} ${styles.danger}`} onClick={() => handleDelete(testimonial.id)}>Delete</button>
+                    <button className={`${styles.button} ${styles.danger}`} onClick={() => handleDelete(testimonial.id)}>{t('dashboard.delete')}</button>
                   )}
                 </div>
               </div>

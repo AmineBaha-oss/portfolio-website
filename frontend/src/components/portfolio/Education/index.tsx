@@ -5,6 +5,7 @@ import styles from './style.module.scss';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/lib/i18n/context';
 import { getEducation, type Education } from '@/lib/api/client';
+import { useTranslations } from '@/lib/i18n/hooks';
 
 function formatDate(dateString: string, locale: string): string {
   if (!dateString) return '';
@@ -60,12 +61,14 @@ export default function Education() {
       };
     });
   }, [education, locale]);
+  const { t } = useTranslations();
+
   if (loading) {
     return (
       <section id="education" className={styles.education}>
         <div className={styles.container}>
-          <h2 className={styles.title}>Education</h2>
-          <p className={styles.subtitle}>Loading...</p>
+          <h2 className={styles.title}>{t('education.title')}</h2>
+          <p className={styles.subtitle}>{t('dashboard.loading')}</p>
         </div>
       </section>
     );
@@ -75,8 +78,8 @@ export default function Education() {
     return (
       <section id="education" className={styles.education}>
         <div className={styles.container}>
-          <h2 className={styles.title}>Education</h2>
-          <p className={styles.subtitle}>Error loading education. Please try again later.</p>
+          <h2 className={styles.title}>{t('education.title')}</h2>
+          <p className={styles.subtitle}>{t('dashboard.error')}</p>
         </div>
       </section>
     );
@@ -91,8 +94,8 @@ export default function Education() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className={styles.title}>Education</h2>
-          <p className={styles.subtitle}>Academic background and qualifications</p>
+          <h2 className={styles.title}>{t('education.title')}</h2>
+          <p className={styles.subtitle}>{t('education.subtitle')}</p>
         </motion.div>
 
         <div className={styles.educationGrid}>

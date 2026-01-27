@@ -3,11 +3,14 @@
 import styles from './style.module.scss';
 import { motion } from 'framer-motion';
 import RoundedButton from '@/common/RoundedButton';
+import { useTranslations } from '@/lib/i18n/hooks';
 
 export default function Resume() {
+  const { t } = useTranslations();
+  
   const handleDownload = () => {
     // Placeholder - will be dynamic from backend later
-    alert('Resume download will be implemented with backend');
+    alert(t('dashboardResume.download'));
   };
 
   return (
@@ -20,9 +23,9 @@ export default function Resume() {
           viewport={{ once: true }}
           className={styles.content}
         >
-          <h2 className={styles.title}>Download My Resume</h2>
+          <h2 className={styles.title}>{t('dashboardResume.title')}</h2>
           <p className={styles.subtitle}>
-            Get a detailed overview of my skills, experience, and education
+            {t('dashboardResume.download')}
           </p>
           
           <div className={styles.resumePreview}>
@@ -39,7 +42,7 @@ export default function Resume() {
 
           <div className={styles.buttonWrapper} onClick={handleDownload}>
             <RoundedButton backgroundColor="#2a2b2c">
-              <p>Download Resume</p>
+              <p>{t('dashboardResume.download')}</p>
             </RoundedButton>
           </div>
         </motion.div>

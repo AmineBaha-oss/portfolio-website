@@ -218,3 +218,28 @@ export async function deleteMessage(id: string) {
     method: 'DELETE',
   });
 }
+
+// Contact Info
+export async function getContactInfo() {
+  return fetchAdminAPI<{ contactInfo: any[] }>('/api/admin/contact-info');
+}
+
+export async function createContactInfo(data: { type: string; value: string; order: number }) {
+  return fetchAdminAPI<{ contactInfo: any }>('/api/admin/contact-info', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateContactInfo(id: string, data: { type?: string; value?: string; order?: number }) {
+  return fetchAdminAPI<{ contactInfo: any }>(`/api/admin/contact-info/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteContactInfo(id: string) {
+  return fetchAdminAPI<{ success: boolean }>(`/api/admin/contact-info/${id}`, {
+    method: 'DELETE',
+  });
+}

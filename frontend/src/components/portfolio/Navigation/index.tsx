@@ -3,21 +3,23 @@
 import { useState, useEffect } from 'react';
 import styles from './style.module.scss';
 import LanguageToggle from '../LanguageToggle';
-
-const navItems = [
-  { name: 'Home', href: '#home' },
-  { name: 'Skills', href: '#skills' },
-  { name: 'Projects', href: '#projects' },
-  { name: 'Experience', href: '#experience' },
-  { name: 'Education', href: '#education' },
-  { name: 'Resume', href: '#resume' },
-  { name: 'Hobbies', href: '#hobbies' },
-  { name: 'Testimonials', href: '#testimonials' },
-  { name: 'Contact', href: '#contact' },
-];
+import { useTranslations } from '@/lib/i18n/hooks';
 
 export default function Navigation() {
+  const { t } = useTranslations();
   const [activeSection, setActiveSection] = useState('home');
+
+  const navItems = [
+    { name: t('nav.home'), href: '#home' },
+    { name: t('nav.skills'), href: '#skills' },
+    { name: t('nav.projects'), href: '#projects' },
+    { name: t('nav.experience'), href: '#experience' },
+    { name: t('nav.education'), href: '#education' },
+    { name: 'Resume', href: '#resume' },
+    { name: t('nav.hobbies'), href: '#hobbies' },
+    { name: t('nav.testimonials'), href: '#testimonials' },
+    { name: t('nav.contact'), href: '#contact' },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -81,7 +83,7 @@ export default function Navigation() {
       <div className={styles.rightSection}>
         <LanguageToggle />
         <div className={styles.adminLink}>
-          <a href="/login">Login</a>
+          <a href="/login">{t('nav.login')}</a>
         </div>
       </div>
     </nav>

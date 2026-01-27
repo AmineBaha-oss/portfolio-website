@@ -5,6 +5,8 @@ import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { authClient } from "@/lib/auth";
 import styles from "./shared.module.scss";
+import { useTranslations } from "@/lib/i18n/hooks";
+import LanguageToggle from "@/components/portfolio/LanguageToggle";
 // Icons used in getIcon function
 import { 
   MdDashboard, 
@@ -17,31 +19,34 @@ import {
   MdRateReview, 
   MdMail,
   MdLogout,
-  MdHome
+  MdHome,
+  MdContactMail
 } from "react-icons/md";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-const navigationItems = [
-  { path: "/dashboard", label: "Overview" },
-  { path: "/dashboard/projects", label: "Projects" },
-  { path: "/dashboard/skills", label: "Skills" },
-  { path: "/dashboard/experience", label: "Experience" },
-  { path: "/dashboard/education", label: "Education" },
-  { path: "/dashboard/resume", label: "Resume" },
-  { path: "/dashboard/hobbies", label: "Hobbies" },
-  { path: "/dashboard/testimonials", label: "Testimonials" },
-  { path: "/dashboard/messages", label: "Messages" },
-];
-
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  const { t } = useTranslations();
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<{ email?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const navigationItems = [
+    { path: "/dashboard", label: t('dashboard.overview') },
+    { path: "/dashboard/projects", label: t('projects.title') },
+    { path: "/dashboard/skills", label: t('skills.title') },
+    { path: "/dashboard/experience", label: t('experience.title') },
+    { path: "/dashboard/education", label: t('education.title') },
+    { path: "/dashboard/resume", label: 'Resume' },
+    { path: "/dashboard/hobbies", label: t('hobbies.title') },
+    { path: "/dashboard/testimonials", label: t('testimonials.title') },
+    { path: "/dashboard/messages", label: t('dashboardMessages.title') },
+    { path: "/dashboard/contact-info", label: t('dashboardContactInfo.title') },
+  ];
 
   useEffect(() => {
     // Prevent horizontal scrolling
@@ -95,7 +100,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           style={{ textAlign: "center" }}
         >
           <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>⚡</div>
-          <p>Loading...</p>
+          <p>{t('dashboard.loading')}</p>
         </motion.div>
       </div>
     );
@@ -112,7 +117,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       "Resume": <MdDescription size={iconSize} />,
       "Hobbies": <MdFavorite size={iconSize} />,
       "Testimonials": <MdRateReview size={iconSize} />,
-      "Messages": <MdMail size={iconSize} />
+      "Messages": <MdMail size={iconSize} />,
+      "Contact Information": <MdContactMail size={iconSize} />,
+      "Informations de contact": <MdContactMail size={iconSize} />
     };
     return icons[label] || <MdDashboard size={iconSize} />;
   };
@@ -135,7 +142,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             alignItems: "center",
             width: "100%"
           }}>
-            {!sidebarCollapsed && <h1 className={styles.logo}>Admin Panel</h1>}
+            {!sidebarCollapsed && <h1 className={styles.logo}>{t('dashboard.title')}</h1>}
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               style={{
@@ -163,10 +170,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               {sidebarCollapsed ? "→" : "←"}
             </button>
           </div>
-          {!sidebarCollapsed && user && (
-            <div className={styles.userInfo}>
-              {user.email}
-            </div>
+          {!sidebarCollapsed && (
+            <>
+              {user && (
+                <div className={styles.userInfo}>
+                  {user.email}
+                </div>
+              )}
+              <div style={{ marginTop: "1rem", display: "flex", justifyContent: "center" }}>
+                <LanguageToggle />
+              </div>
+            </>
           )}
         </div>
 
@@ -180,7 +194,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             className={styles.navItem}
             whileHover={{ x: sidebarCollapsed ? 0 : 5 }}
             whileTap={{ scale: 0.98 }}
-            title={sidebarCollapsed ? "View Site" : undefined}
+            title={sidebarCollapsed ? t('nav.home') : undefined}
             style={{
               justifyContent: sidebarCollapsed ? "center" : "flex-start",
               padding: sidebarCollapsed ? "0.875rem 0" : "0.875rem 1.5rem",
@@ -192,7 +206,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             }}
           >
             <MdHome size={sidebarCollapsed ? 24 : 20} />
-            {!sidebarCollapsed && <span>View Site</span>}
+            {!sidebarCollapsed && <span>{t('nav.home')}</span>}
           </motion.a>
 
           {navigationItems.map((item) => (
@@ -234,7 +248,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             }}
           >
             <MdLogout size={20} />
-            {!sidebarCollapsed && <span>Sign Out</span>}
+            {!sidebarCollapsed && <span>{t('nav.logout')}</span>}
           </motion.button>
         </div>
       </motion.aside>

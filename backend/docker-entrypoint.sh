@@ -47,12 +47,14 @@ for i in $(seq 1 30); do
   fi
   sleep 1
 done
-# If still running, kill it and continue
 if kill -0 $SEED_PID 2>/dev/null; then
   echo "WARNING: Seeding timed out, killing process and continuing..."
   kill $SEED_PID 2>/dev/null || true
   wait $SEED_PID 2>/dev/null || true
 fi
+
+echo "Seeding contact information..."
+PGPASSWORD=app_pass psql -h app-db -U app_user -d portfolio_app -f /app/scripts/seed-contact-info.sql 2>&1 | grep -v "ERROR" || echo "Contact info seeding completed (may already exist)"
 
 echo "Starting Next.js server..."
 exec node server.js

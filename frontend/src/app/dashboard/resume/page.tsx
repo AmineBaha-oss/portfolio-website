@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
+import { useTranslations } from "@/lib/i18n/hooks";
 
 export default function ResumeManagementPage() {
+  const { t } = useTranslations();
   const [uploadedCV, setUploadedCV] = useState<{
     filename: string;
     uploadedAt: string;
@@ -25,15 +27,15 @@ export default function ResumeManagementPage() {
         >
           <div className={styles.topBar}>
             <div className={styles.breadcrumb}>
-              <a href="/dashboard">Dashboard</a>
+              <a href="/dashboard">{t('dashboard.title')}</a>
               <span>/</span>
-              <span>Resume</span>
+              <span>{t('dashboardResume.title')}</span>
             </div>
           </div>
 
           <div className={styles.pageTitle}>
-            <h1>Resume / CV</h1>
-            <p>Manage your downloadable resume file</p>
+            <h1>{t('dashboardResume.title')}</h1>
+            <p>{t('dashboardResume.subtitle')}</p>
           </div>
         </motion.div>
 
@@ -46,7 +48,7 @@ export default function ResumeManagementPage() {
             transition={{ duration: 0.6, delay: 0.1 }}
           >
             <h3 style={{ fontSize: "1.25rem", color: "white", margin: "0 0 1.5rem 0" }}>
-              Current Resume
+              {t('dashboardResume.current')}
             </h3>
 
             {uploadedCV ? (
@@ -70,27 +72,27 @@ export default function ResumeManagementPage() {
                   </div>
                   
                   <div style={{ fontSize: "0.75rem", color: "rgba(255, 255, 255, 0.4)" }}>
-                    Uploaded: {new Date(uploadedCV.uploadedAt).toLocaleDateString()}
+                    {t('dashboardResume.uploaded')}: {new Date(uploadedCV.uploadedAt).toLocaleDateString()}
                   </div>
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                   <button className={`${styles.button} ${styles.primary}`}>
-                    Download
+                    {t('dashboardResume.download')}
                   </button>
                   <button className={`${styles.button} ${styles.secondary}`}>
-                    Replace
+                    {t('dashboardResume.replace')}
                   </button>
                   <button className={`${styles.button} ${styles.danger}`}>
-                    Delete
+                    {t('dashboard.delete')}
                   </button>
                 </div>
               </div>
             ) : (
               <div className={styles.emptyState}>
                 <div className={styles.icon}>📄</div>
-                <h3>No Resume Uploaded</h3>
-                <p>Upload your resume to make it available for download</p>
+                <h3>{t('dashboardResume.noResume')}</h3>
+                <p>{t('dashboardResume.noResumeDesc')}</p>
               </div>
             )}
           </motion.div>
@@ -103,7 +105,7 @@ export default function ResumeManagementPage() {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <h3 style={{ fontSize: "1.25rem", color: "white", margin: "0 0 1.5rem 0" }}>
-              Upload New Resume
+              {t('dashboardResume.uploadNew')}
             </h3>
 
             <div style={{
@@ -128,10 +130,10 @@ export default function ResumeManagementPage() {
                 ⬆️
               </div>
               <h4 style={{ fontSize: "1rem", color: "white", margin: "0 0 0.5rem 0" }}>
-                Click to upload or drag and drop
+                {t('dashboardResume.uploadPrompt')}
               </h4>
               <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.5)", margin: 0 }}>
-                PDF files only (Max 5MB)
+                {t('dashboardResume.uploadDesc')}
               </p>
               <input 
                 type="file" 
@@ -149,7 +151,7 @@ export default function ResumeManagementPage() {
 
             <div style={{ marginTop: "2rem", padding: "1rem", background: "rgba(59, 130, 246, 0.1)", border: "1px solid rgba(59, 130, 246, 0.2)", borderRadius: "8px" }}>
               <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.7)", margin: 0, lineHeight: "1.6" }}>
-                <strong style={{ color: "white" }}>Tip:</strong> Make sure your resume is up-to-date and professionally formatted before uploading.
+                <strong style={{ color: "white" }}>{t('dashboardResume.tipLabel')}:</strong> {t('dashboardResume.tipText')}
               </p>
             </div>
           </motion.div>
@@ -164,7 +166,7 @@ export default function ResumeManagementPage() {
           style={{ marginTop: "1.5rem" }}
         >
           <h3 style={{ fontSize: "1.25rem", color: "white", margin: "0 0 1.5rem 0" }}>
-            Download Statistics
+            {t('dashboardResume.stats')}
           </h3>
 
           <div className={`${styles.grid} ${styles.cols3}`}>
@@ -173,7 +175,7 @@ export default function ResumeManagementPage() {
                 127
               </p>
               <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.6)", margin: 0 }}>
-                Total Downloads
+                {t('dashboardResume.totalDownloads')}
               </p>
             </div>
             <div style={{ textAlign: "center", padding: "1.5rem" }}>
@@ -181,7 +183,7 @@ export default function ResumeManagementPage() {
                 23
               </p>
               <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.6)", margin: 0 }}>
-                This Month
+                {t('dashboardResume.thisMonth')}
               </p>
             </div>
             <div style={{ textAlign: "center", padding: "1.5rem" }}>
@@ -189,7 +191,7 @@ export default function ResumeManagementPage() {
                 5
               </p>
               <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.6)", margin: 0 }}>
-                Today
+                {t('dashboardResume.today')}
               </p>
             </div>
           </div>

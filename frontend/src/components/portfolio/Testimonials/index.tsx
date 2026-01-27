@@ -5,9 +5,11 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/lib/i18n/context';
 import { getTestimonials, submitTestimonial, type Testimonial } from '@/lib/api/client';
+import { useTranslations } from '@/lib/i18n/hooks';
 
 export default function Testimonials() {
   const { locale } = useLanguage();
+  const { t } = useTranslations();
   const [testimonialsData, setTestimonialsData] = useState<Array<{ id: string; name: string; role: string; company: string; testimonial: string; rating: number; status: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -90,18 +92,18 @@ export default function Testimonials() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className={styles.title}>Testimonials</h2>
-          <p className={styles.subtitle}>What people say about working with me</p>
+          <h2 className={styles.title}>{t('testimonials.title')}</h2>
+          <p className={styles.subtitle}>{t('testimonials.subtitle')}</p>
         </motion.div>
 
         <div className={styles.body}>
           {loading ? (
             <p style={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center', padding: '2rem' }}>
-              Loading testimonials...
+              {t('dashboard.loading')}
             </p>
           ) : error ? (
             <p style={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center', padding: '2rem' }}>
-              Error loading testimonials. Please try again later.
+              {t('dashboard.error')}
             </p>
           ) : (
             <div className={styles.testimonialsGrid}>
@@ -135,7 +137,7 @@ export default function Testimonials() {
               </motion.div>
               )) : (
                 <p style={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center', padding: '2rem', gridColumn: '1 / -1' }}>
-                  No testimonials available yet.
+                  {t('testimonials.noTestimonials')}
                 </p>
               )}
             </div>
@@ -153,7 +155,7 @@ export default function Testimonials() {
                 className={styles.submitButton}
                 onClick={() => setShowForm(true)}
               >
-                Submit a Testimonial
+                {t('testimonials.submitButton')}
               </button>
             ) : (
               <motion.div
@@ -162,8 +164,8 @@ export default function Testimonials() {
                 animate={{ opacity: 1, height: 'auto' }}
                 transition={{ duration: 0.3 }}
               >
-                <h3>Share Your Experience</h3>
-                <p className={styles.formSubtitle}>Your testimonial will be reviewed before being published</p>
+                <h3>{t('testimonials.formTitle')}</h3>
+                <p className={styles.formSubtitle}>{t('testimonials.formSubtitle')}</p>
                 {submitSuccess && (
                   <div style={{ 
                     padding: '1rem', 
@@ -173,26 +175,26 @@ export default function Testimonials() {
                     marginBottom: '1rem',
                     color: '#22c55e'
                   }}>
-                    Thank you! Your testimonial has been submitted and is pending admin approval.
+                    {t('testimonials.successMessage')}
                   </div>
                 )}
                 <form className={styles.testimonialForm} onSubmit={handleSubmit}>
                   <div className={styles.formRow}>
                     <div className={styles.formGroup}>
-                      <label>Your Name *</label>
+                      <label>{t('testimonials.yourName')} *</label>
                       <input
                         type="text"
-                        placeholder="John Doe"
+                        placeholder={t('testimonials.namePlaceholder')}
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         required
                       />
                     </div>
                     <div className={styles.formGroup}>
-                      <label>Email *</label>
+                      <label>{t('testimonials.yourEmail')} *</label>
                       <input
                         type="email"
-                        placeholder="john@example.com"
+                        placeholder={t('testimonials.emailPlaceholder')}
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         required
@@ -202,20 +204,20 @@ export default function Testimonials() {
 
                   <div className={styles.formRow}>
                     <div className={styles.formGroup}>
-                      <label>Your Role *</label>
+                      <label>{t('testimonials.yourRole')} *</label>
                       <input
                         type="text"
-                        placeholder="CEO, Developer, etc."
+                        placeholder={t('testimonials.rolePlaceholder')}
                         value={formData.role}
                         onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                         required
                       />
                     </div>
                     <div className={styles.formGroup}>
-                      <label>School / Company (Optional)</label>
+                      <label>{t('testimonials.schoolCompany')}</label>
                       <input
                         type="text"
-                        placeholder="University Name or Company Name"
+                        placeholder={t('testimonials.companyPlaceholder')}
                         value={formData.company}
                         onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                       />
@@ -223,9 +225,9 @@ export default function Testimonials() {
                   </div>
 
                   <div className={styles.formGroup}>
-                    <label>Your Testimonial *</label>
+                    <label>{t('testimonials.yourTestimonial')} *</label>
                     <textarea
-                      placeholder="Share your experience working with me..."
+                      placeholder={t('testimonials.testimonialPlaceholder')}
                       value={formData.testimonial}
                       onChange={(e) => setFormData({ ...formData, testimonial: e.target.value })}
                       required
@@ -234,7 +236,7 @@ export default function Testimonials() {
                   </div>
 
                   <div className={styles.formGroup}>
-                    <label>Rating *</label>
+                    <label>{t('testimonials.rating')} *</label>
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                       {[1, 2, 3, 4, 5].map((rating) => (
                         <button
@@ -266,14 +268,14 @@ export default function Testimonials() {
                       onClick={() => setShowForm(false)}
                       disabled={isSubmitting}
                     >
-                      Cancel
+                      {t('dashboard.cancel')}
                     </button>
                     <button
                       type="submit"
                       className={styles.submitFormButton}
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? 'Submitting...' : 'Submit Testimonial'}
+                      {isSubmitting ? t('testimonials.submitting') : t('testimonials.submitButton')}
                     </button>
                   </div>
                 </form>

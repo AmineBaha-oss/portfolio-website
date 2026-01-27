@@ -7,6 +7,7 @@ import gsap from 'gsap';
 import Image from 'next/image';
 import { useLanguage } from '@/lib/i18n/context';
 import { getHobbies, type Hobby } from '@/lib/api/client';
+import { useTranslations } from '@/lib/i18n/hooks';
 
 const scaleAnimation = {
     initial: {scale: 0, x:"-50%", y:"-50%"},
@@ -16,6 +17,7 @@ const scaleAnimation = {
 
 export default function Home() {
   const { locale } = useLanguage();
+  const { t } = useTranslations();
   const [hobbies, setHobbies] = useState<Array<{ title: string; description: string; src: string; color: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -93,7 +95,7 @@ export default function Home() {
       <main className={styles.projects}>
         <div className={styles.body}>
           <p style={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center', padding: '2rem' }}>
-            Loading hobbies...
+            {t('dashboard.loading')}
           </p>
         </div>
       </main>
@@ -105,7 +107,7 @@ export default function Home() {
       <main className={styles.projects}>
         <div className={styles.body}>
           <p style={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center', padding: '2rem' }}>
-            Error loading hobbies. Please try again later.
+            {t('dashboard.error')}
           </p>
         </div>
       </main>

@@ -8,8 +8,11 @@ import { formatAuthErrorMessage } from "@/lib/auth";
 import { parseAuthError } from "@shared/lib/auth/parse-error";
 import { motion } from "framer-motion";
 import styles from "./page.module.scss";
+import { useTranslations } from "@/lib/i18n/hooks";
+import LanguageToggle from "@/components/portfolio/LanguageToggle";
 
 function LoginForm() {
+  const { t } = useTranslations();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [emailOrUsername, setEmailOrUsername] = useState("");
@@ -193,6 +196,48 @@ function LoginForm() {
 
   return (
     <div className={styles.loginPage}>
+      <div style={{ position: 'absolute', top: '2rem', left: '2rem', zIndex: 1000 }}>
+        <button
+          onClick={() => router.push('/')}
+          style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '12px',
+            width: '48px',
+            height: '48px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+          }}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+        </button>
+      </div>
+      <div style={{ position: 'absolute', top: '2rem', right: '2rem', zIndex: 1000 }}>
+        <LanguageToggle />
+      </div>
       <motion.div 
         className={styles.loginContainer}
         initial={{ opacity: 0, y: 20 }}
@@ -205,14 +250,14 @@ function LoginForm() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Welcome
+            {t('login.title')}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            Sign in to continue
+            {t('login.subtitle')}
           </motion.p>
         </div>
 
@@ -234,28 +279,28 @@ function LoginForm() {
             )}
 
             <div className={styles.formGroup}>
-              <label htmlFor="emailOrUsername">Email or Username</label>
+              <label htmlFor="emailOrUsername">{t('login.email')}</label>
               <input
                 id="emailOrUsername"
                 name="emailOrUsername"
                 type="text"
                 autoComplete="username"
                 required
-                placeholder="Enter your email or username"
+                placeholder={t('login.emailPlaceholder')}
                 value={emailOrUsername}
                 onChange={(e) => setEmailOrUsername(e.target.value)}
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="password">Password</label>
+              <label htmlFor="password">{t('login.password')}</label>
               <input
                 id="password"
                 name="password"
                 type="password"
                 autoComplete="current-password"
                 required
-                placeholder="Enter your password"
+                placeholder={t('login.passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -266,11 +311,11 @@ function LoginForm() {
               disabled={loading}
               className={styles.submitButton}
             >
-              {loading ? "Signing in..." : "Sign in"}
+              {loading ? t('login.submitting') : t('login.submit')}
             </button>
 
             <div className={styles.divider}>
-              <span>Or continue with</span>
+              <span>{t('login.continueWith')}</span>
             </div>
 
             <button
@@ -314,7 +359,7 @@ function LoginForm() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Sign in with Google
+              {t('login.signInWithGoogle')}
             </button>
           </form>
         </motion.div>

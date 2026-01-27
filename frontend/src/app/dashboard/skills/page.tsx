@@ -4,13 +4,28 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
 import { getSkills, createSkill, updateSkill, deleteSkill } from "@/lib/api/admin-client";
+import { useTranslations } from "@/lib/i18n/hooks";
 
 export default function SkillsManagementPage() {
+  const { t, locale } = useTranslations();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingSkill, setEditingSkill] = useState<any>(null);
   const [skills, setSkills] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Map category keys to translation keys
+  const getCategoryTranslation = (category: string) => {
+    const categoryMap: { [key: string]: string } = {
+      'Languages': 'skills.categories.languages',
+      'Back-End': 'skills.categories.backend',
+      'Front-End & Mobile': 'skills.categories.frontend',
+      'Databases': 'skills.categories.databases',
+      'DevOps & Tools': 'skills.categories.devops',
+      'AI & Data': 'skills.categories.ai',
+    };
+    return t(categoryMap[category] || category);
+  };
 
   useEffect(() => {
     fetchSkills();
@@ -31,13 +46,13 @@ export default function SkillsManagementPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this skill?')) return;
+    if (!confirm(t('dashboard.deleteConfirm'))) return;
     
     try {
       await deleteSkill(id);
       await fetchSkills();
     } catch (err: any) {
-      alert(err.message || 'Failed to delete skill');
+      alert(err.message || t('dashboard.error'));
     }
   };
 
@@ -51,8 +66,8 @@ export default function SkillsManagementPage() {
       <div className={styles.pageContainer}>
         <div className={styles.container}>
           <div className={styles.header}>
-            <h1>Skills</h1>
-            <p>Loading...</p>
+            <h1>{t('skills.title')}</h1>
+            <p>{t('dashboard.loading')}</p>
           </div>
         </div>
       </div>
@@ -69,9 +84,9 @@ export default function SkillsManagementPage() {
         >
           <div className={styles.topBar}>
             <div className={styles.breadcrumb}>
-              <a href="/dashboard">Dashboard</a>
+              <a href="/dashboard">{t('dashboard.title')}</a>
               <span>/</span>
-              <span>Skills</span>
+              <span>{t('skills.title')}</span>
             </div>
             <div className={styles.actions}>
               <button
@@ -81,14 +96,14 @@ export default function SkillsManagementPage() {
                   setShowAddModal(true);
                 }}
               >
-                + Add Skill
+                + {t('dashboardSkills.addNew')}
               </button>
             </div>
           </div>
 
           <div className={styles.pageTitle}>
-            <h1>Skills</h1>
-            <p>Manage your technical skills and expertise</p>
+            <h1>{t('dashboardSkills.title')}</h1>
+            <p>{t('skills.subtitle')}</p>
           </div>
         </motion.div>
 
@@ -101,15 +116,15 @@ export default function SkillsManagementPage() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Skill</th>
-                <th>Category</th>
-                <th>Order</th>
-                <th>Actions</th>
+                <th>{t('dashboardSkills.name')}</th>
+                <th>{t('dashboardSkills.category')}</th>
+                <th>{t('dashboardSkills.order')}</th>
+                <th>{t('dashboard.actions')}</th>
               </tr>
             </thead>
             <tbody>
               {skills.map((skill, index) => {
-                const name = typeof skill.name === 'object' ? skill.name.en || skill.name.fr : skill.name;
+                const name = typeof skill.name === 'object' && skill.name && locale in skill.name ? skill.name[locale] : String(skill.name ?? '');
                 return (
                   <motion.tr
                     key={skill.id}
@@ -118,7 +133,7 @@ export default function SkillsManagementPage() {
                     transition={{ duration: 0.4, delay: 0.1 + index * 0.05 }}
                   >
                     <td style={{ fontWeight: 500 }}>{name}</td>
-                    <td>{skill.category}</td>
+                    <td>{getCategoryTranslation(skill.category)}</td>
                     <td>{skill.order}</td>
                     <td>
                       <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -126,13 +141,13 @@ export default function SkillsManagementPage() {
                           className={`${styles.button} ${styles.secondary}`}
                           onClick={() => handleEdit(skill)}
                         >
-                          Edit
+                          {t('dashboard.edit')}
                         </button>
                         <button 
                           className={`${styles.button} ${styles.danger}`}
                           onClick={() => handleDelete(skill.id)}
                         >
-                          Delete
+                          {t('dashboard.delete')}
                         </button>
                       </div>
                     </td>
@@ -159,6 +174,7 @@ export default function SkillsManagementPage() {
 }
 
 function SkillModal({ skill, onClose, onSuccess }: { skill: any; onClose: () => void; onSuccess: () => void }) {
+  const { t } = useTranslations();
   const isEditing = !!skill;
   const [formData, setFormData] = useState({
     name: { en: '', fr: '' },
@@ -218,12 +234,12 @@ function SkillModal({ skill, onClose, onSuccess }: { skill: any; onClose: () => 
         onClick={(e) => e.stopPropagation()}
       >
         <h2 style={{ fontSize: "1.5rem", color: "white", marginBottom: "1.5rem" }}>
-          {isEditing ? 'Edit Skill' : 'Add New Skill'}
+          {isEditing ? t('dashboardSkills.editTitle') : t('dashboardSkills.addNew')}
         </h2>
 
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
-            <label>Skill Name (English) *</label>
+            <label>{t('dashboardSkills.name')} (English) *</label>
             <input 
               type="text" 
               placeholder="e.g. React"
@@ -234,7 +250,7 @@ function SkillModal({ skill, onClose, onSuccess }: { skill: any; onClose: () => 
           </div>
 
           <div className={styles.formGroup}>
-            <label>Skill Name (French) *</label>
+            <label>{t('dashboardSkills.name')} (French) *</label>
             <input 
               type="text" 
               placeholder="e.g. React"
@@ -245,24 +261,24 @@ function SkillModal({ skill, onClose, onSuccess }: { skill: any; onClose: () => 
           </div>
 
           <div className={styles.formGroup}>
-            <label>Category *</label>
+            <label>{t('dashboardSkills.category')} *</label>
             <select
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               required
             >
-              <option value="">Select category</option>
-              <option value="Languages">Languages</option>
-              <option value="Back-End">Back-End</option>
-              <option value="Front-End & Mobile">Front-End & Mobile</option>
-              <option value="Databases">Databases</option>
-              <option value="DevOps & Tools">DevOps & Tools</option>
-              <option value="AI & Data">AI & Data</option>
+              <option value="">{t('common.select')}</option>
+              <option value="Languages">{t('skills.categories.languages')}</option>
+              <option value="Back-End">{t('skills.categories.backend')}</option>
+              <option value="Front-End & Mobile">{t('skills.categories.frontend')}</option>
+              <option value="Databases">{t('skills.categories.databases')}</option>
+              <option value="DevOps & Tools">{t('skills.categories.devops')}</option>
+              <option value="AI & Data">{t('skills.categories.ai')}</option>
             </select>
           </div>
 
           <div className={styles.formGroup}>
-            <label>Display Order</label>
+            <label>{t('dashboardSkills.order')}</label>
             <input 
               type="number" 
               placeholder="0" 
@@ -279,7 +295,7 @@ function SkillModal({ skill, onClose, onSuccess }: { skill: any; onClose: () => 
               style={{ flex: 1 }}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Saving...' : (isEditing ? 'Update Skill' : 'Add Skill')}
+              {isSubmitting ? t('common.submitting') : (isEditing ? t('dashboard.save') : t('dashboard.add'))}
             </button>
             <button
               type="button"
@@ -288,7 +304,7 @@ function SkillModal({ skill, onClose, onSuccess }: { skill: any; onClose: () => 
               style={{ flex: 1 }}
               disabled={isSubmitting}
             >
-              Cancel
+              {t('dashboard.cancel')}
             </button>
           </div>
         </form>

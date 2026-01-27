@@ -3,11 +3,20 @@
 import styles from './style.module.scss';
 import Image from 'next/image';
 import Rounded from '@/common/RoundedButton';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useScroll, motion, useTransform } from 'framer-motion';
 import Magnetic from '@/common/Magnetic';
+import { useTranslations } from '@/lib/i18n/hooks';
+
+interface ContactInfo {
+    id: string;
+    type: string;
+    value: string;
+    order: number;
+}
 
 export default function Contact() {
+    const { t, locale } = useTranslations();
     const container = useRef(null);
     const { scrollYProgress } = useScroll({
         target: container,
@@ -17,6 +26,58 @@ export default function Contact() {
     const y = useTransform(scrollYProgress, [0, 1], [-500, 0])
     const rotate = useTransform(scrollYProgress, [0, 1], [120, 90])
 
+    // Contact info state
+    const [contactInfo, setContactInfo] = useState<ContactInfo[]>([]);
+    const [email, setEmail] = useState('');
+    const [socialLinks, setSocialLinks] = useState<{ github?: string; linkedin?: string }>({});
+
+    // Fetch contact info
+    useEffect(() => {
+        const fetchContactInfo = async () => {
+            try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+                console.log('Fetching contact info from:', `${apiUrl}/api/public/contact-info`);
+                const response = await fetch(`${apiUrl}/api/public/contact-info`);
+                console.log('Contact info response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Contact info data:', data);
+                    setContactInfo(data.contactInfo || []);
+                    
+                    // Update email and social links from API
+                    const links: { github?: string; linkedin?: string } = {};
+                    
+                    data.contactInfo?.forEach((info: ContactInfo) => {
+                        console.log('Processing contact info:', info);
+                        if (info.type === 'email') {
+                            console.log('Setting email:', info.value);
+                            setEmail(info.value);
+                        } else if (info.type === 'social_links') {
+                            // Parse social links by URL
+                            const url = info.value.toLowerCase();
+                            if (url.includes('github.com')) {
+                                links.github = info.value;
+                            } else if (url.includes('linkedin.com')) {
+                                links.linkedin = info.value;
+                            }
+                        }
+                    });
+                    
+                    console.log('Setting social links:', links);
+                    setSocialLinks(links);
+                    console.log('Email state:', email);
+                } else {
+                    console.error('Failed to fetch contact info:', response.status, response.statusText);
+                }
+            } catch (error) {
+                console.error('Error fetching contact info:', error);
+            }
+        };
+
+        fetchContactInfo();
+    }, []);
+
     // Message form state
     const [formData, setFormData] = useState({
         name: '',
@@ -25,9 +86,9 @@ export default function Contact() {
         message: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitStatus, setSubmitStatus] = useState(null);
+    const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | null>(null);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         setSubmitStatus(null);
@@ -60,12 +121,12 @@ export default function Contact() {
                             src={`/images/background.jpg`}
                             />
                         </div>
-                        <h2>Let's work</h2>
+                        <h2>{t('contact.title').split(' ')[0]} {t('contact.title').split(' ')[1]}</h2>
                     </span>
-                    <h2>together</h2>
+                    <h2>{t('contact.subtitle').split(' ')[0]}</h2>
                     <motion.div style={{x}} className={styles.buttonContainer}>
-                        <Rounded  backgroundColor={"#2a2b2c"} className={styles.button}>
-                            <p>Get in touch</p>
+                        <Rounded backgroundColor={"#2a2b2c"} className={styles.button}>
+                            <p>{t('contact.title')}</p>
                         </Rounded>
                     </motion.div>
                     <motion.svg style={{rotate, scale: 2}} width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -73,32 +134,34 @@ export default function Contact() {
                     </motion.svg>
                 </div>
                 <div className={styles.nav}>
+                    {email && (
                         <Rounded backgroundColor="#2a2b2c">
-                            <p>aminebaha115@gmail.com</p>
+                            <p>{email}</p>
                         </Rounded>
+                    )}
                 </div>
 
                 {/* Message Form Section */}
                 <div className={styles.messageForm}>
-                    <h3>Send me a message</h3>
+                    <h3>{t('contact.send')}</h3>
                     <form onSubmit={handleSubmit}>
                         {submitStatus === 'success' && (
-                            <div className={styles.successMessage}>Message sent successfully!</div>
+                            <div className={styles.successMessage}>{t('contact.success')}</div>
                         )}
                         {submitStatus === 'error' && (
-                            <div className={styles.errorMessage}>Failed to send. Please try again.</div>
+                            <div className={styles.errorMessage}>{t('contact.error')}</div>
                         )}
                         <div className={styles.formRow}>
                             <input
                                 type="text"
-                                placeholder="Your Name"
+                                placeholder={t('contact.namePlaceholder')}
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 required
                             />
                             <input
                                 type="email"
-                                placeholder="Your Email"
+                                placeholder={t('contact.emailPlaceholder')}
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 required
@@ -106,20 +169,20 @@ export default function Contact() {
                         </div>
                         <input
                             type="text"
-                            placeholder="Subject"
+                            placeholder={t('contact.subjectPlaceholder')}
                             value={formData.subject}
                             onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                             required
                         />
                         <textarea
-                            placeholder="Your Message"
+                            placeholder={t('contact.messagePlaceholder')}
                             value={formData.message}
                             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                             required
-                            rows="5"
+                            rows={5}
                         />
                         <button type="submit" disabled={isSubmitting}>
-                            {isSubmitting ? 'Sending...' : 'Send Message'}
+                            {isSubmitting ? t('contact.sending') : t('contact.send')}
                         </button>
                     </form>
                 </div>
@@ -131,24 +194,28 @@ export default function Contact() {
                             <p>2026 © Edition</p>
                         </span>
                         <span>
-                            <h3>Local Time</h3>
-                            <p>{new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' })}</p>
+                            <h3>{locale === 'fr' ? 'Heure locale' : 'Local Time'}</h3>
+                            <p>{new Date().toLocaleTimeString(locale === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' })}</p>
                         </span>
                     </div>
                     <div>
                         <span>
-                            <h3>socials</h3>
+                            <h3>{locale === 'fr' ? 'Réseaux sociaux' : 'Socials'}</h3>
+                            {socialLinks.github && (
+                                <Magnetic>
+                                    <a href={socialLinks.github} target="_blank" rel="noopener noreferrer">
+                                        <p>GitHub</p>
+                                    </a>
+                                </Magnetic>
+                            )}
+                        </span>
+                        {socialLinks.linkedin && (
                             <Magnetic>
-                                <a href="https://github.com/AmineBaha-oss" target="_blank" rel="noopener noreferrer">
-                                    <p>GitHub</p>
+                                <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer">
+                                    <p>Linkedin</p>
                                 </a>
                             </Magnetic>
-                        </span>
-                        <Magnetic>
-                            <a href="https://www.linkedin.com/in/amine-baha-oss" target="_blank" rel="noopener noreferrer">
-                                <p>Linkedin</p>
-                            </a>
-                        </Magnetic>
+                        )}
                     </div>
                 </div>
             </div>

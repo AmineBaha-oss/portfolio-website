@@ -8,6 +8,7 @@ import Image from 'next/image';
 import Rounded from '@/common/RoundedButton';
 import { useLanguage } from '@/lib/i18n/context';
 import { getProjects } from '@/lib/api/client';
+import { useTranslations } from '@/lib/i18n/hooks';
 
 const scaleAnimation = {
     initial: {scale: 0, x:"-50%", y:"-50%"},
@@ -17,6 +18,7 @@ const scaleAnimation = {
 
 export default function Home() {
   const { locale } = useLanguage();
+  const { t } = useTranslations();
   const [projects, setProjects] = useState<Array<{ title: string; src: string; color: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -92,8 +94,8 @@ export default function Home() {
     return (
       <main className={styles.projects}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Featured Projects</h2>
-          <p className={styles.subtitle}>Loading...</p>
+          <h2 className={styles.title}>{t('projects.title')}</h2>
+          <p className={styles.subtitle}>{t('dashboard.loading')}</p>
         </div>
       </main>
     );
@@ -103,8 +105,8 @@ export default function Home() {
     return (
       <main className={styles.projects}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Featured Projects</h2>
-          <p className={styles.subtitle}>Error loading projects. Please try again later.</p>
+          <h2 className={styles.title}>{t('projects.title')}</h2>
+          <p className={styles.subtitle}>{t('dashboard.error')}</p>
         </div>
       </main>
     );
@@ -113,8 +115,8 @@ export default function Home() {
   return (
   <main onMouseMove={(e) => {moveItems(e.clientX, e.clientY)}} className={styles.projects}>
     <div className={styles.header}>
-      <h2 className={styles.title}>Featured Projects</h2>
-      <p className={styles.subtitle}>Selected works that showcase my skills and experience</p>
+      <h2 className={styles.title}>{t('projects.title')}</h2>
+      <p className={styles.subtitle}>{t('projects.subtitle')}</p>
     </div>
     <div className={styles.body}>
       {
@@ -122,13 +124,13 @@ export default function Home() {
           return <Project index={index} title={project.title} manageModal={manageModal} key={index}/>
         }) : (
           <p style={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center', padding: '2rem' }}>
-            No featured projects available.
+            {t('dashboard.noData')}
           </p>
         )
       }
     </div>
     <Rounded backgroundColor="#2a2b2c">
-      <p>More work</p>
+      <p>{t('projects.moreWork')}</p>
     </Rounded>
     <>
         <motion.div ref={modalContainer} variants={scaleAnimation} initial="initial" animate={active ? "enter" : "closed"} className={styles.modalContainer}>

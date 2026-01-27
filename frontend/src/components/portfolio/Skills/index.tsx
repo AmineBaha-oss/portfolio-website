@@ -5,6 +5,7 @@ import styles from './style.module.scss';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/lib/i18n/context';
 import { getSkills, type Skill } from '@/lib/api/client';
+import { useTranslations } from '@/lib/i18n/hooks';
 
 export default function Skills() {
   const { locale } = useLanguage();
@@ -46,12 +47,28 @@ export default function Skills() {
       skills: skillsList,
     }));
   }, [skills]);
+  const { t } = useTranslations();
+
+  // Helper function to get translated category name
+  const getCategoryTranslation = (category: string): string => {
+    const categoryMap: { [key: string]: string } = {
+      'Languages': 'skills.categories.languages',
+      'Backend': 'skills.categories.backend',
+      'Frontend': 'skills.categories.frontend',
+      'Front-End & Mobile': 'skills.categories.frontend',
+      'Databases': 'skills.categories.databases',
+      'DevOps': 'skills.categories.devops',
+      'AI & Machine Learning': 'skills.categories.ai',
+    };
+    return categoryMap[category] || category;
+  };
+
   if (loading) {
     return (
       <section id="skills" className={styles.skills}>
         <div className={styles.container}>
-          <h2 className={styles.title}>Skills & Technologies</h2>
-          <p className={styles.subtitle}>Loading...</p>
+          <h2 className={styles.title}>{t('skills.title')}</h2>
+          <p className={styles.subtitle}>{t('dashboard.loading')}</p>
         </div>
       </section>
     );
@@ -61,8 +78,8 @@ export default function Skills() {
     return (
       <section id="skills" className={styles.skills}>
         <div className={styles.container}>
-          <h2 className={styles.title}>Skills & Technologies</h2>
-          <p className={styles.subtitle}>Error loading skills. Please try again later.</p>
+          <h2 className={styles.title}>{t('skills.title')}</h2>
+          <p className={styles.subtitle}>{t('dashboard.error')}</p>
         </div>
       </section>
     );
@@ -77,9 +94,9 @@ export default function Skills() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className={styles.title}>Skills & Technologies</h2>
+          <h2 className={styles.title}>{t('skills.title')}</h2>
           <p className={styles.subtitle}>
-            Technologies and tools I work with to bring ideas to life
+            {t('skills.subtitle')}
           </p>
         </motion.div>
 
@@ -93,7 +110,7 @@ export default function Skills() {
               transition={{ duration: 0.5 }}
               viewport={{ once: true, amount: 0.5 }}
             >
-              <h3>{category.category}</h3>
+              <h3>{t(getCategoryTranslation(category.category))}</h3>
               <div className={styles.skillsList}>
                 {category.skills.map((skill, skillIndex) => (
                   <motion.span

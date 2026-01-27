@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
 import { getProjects, createProject, updateProject, deleteProject } from "@/lib/api/admin-client";
+import { useTranslations } from "@/lib/i18n/hooks";
 
 export default function ProjectsManagementPage() {
+  const { t, locale } = useTranslations();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
   const [projects, setProjects] = useState<any[]>([]);
@@ -31,13 +33,13 @@ export default function ProjectsManagementPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this project?')) return;
+    if (!confirm(t('dashboard.deleteConfirm'))) return;
     
     try {
       await deleteProject(id);
       await fetchProjects();
     } catch (err: any) {
-      alert(err.message || 'Failed to delete project');
+      alert(err.message || t('dashboard.error'));
     }
   };
 
@@ -51,8 +53,8 @@ export default function ProjectsManagementPage() {
       <div className={styles.pageContainer}>
         <div className={styles.container}>
           <div className={styles.header}>
-            <h1>Projects</h1>
-            <p>Loading...</p>
+            <h1>{t('projects.title')}</h1>
+            <p>{t('dashboard.loading')}</p>
           </div>
         </div>
       </div>
@@ -64,8 +66,8 @@ export default function ProjectsManagementPage() {
       <div className={styles.pageContainer}>
         <div className={styles.container}>
           <div className={styles.header}>
-            <h1>Projects</h1>
-            <p style={{ color: 'red' }}>Error: {error}</p>
+            <h1>{t('projects.title')}</h1>
+            <p style={{ color: 'red' }}>{t('dashboard.error')}: {error}</p>
           </div>
         </div>
       </div>
@@ -82,9 +84,9 @@ export default function ProjectsManagementPage() {
         >
           <div className={styles.topBar}>
             <div className={styles.breadcrumb}>
-              <a href="/dashboard">Dashboard</a>
+              <a href="/dashboard">{t('dashboard.title')}</a>
               <span>/</span>
-              <span>Projects</span>
+              <span>{t('projects.title')}</span>
             </div>
             <div className={styles.actions}>
               <button
@@ -94,21 +96,21 @@ export default function ProjectsManagementPage() {
                   setShowAddModal(true);
                 }}
               >
-                + Add Project
+                + {t('dashboardProjects.addNew')}
               </button>
             </div>
           </div>
 
           <div className={styles.pageTitle}>
-            <h1>Projects</h1>
-            <p>Manage your portfolio projects and case studies</p>
+            <h1>{t('dashboardProjects.title')}</h1>
+            <p>{t('projects.subtitle')}</p>
           </div>
         </motion.div>
 
         <div className={`${styles.grid} ${styles.cols2}`}>
           {projects.map((project, index) => {
-            const title = typeof project.title === 'object' ? project.title.en || project.title.fr : project.title;
-            const description = typeof project.description === 'object' ? project.description.en || project.description.fr : project.description;
+            const title = typeof project.title === 'object' && project.title && locale in project.title ? project.title[locale] : String(project.title ?? '');
+            const description = typeof project.description === 'object' && project.description && locale in project.description ? project.description[locale] : String(project.description ?? '');
             
             return (
               <motion.div
@@ -124,11 +126,11 @@ export default function ProjectsManagementPage() {
                       {title}
                     </h3>
                     {project.featured && (
-                      <span className={styles.badge}>Featured</span>
+                      <span className={styles.badge}>{t('dashboardProjects.featured')}</span>
                     )}
                   </div>
                   <span className={styles.badge}>
-                    {project.status}
+                    {project.status === 'published' ? t('dashboardProjects.published') : t('dashboardProjects.draft')}
                   </span>
                 </div>
 
@@ -160,13 +162,13 @@ export default function ProjectsManagementPage() {
                     style={{ flex: 1 }}
                     onClick={() => handleEdit(project)}
                   >
-                    Edit
+                    {t('dashboard.edit')}
                   </button>
                   <button 
                     className={`${styles.button} ${styles.danger}`}
                     onClick={() => handleDelete(project.id)}
                   >
-                    Delete
+                    {t('dashboard.delete')}
                   </button>
                 </div>
               </motion.div>
@@ -190,6 +192,7 @@ export default function ProjectsManagementPage() {
 }
 
 function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: () => void; onSuccess: () => void }) {
+  const { t } = useTranslations();
   const isEditing = !!project;
   const [formData, setFormData] = useState({
     title: { en: '', fr: '' },
@@ -251,7 +254,7 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
       onSuccess();
       onClose();
     } catch (err: any) {
-      alert(err.message || 'Failed to save project');
+      alert(err.message || t('dashboard.error'));
     } finally {
       setIsSubmitting(false);
     }
@@ -271,15 +274,15 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
         onClick={(e) => e.stopPropagation()}
       >
         <h2 style={{ fontSize: "1.5rem", color: "white", marginBottom: "1.5rem" }}>
-          {isEditing ? 'Edit Project' : 'Add New Project'}
+          {isEditing ? t('dashboardProjects.editTitle') : t('dashboardProjects.addNew')}
         </h2>
 
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
-            <label>Project Title (English) *</label>
+            <label>{t('dashboardProjects.title')} (English) *</label>
             <input 
               type="text" 
-              placeholder="Enter project title in English"
+              placeholder={t('dashboardProjects.titlePlaceholder')}
               value={formData.title.en}
               onChange={(e) => setFormData({ ...formData, title: { ...formData.title, en: e.target.value } })}
               required
@@ -287,10 +290,10 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
           </div>
 
           <div className={styles.formGroup}>
-            <label>Project Title (French) *</label>
+            <label>{t('dashboardProjects.title')} (French) *</label>
             <input 
               type="text" 
-              placeholder="Enter project title in French"
+              placeholder={t('dashboardProjects.titlePlaceholderFr')}
               value={formData.title.fr}
               onChange={(e) => setFormData({ ...formData, title: { ...formData.title, fr: e.target.value } })}
               required
@@ -298,9 +301,9 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
           </div>
 
           <div className={styles.formGroup}>
-            <label>Description (English) *</label>
+            <label>{t('dashboardProjects.description')} (English) *</label>
             <textarea 
-              placeholder="Brief description in English" 
+              placeholder={t('dashboardProjects.descriptionPlaceholder')} 
               rows={3}
               value={formData.description.en}
               onChange={(e) => setFormData({ ...formData, description: { ...formData.description, en: e.target.value } })}
@@ -309,9 +312,9 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
           </div>
 
           <div className={styles.formGroup}>
-            <label>Description (French) *</label>
+            <label>{t('dashboardProjects.description')} (French) *</label>
             <textarea 
-              placeholder="Brief description in French" 
+              placeholder={t('dashboardProjects.descriptionPlaceholderFr')} 
               rows={3}
               value={formData.description.fr}
               onChange={(e) => setFormData({ ...formData, description: { ...formData.description, fr: e.target.value } })}
@@ -321,17 +324,17 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
 
           <div className={`${styles.grid} ${styles.cols2}`}>
             <div className={styles.formGroup}>
-              <label>Client/Company</label>
+              <label>{t('dashboardProjects.client')}</label>
               <input 
                 type="text" 
-                placeholder="Client name (optional)"
+                placeholder={t('dashboardProjects.clientPlaceholder')}
                 value={formData.client}
                 onChange={(e) => setFormData({ ...formData, client: e.target.value })}
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label>Color</label>
+              <label>{t('dashboardProjects.color')}</label>
               <input 
                 type="text" 
                 placeholder="#EFE8D3"
@@ -342,10 +345,10 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
           </div>
 
           <div className={styles.formGroup}>
-            <label>Technologies Used</label>
+            <label>{t('dashboardProjects.technologies')}</label>
             <input 
               type="text" 
-              placeholder="React, Node.js, MongoDB (comma separated)"
+              placeholder={t('dashboardProjects.technologiesPlaceholder')}
               value={formData.technologies}
               onChange={(e) => setFormData({ ...formData, technologies: e.target.value })}
             />
@@ -353,7 +356,7 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
 
           <div className={`${styles.grid} ${styles.cols2}`}>
             <div className={styles.formGroup}>
-              <label>Start Date</label>
+              <label>{t('dashboardProjects.startDate')}</label>
               <input 
                 type="date"
                 value={formData.startDate}
@@ -362,7 +365,7 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
             </div>
 
             <div className={styles.formGroup}>
-              <label>End Date</label>
+              <label>{t('dashboardProjects.endDate')}</label>
               <input 
                 type="date"
                 value={formData.endDate}
@@ -372,7 +375,7 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
           </div>
 
           <div className={styles.formGroup}>
-            <label>Project URL</label>
+            <label>{t('dashboardProjects.projectUrl')}</label>
             <input 
               type="url" 
               placeholder="https://example.com"
@@ -382,7 +385,7 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
           </div>
 
           <div className={styles.formGroup}>
-            <label>GitHub Repository</label>
+            <label>{t('dashboardProjects.githubUrl')}</label>
             <input 
               type="url" 
               placeholder="https://github.com/username/repo"
@@ -392,9 +395,9 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
           </div>
 
           <div className={styles.formGroup}>
-            <label>Full Description (English)</label>
+            <label>{t('dashboardProjects.fullDescription')} (English)</label>
             <textarea 
-              placeholder="Detailed project description in English" 
+              placeholder={t('dashboardProjects.fullDescriptionPlaceholder')} 
               rows={4}
               value={formData.fullDescription.en}
               onChange={(e) => setFormData({ ...formData, fullDescription: { ...formData.fullDescription, en: e.target.value } })}
@@ -402,9 +405,9 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
           </div>
 
           <div className={styles.formGroup}>
-            <label>Full Description (French)</label>
+            <label>{t('dashboardProjects.fullDescription')} (French)</label>
             <textarea 
-              placeholder="Detailed project description in French" 
+              placeholder={t('dashboardProjects.fullDescriptionPlaceholderFr')} 
               rows={4}
               value={formData.fullDescription.fr}
               onChange={(e) => setFormData({ ...formData, fullDescription: { ...formData.fullDescription, fr: e.target.value } })}
@@ -413,13 +416,13 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
 
           <div className={`${styles.grid} ${styles.cols2}`}>
             <div className={styles.formGroup}>
-              <label>Status</label>
+              <label>{t('dashboardProjects.status')}</label>
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
               >
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
+                <option value="draft">{t('dashboardProjects.draft')}</option>
+                <option value="published">{t('dashboardProjects.published')}</option>
               </select>
             </div>
 
@@ -430,7 +433,7 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
                   checked={formData.featured}
                   onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
                 />
-                <span>Featured Project</span>
+                <span>{t('dashboardProjects.featured')}</span>
               </label>
             </div>
           </div>
@@ -442,7 +445,7 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
               style={{ flex: 1 }}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Saving...' : (isEditing ? 'Update Project' : 'Add Project')}
+              {isSubmitting ? t('common.submitting') : (isEditing ? t('dashboard.save') : t('dashboard.add'))}
             </button>
             <button
               type="button"
@@ -451,7 +454,7 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
               style={{ flex: 1 }}
               disabled={isSubmitting}
             >
-              Cancel
+              {t('dashboard.cancel')}
             </button>
           </div>
         </form>

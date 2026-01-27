@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
 import { getEducation, createEducation, updateEducation, deleteEducation } from "@/lib/api/admin-client";
+import { useTranslations } from "@/lib/i18n/hooks";
 
 export default function EducationManagementPage() {
+  const { t, locale } = useTranslations();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingEdu, setEditingEdu] = useState<any>(null);
   const [education, setEducation] = useState<any[]>([]);
@@ -28,36 +30,36 @@ export default function EducationManagementPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this education entry?')) return;
+    if (!confirm(t('dashboard.deleteConfirm'))) return;
     try {
       await deleteEducation(id);
       await fetchEducation();
     } catch (err: any) {
-      alert(err.message || 'Failed to delete education');
+      alert(err.message || t('dashboard.error'));
     }
   };
 
-  if (loading) return <div className={styles.pageContainer}><div className={styles.container}><p>Loading...</p></div></div>;
+  if (loading) return <div className={styles.pageContainer}><div className={styles.container}><p>{t('dashboard.loading')}</p></div></div>;
 
   return (
     <div className={styles.pageContainer}>
       <div className={styles.container}>
         <motion.div className={styles.header} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className={styles.topBar}>
-            <div className={styles.breadcrumb}><a href="/dashboard">Dashboard</a><span>/</span><span>Education</span></div>
+            <div className={styles.breadcrumb}><a href="/dashboard">{t('dashboard.title')}</a><span>/</span><span>{t('education.title')}</span></div>
             <div className={styles.actions}>
-              <button className={`${styles.button} ${styles.primary}`} onClick={() => { setEditingEdu(null); setShowAddModal(true); }}>+ Add Education</button>
+              <button className={`${styles.button} ${styles.primary}`} onClick={() => { setEditingEdu(null); setShowAddModal(true); }}>+ {t('dashboardEducation.addNew')}</button>
             </div>
           </div>
-          <div className={styles.pageTitle}><h1>Education</h1><p>Manage your educational background and qualifications</p></div>
+          <div className={styles.pageTitle}><h1>{t('dashboardEducation.title')}</h1><p>{t('education.subtitle')}</p></div>
         </motion.div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           {education.map((edu, index) => {
-            const deg = typeof edu.degree === 'object' && edu.degree && 'en' in edu.degree ? (edu.degree as { en?: string }).en : String(edu.degree ?? '');
-            const inst = typeof edu.institution === 'object' && edu.institution && 'en' in edu.institution ? (edu.institution as { en?: string }).en : String(edu.institution ?? '');
-            const loc = typeof edu.location === 'object' && edu.location && 'en' in edu.location ? (edu.location as { en?: string }).en : String(edu.location ?? '');
-            const desc = typeof edu.description === 'object' && edu.description && 'en' in edu.description ? (edu.description as { en?: string }).en : String(edu.description ?? '');
+            const deg = typeof edu.degree === 'object' && edu.degree && locale in edu.degree ? edu.degree[locale] : String(edu.degree ?? '');
+            const inst = typeof edu.institution === 'object' && edu.institution && locale in edu.institution ? edu.institution[locale] : String(edu.institution ?? '');
+            const loc = typeof edu.location === 'object' && edu.location && locale in edu.location ? edu.location[locale] : String(edu.location ?? '');
+            const desc = typeof edu.description === 'object' && edu.description && locale in edu.description ? edu.description[locale] : String(edu.description ?? '');
             return (
             <motion.div key={edu.id} className={styles.card} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: index * 0.1 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
@@ -73,8 +75,8 @@ export default function EducationManagementPage() {
                   {desc && <p style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "0.875rem", lineHeight: "1.6" }}>{desc}</p>}
                 </div>
                 <div style={{ display: "flex", gap: "0.75rem", marginLeft: "2rem" }}>
-                  <button className={`${styles.button} ${styles.secondary}`} onClick={() => { setEditingEdu(edu); setShowAddModal(true); }}>Edit</button>
-                  <button className={`${styles.button} ${styles.danger}`} onClick={() => handleDelete(edu.id)}>Delete</button>
+                  <button className={`${styles.button} ${styles.secondary}`} onClick={() => { setEditingEdu(edu); setShowAddModal(true); }}>{t('dashboard.edit')}</button>
+                  <button className={`${styles.button} ${styles.danger}`} onClick={() => handleDelete(edu.id)}>{t('dashboard.delete')}</button>
                 </div>
               </div>
             </motion.div>
@@ -94,6 +96,7 @@ function toBilingual(v: unknown): { en: string; fr: string } {
 }
 
 function EducationModal({ edu, onClose, onSuccess }: { edu: any; onClose: () => void; onSuccess: () => void }) {
+  const { t } = useTranslations();
   const [formData, setFormData] = useState<{
     degree: { en: string; fr: string };
     institution: { en: string; fr: string };
@@ -145,7 +148,7 @@ function EducationModal({ edu, onClose, onSuccess }: { edu: any; onClose: () => 
       onSuccess();
       onClose();
     } catch (err: any) {
-      alert(err.message || 'Failed to save education');
+      alert(err.message || t('dashboard.error'));
     } finally {
       setIsSubmitting(false);
     }
@@ -154,28 +157,28 @@ function EducationModal({ edu, onClose, onSuccess }: { edu: any; onClose: () => 
   return (
     <motion.div className={styles.modalOverlay} initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={onClose}>
       <motion.div className={styles.modalCard} initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={(e) => e.stopPropagation()}>
-        <h2 style={{ fontSize: "1.5rem", color: "white", marginBottom: "1.5rem" }}>{edu ? 'Edit Education' : 'Add Education'}</h2>
+        <h2 style={{ fontSize: "1.5rem", color: "white", marginBottom: "1.5rem" }}>{edu ? t('dashboardEducation.editTitle') : t('dashboardEducation.addNew')}</h2>
         <form onSubmit={handleSubmit}>
-          <div className={styles.formGroup}><label>Degree (English)</label><input type="text" placeholder="e.g. Bachelor of Science in Computer Science" value={formData.degree.en} onChange={(e) => setFormData({ ...formData, degree: { ...formData.degree, en: e.target.value } })} required /></div>
-          <div className={styles.formGroup}><label>Degree (French)</label><input type="text" placeholder="e.g. Baccalauréat en informatique" value={formData.degree.fr} onChange={(e) => setFormData({ ...formData, degree: { ...formData.degree, fr: e.target.value } })} /></div>
+          <div className={styles.formGroup}><label>{t('dashboardEducation.degree')} (English)</label><input type="text" placeholder={t('dashboardEducation.degreePlaceholder')} value={formData.degree.en} onChange={(e) => setFormData({ ...formData, degree: { ...formData.degree, en: e.target.value } })} required /></div>
+          <div className={styles.formGroup}><label>{t('dashboardEducation.degree')} (French)</label><input type="text" placeholder={t('dashboardEducation.degreePlaceholderFr')} value={formData.degree.fr} onChange={(e) => setFormData({ ...formData, degree: { ...formData.degree, fr: e.target.value } })} /></div>
           <div className={`${styles.grid} ${styles.cols2}`}>
-            <div className={styles.formGroup}><label>Institution (English)</label><input type="text" placeholder="University/School name" value={formData.institution.en} onChange={(e) => setFormData({ ...formData, institution: { ...formData.institution, en: e.target.value } })} required /></div>
-            <div className={styles.formGroup}><label>Institution (French)</label><input type="text" placeholder="Université / Établissement" value={formData.institution.fr} onChange={(e) => setFormData({ ...formData, institution: { ...formData.institution, fr: e.target.value } })} /></div>
+            <div className={styles.formGroup}><label>{t('dashboardEducation.institution')} (English)</label><input type="text" placeholder={t('dashboardEducation.institutionPlaceholder')} value={formData.institution.en} onChange={(e) => setFormData({ ...formData, institution: { ...formData.institution, en: e.target.value } })} required /></div>
+            <div className={styles.formGroup}><label>{t('dashboardEducation.institution')} (French)</label><input type="text" placeholder={t('dashboardEducation.institutionPlaceholderFr')} value={formData.institution.fr} onChange={(e) => setFormData({ ...formData, institution: { ...formData.institution, fr: e.target.value } })} /></div>
           </div>
           <div className={`${styles.grid} ${styles.cols2}`}>
-            <div className={styles.formGroup}><label>Location (English)</label><input type="text" placeholder="City, Country" value={formData.location.en} onChange={(e) => setFormData({ ...formData, location: { ...formData.location, en: e.target.value } })} required /></div>
-            <div className={styles.formGroup}><label>Location (French)</label><input type="text" placeholder="Ville, Pays" value={formData.location.fr} onChange={(e) => setFormData({ ...formData, location: { ...formData.location, fr: e.target.value } })} /></div>
+            <div className={styles.formGroup}><label>{t('dashboardEducation.location')} (English)</label><input type="text" placeholder={t('dashboardEducation.locationPlaceholder')} value={formData.location.en} onChange={(e) => setFormData({ ...formData, location: { ...formData.location, en: e.target.value } })} required /></div>
+            <div className={styles.formGroup}><label>{t('dashboardEducation.location')} (French)</label><input type="text" placeholder={t('dashboardEducation.locationPlaceholderFr')} value={formData.location.fr} onChange={(e) => setFormData({ ...formData, location: { ...formData.location, fr: e.target.value } })} /></div>
           </div>
           <div className={`${styles.grid} ${styles.cols2}`}>
-            <div className={styles.formGroup}><label>Start Date</label><input type="date" value={formData.startDate} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} required /></div>
-            <div className={styles.formGroup}><label>End Date (or Expected)</label><input type="date" value={formData.endDate} onChange={(e) => setFormData({ ...formData, endDate: e.target.value })} /></div>
+            <div className={styles.formGroup}><label>{t('dashboardEducation.startDate')}</label><input type="date" value={formData.startDate} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} required /></div>
+            <div className={styles.formGroup}><label>{t('dashboardEducation.endDate')}</label><input type="date" value={formData.endDate} onChange={(e) => setFormData({ ...formData, endDate: e.target.value })} /></div>
           </div>
-          <div className={styles.formGroup}><label>GPA (Optional)</label><input type="text" placeholder="e.g. 3.8/4.0" value={formData.gpa} onChange={(e) => setFormData({ ...formData, gpa: e.target.value })} /></div>
-          <div className={styles.formGroup}><label>Description (English)</label><textarea placeholder="Relevant courses, achievements, specializations..." rows={3} value={formData.description.en} onChange={(e) => setFormData({ ...formData, description: { ...formData.description, en: e.target.value } })} /></div>
-          <div className={styles.formGroup}><label>Description (French)</label><textarea placeholder="Cours pertinents, réalisations, spécialisations..." rows={3} value={formData.description.fr} onChange={(e) => setFormData({ ...formData, description: { ...formData.description, fr: e.target.value } })} /></div>
+          <div className={styles.formGroup}><label>{t('dashboardEducation.gpa')}</label><input type="text" placeholder={t('dashboardEducation.gpaPlaceholder')} value={formData.gpa} onChange={(e) => setFormData({ ...formData, gpa: e.target.value })} /></div>
+          <div className={styles.formGroup}><label>{t('dashboardEducation.description')} (English)</label><textarea placeholder={t('dashboardEducation.descriptionPlaceholder')} rows={3} value={formData.description.en} onChange={(e) => setFormData({ ...formData, description: { ...formData.description, en: e.target.value } })} /></div>
+          <div className={styles.formGroup}><label>{t('dashboardEducation.description')} (French)</label><textarea placeholder={t('dashboardEducation.descriptionPlaceholderFr')} rows={3} value={formData.description.fr} onChange={(e) => setFormData({ ...formData, description: { ...formData.description, fr: e.target.value } })} /></div>
           <div style={{ display: "flex", gap: "1rem", marginTop: "2rem" }}>
-            <button type="submit" className={`${styles.button} ${styles.primary}`} style={{ flex: 1 }} disabled={isSubmitting}>{isSubmitting ? 'Saving...' : (edu ? 'Update' : 'Add Education')}</button>
-            <button type="button" onClick={onClose} className={`${styles.button} ${styles.secondary}`} style={{ flex: 1 }} disabled={isSubmitting}>Cancel</button>
+            <button type="submit" className={`${styles.button} ${styles.primary}`} style={{ flex: 1 }} disabled={isSubmitting}>{isSubmitting ? t('common.submitting') : (edu ? t('dashboard.save') : t('dashboard.add'))}</button>
+            <button type="button" onClick={onClose} className={`${styles.button} ${styles.secondary}`} style={{ flex: 1 }} disabled={isSubmitting}>{t('dashboard.cancel')}</button>
           </div>
         </form>
       </motion.div>

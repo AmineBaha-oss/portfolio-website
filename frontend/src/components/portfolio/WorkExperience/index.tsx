@@ -5,6 +5,7 @@ import styles from './style.module.scss';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/lib/i18n/context';
 import { getExperience, type WorkExperience } from '@/lib/api/client';
+import { useTranslations } from '@/lib/i18n/hooks';
 
 function formatDate(dateString: string, locale: string): string {
   if (!dateString) return '';
@@ -17,6 +18,7 @@ function formatDate(dateString: string, locale: string): string {
 
 export default function WorkExperience() {
   const { locale } = useLanguage();
+  const { t } = useTranslations();
   const [experiences, setExperiences] = useState<WorkExperience[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +45,7 @@ export default function WorkExperience() {
   const experienceData = useMemo(() => {
     return experiences.map((exp) => {
       const period = exp.current 
-        ? `${formatDate(exp.startDate, locale)} - Present`
+        ? `${formatDate(exp.startDate, locale)} - ${t('experience.present')}`
         : `${formatDate(exp.startDate, locale)} - ${exp.endDate ? formatDate(exp.endDate, locale) : ''}`;
       
       // Split description by newlines for achievements, or use as single description
@@ -64,8 +66,8 @@ export default function WorkExperience() {
     return (
       <section id="experience" className={styles.experience}>
         <div className={styles.container}>
-          <h2 className={styles.title}>Work Experience</h2>
-          <p className={styles.subtitle}>Loading...</p>
+          <h2 className={styles.title}>{t('experience.title')}</h2>
+          <p className={styles.subtitle}>{t('dashboard.loading')}</p>
         </div>
       </section>
     );
@@ -75,8 +77,8 @@ export default function WorkExperience() {
     return (
       <section id="experience" className={styles.experience}>
         <div className={styles.container}>
-          <h2 className={styles.title}>Work Experience</h2>
-          <p className={styles.subtitle}>Error loading experience. Please try again later.</p>
+          <h2 className={styles.title}>{t('experience.title')}</h2>
+          <p className={styles.subtitle}>{t('dashboard.error')}</p>
         </div>
       </section>
     );
@@ -91,9 +93,9 @@ export default function WorkExperience() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className={styles.title}>Work Experience</h2>
+          <h2 className={styles.title}>{t('experience.title')}</h2>
           <p className={styles.subtitle}>
-            My professional journey and achievements
+            {t('experience.subtitle')}
           </p>
         </motion.div>
 

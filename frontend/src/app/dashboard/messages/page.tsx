@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
 import { getMessages, markMessageRead, deleteMessage } from "@/lib/api/admin-client";
+import { useTranslations } from "@/lib/i18n/hooks";
 
 export default function MessagesManagementPage() {
+  const { t } = useTranslations();
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -21,7 +23,7 @@ export default function MessagesManagementPage() {
       const response = await getMessages();
       setMessages(response.messages);
     } catch (err: any) {
-      alert(err.message || 'Failed to load messages');
+      alert(err.message || t('dashboard.error'));
     } finally {
       setLoading(false);
     }
@@ -32,18 +34,18 @@ export default function MessagesManagementPage() {
       await markMessageRead(id);
       await fetchMessages();
     } catch (err: any) {
-      alert(err.message || 'Failed to mark message as read');
+      alert(err.message || t('dashboard.error'));
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this message?')) return;
+    if (!confirm(t('dashboard.deleteConfirm'))) return;
     try {
       await deleteMessage(id);
       await fetchMessages();
       if (selectedMessage?.id === id) setSelectedMessage(null);
     } catch (err: any) {
-      alert(err.message || 'Failed to delete message');
+      alert(err.message || t('dashboard.error'));
     }
   };
 
@@ -53,23 +55,23 @@ export default function MessagesManagementPage() {
 
   const unreadCount = messages.filter(m => m.status === "unread").length;
 
-  if (loading) return <div className={styles.pageContainer}><div className={styles.container}><p>Loading...</p></div></div>;
+  if (loading) return <div className={styles.pageContainer}><div className={styles.container}><p>{t('dashboard.loading')}</p></div></div>;
 
   return (
     <div className={styles.pageContainer}>
       <div className={styles.container}>
         <motion.div className={styles.header} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className={styles.topBar}>
-            <div className={styles.breadcrumb}><a href="/dashboard">Dashboard</a><span>/</span><span>Messages</span></div>
-            {unreadCount > 0 && <span className={`${styles.badge} ${styles.info}`}>{unreadCount} Unread</span>}
+            <div className={styles.breadcrumb}><a href="/dashboard">{t('dashboard.title')}</a><span>/</span><span>{t('dashboardMessages.title')}</span></div>
+            {unreadCount > 0 && <span className={`${styles.badge} ${styles.info}`}>{unreadCount} {t('dashboardMessages.unread')}</span>}
           </div>
-          <div className={styles.pageTitle}><h1>Messages</h1><p>Manage contact form submissions and inquiries</p></div>
+          <div className={styles.pageTitle}><h1>{t('dashboardMessages.title')}</h1><p>{t('dashboardMessages.subtitle')}</p></div>
         </motion.div>
 
         <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem" }}>
-          <button className={`${styles.button} ${filter === 'all' ? styles.primary : styles.secondary}`} onClick={() => setFilter('all')}>All ({messages.length})</button>
-          <button className={`${styles.button} ${filter === 'unread' ? styles.primary : styles.secondary}`} onClick={() => setFilter('unread')}>Unread ({unreadCount})</button>
-          <button className={`${styles.button} ${filter === 'read' ? styles.primary : styles.secondary}`} onClick={() => setFilter('read')}>Read ({messages.length - unreadCount})</button>
+          <button className={`${styles.button} ${filter === 'all' ? styles.primary : styles.secondary}`} onClick={() => setFilter('all')}>{t('dashboardMessages.all')} ({messages.length})</button>
+          <button className={`${styles.button} ${filter === 'unread' ? styles.primary : styles.secondary}`} onClick={() => setFilter('unread')}>{t('dashboardMessages.unread')} ({unreadCount})</button>
+          <button className={`${styles.button} ${filter === 'read' ? styles.primary : styles.secondary}`} onClick={() => setFilter('read')}>{t('dashboardMessages.read')} ({messages.length - unreadCount})</button>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -106,7 +108,7 @@ export default function MessagesManagementPage() {
                         handleMarkRead(message.id);
                       }}
                     >
-                      {message.status === "unread" ? "Mark Read" : "Mark Unread"}
+                      {message.status === "unread" ? t('dashboardMessages.markRead') : t('dashboardMessages.markUnread')}
                     </button>
                     <button 
                       className={`${styles.button} ${styles.danger}`}
@@ -115,7 +117,7 @@ export default function MessagesManagementPage() {
                         handleDelete(message.id);
                       }}
                     >
-                      Delete
+                      {t('dashboard.delete')}
                     </button>
                   </div>
                 </div>
@@ -144,13 +146,14 @@ export default function MessagesManagementPage() {
 }
 
 function MessageModal({ message, onClose, onDelete, onMarkRead }: { message: any; onClose: () => void; onDelete: () => void; onMarkRead: () => void }) {
+  const { t } = useTranslations();
   return (
     <motion.div className={styles.modalOverlay} initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={onClose}>
       <motion.div className={styles.modalCard} initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "2rem" }}>
           <div>
             <h2 style={{ fontSize: "1.5rem", color: "white", margin: "0 0 0.5rem 0" }}>{message.subject}</h2>
-            <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.6)", margin: 0 }}>From: {message.name} ({message.email})</p>
+            <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.6)", margin: 0 }}>{t('dashboardMessages.from')}: {message.name} ({message.email})</p>
             <p style={{ fontSize: "0.75rem", color: "rgba(255, 255, 255, 0.4)", marginTop: "0.25rem" }}>{new Date(message.createdAt).toLocaleString()}</p>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "white", fontSize: "1.5rem", cursor: "pointer", padding: "0.5rem" }}>×</button>
@@ -159,11 +162,11 @@ function MessageModal({ message, onClose, onDelete, onMarkRead }: { message: any
           <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "0.875rem", lineHeight: "1.6", margin: 0 }}>{message.message}</p>
         </div>
         <div style={{ display: "flex", gap: "1rem" }}>
-          <a href={`mailto:${message.email}`} className={`${styles.button} ${styles.primary}`} style={{ flex: 1, textDecoration: "none", textAlign: "center" }}>Reply via Email</a>
+          <a href={`mailto:${message.email}`} className={`${styles.button} ${styles.primary}`} style={{ flex: 1, textDecoration: "none", textAlign: "center" }}>{t('dashboardMessages.reply')}</a>
           {message.status === "unread" && (
-            <button className={`${styles.button} ${styles.secondary}`} onClick={onMarkRead}>Mark as Read</button>
+            <button className={`${styles.button} ${styles.secondary}`} onClick={onMarkRead}>{t('dashboardMessages.markRead')}</button>
           )}
-          <button className={`${styles.button} ${styles.danger}`} onClick={onDelete}>Delete</button>
+          <button className={`${styles.button} ${styles.danger}`} onClick={onDelete}>{t('dashboard.delete')}</button>
         </div>
       </motion.div>
     </motion.div>
