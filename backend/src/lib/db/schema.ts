@@ -1,4 +1,13 @@
-import { pgTable, uuid, text, integer, boolean, date, timestamp, jsonb } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  uuid,
+  text,
+  integer,
+  boolean,
+  date,
+  timestamp,
+  jsonb,
+} from "drizzle-orm/pg-core";
 
 // Skills Table
 export const skills = pgTable("skills", {
@@ -14,8 +23,13 @@ export const skills = pgTable("skills", {
 export const projects = pgTable("projects", {
   id: uuid("id").defaultRandom().primaryKey(),
   title: jsonb("title").$type<{ en: string; fr: string }>().notNull(),
-  description: jsonb("description").$type<{ en: string; fr: string }>().notNull(),
-  fullDescription: jsonb("full_description").$type<{ en: string; fr: string }>(),
+  description: jsonb("description")
+    .$type<{ en: string; fr: string }>()
+    .notNull(),
+  fullDescription: jsonb("full_description").$type<{
+    en: string;
+    fr: string;
+  }>(),
   client: text("client"),
   projectUrl: text("project_url"),
   githubUrl: text("github_url"),
@@ -38,7 +52,9 @@ export const workExperience = pgTable("work_experience", {
   position: jsonb("position").$type<{ en: string; fr: string }>().notNull(),
   company: jsonb("company").$type<{ en: string; fr: string }>().notNull(),
   location: jsonb("location").$type<{ en: string; fr: string }>().notNull(),
-  description: jsonb("description").$type<{ en: string; fr: string }>().notNull(),
+  description: jsonb("description")
+    .$type<{ en: string; fr: string }>()
+    .notNull(),
   startDate: date("start_date").notNull(),
   endDate: date("end_date"),
   current: boolean("current").notNull().default(false),
@@ -51,7 +67,9 @@ export const workExperience = pgTable("work_experience", {
 export const education = pgTable("education", {
   id: uuid("id").defaultRandom().primaryKey(),
   degree: jsonb("degree").$type<{ en: string; fr: string }>().notNull(),
-  institution: jsonb("institution").$type<{ en: string; fr: string }>().notNull(),
+  institution: jsonb("institution")
+    .$type<{ en: string; fr: string }>()
+    .notNull(),
   location: jsonb("location").$type<{ en: string; fr: string }>().notNull(),
   description: jsonb("description").$type<{ en: string; fr: string }>(),
   startDate: date("start_date").notNull(),
@@ -120,7 +138,9 @@ export const resumes = pgTable("resumes", {
 // Resume Downloads Tracking Table
 export const resumeDownloads = pgTable("resume_downloads", {
   id: uuid("id").defaultRandom().primaryKey(),
-  resumeId: uuid("resume_id").notNull().references(() => resumes.id, { onDelete: "cascade" }),
+  resumeId: uuid("resume_id")
+    .notNull()
+    .references(() => resumes.id, { onDelete: "cascade" }),
   downloadedAt: timestamp("downloaded_at").defaultNow().notNull(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),

@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export interface Project {
   id: string;
@@ -79,20 +79,25 @@ export interface ContactMessage {
   createdAt: string;
 }
 
-async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
+async function fetchAPI<T>(
+  endpoint: string,
+  options?: RequestInit,
+): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   try {
     const response = await fetch(url, {
       ...options,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options?.headers,
       },
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Request failed' }));
+      const error = await response
+        .json()
+        .catch(() => ({ error: "Request failed" }));
       throw new Error(error.error || `HTTP error! status: ${response.status}`);
     }
 
@@ -103,38 +108,64 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
   }
 }
 
-export async function getProjects(lang: string = 'en', featured?: boolean): Promise<{ projects: Project[] }> {
+export async function getProjects(
+  lang: string = "en",
+  featured?: boolean,
+): Promise<{ projects: Project[] }> {
   const timestamp = new Date().getTime();
   const params = new URLSearchParams({ lang, t: timestamp.toString() });
   if (featured) {
-    params.append('featured', 'true');
+    params.append("featured", "true");
   }
-  return fetchAPI<{ projects: Project[] }>(`/api/public/projects?${params.toString()}`);
+  return fetchAPI<{ projects: Project[] }>(
+    `/api/public/projects?${params.toString()}`,
+  );
 }
 
-export async function getProjectById(id: string, lang: string = 'en'): Promise<{ project: Project }> {
+export async function getProjectById(
+  id: string,
+  lang: string = "en",
+): Promise<{ project: Project }> {
   const timestamp = new Date().getTime();
-  return fetchAPI<{ project: Project }>(`/api/public/projects/${id}?lang=${lang}&t=${timestamp}`);
+  return fetchAPI<{ project: Project }>(
+    `/api/public/projects/${id}?lang=${lang}&t=${timestamp}`,
+  );
 }
 
-export async function getSkills(lang: string = 'en'): Promise<{ skills: Skill[] }> {
+export async function getSkills(
+  lang: string = "en",
+): Promise<{ skills: Skill[] }> {
   return fetchAPI<{ skills: Skill[] }>(`/api/public/skills?lang=${lang}`);
 }
 
-export async function getExperience(lang: string = 'en'): Promise<{ experiences: WorkExperience[] }> {
-  return fetchAPI<{ experiences: WorkExperience[] }>(`/api/public/experience?lang=${lang}`);
+export async function getExperience(
+  lang: string = "en",
+): Promise<{ experiences: WorkExperience[] }> {
+  return fetchAPI<{ experiences: WorkExperience[] }>(
+    `/api/public/experience?lang=${lang}`,
+  );
 }
 
-export async function getEducation(lang: string = 'en'): Promise<{ education: Education[] }> {
-  return fetchAPI<{ education: Education[] }>(`/api/public/education?lang=${lang}`);
+export async function getEducation(
+  lang: string = "en",
+): Promise<{ education: Education[] }> {
+  return fetchAPI<{ education: Education[] }>(
+    `/api/public/education?lang=${lang}`,
+  );
 }
 
-export async function getHobbies(lang: string = 'en'): Promise<{ hobbies: Hobby[] }> {
+export async function getHobbies(
+  lang: string = "en",
+): Promise<{ hobbies: Hobby[] }> {
   return fetchAPI<{ hobbies: Hobby[] }>(`/api/public/hobbies?lang=${lang}`);
 }
 
-export async function getTestimonials(lang: string = 'en'): Promise<{ testimonials: Testimonial[] }> {
-  return fetchAPI<{ testimonials: Testimonial[] }>(`/api/public/testimonials?lang=${lang}`);
+export async function getTestimonials(
+  lang: string = "en",
+): Promise<{ testimonials: Testimonial[] }> {
+  return fetchAPI<{ testimonials: Testimonial[] }>(
+    `/api/public/testimonials?lang=${lang}`,
+  );
 }
 
 export async function submitTestimonial(data: {
@@ -145,10 +176,13 @@ export async function submitTestimonial(data: {
   message: string;
   rating: number;
 }): Promise<{ success: boolean; message: string; id?: string }> {
-  return fetchAPI<{ success: boolean; message: string; id?: string }>('/api/public/testimonials', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  });
+  return fetchAPI<{ success: boolean; message: string; id?: string }>(
+    "/api/public/testimonials",
+    {
+      method: "POST",
+      body: JSON.stringify(data),
+    },
+  );
 }
 
 export async function submitMessage(data: {
@@ -157,8 +191,11 @@ export async function submitMessage(data: {
   subject: string;
   message: string;
 }): Promise<{ success: boolean; message: string; id?: string }> {
-  return fetchAPI<{ success: boolean; message: string; id?: string }>('/api/public/messages', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  });
+  return fetchAPI<{ success: boolean; message: string; id?: string }>(
+    "/api/public/messages",
+    {
+      method: "POST",
+      body: JSON.stringify(data),
+    },
+  );
 }

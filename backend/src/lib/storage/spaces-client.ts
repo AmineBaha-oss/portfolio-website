@@ -3,7 +3,13 @@
  * Spaces is S3-compatible, so we use AWS SDK
  */
 
-import { S3Client, PutObjectCommand, DeleteObjectCommand, HeadObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  HeadObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 // Environment variable getters (only validated at runtime, not at import time)
@@ -99,7 +105,10 @@ export async function fileExists(key: string): Promise<boolean> {
  * Generate a pre-signed URL for temporary access to a private file
  * Default expiration: 7 days (604800 seconds)
  */
-export async function getPresignedUrl(key: string, expiresIn: number = 604800): Promise<string> {
+export async function getPresignedUrl(
+  key: string,
+  expiresIn: number = 604800,
+): Promise<string> {
   const command = new GetObjectCommand({
     Bucket: SPACES_BUCKET(),
     Key: key,

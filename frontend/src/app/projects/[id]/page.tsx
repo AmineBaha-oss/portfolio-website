@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useParams, usePathname, useRouter } from 'next/navigation';
-import styles from './page.module.scss';
-import { useLanguage } from '@/lib/i18n/context';
-import { getProjectById, type Project } from '@/lib/api/client';
-import { useTranslations } from '@/lib/i18n/hooks';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { useParams, usePathname, useRouter } from "next/navigation";
+import styles from "./page.module.scss";
+import { useLanguage } from "@/lib/i18n/context";
+import { getProjectById, type Project } from "@/lib/api/client";
+import { useTranslations } from "@/lib/i18n/hooks";
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -19,14 +19,14 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [referrer, setReferrer] = useState<string>('/projects');
+  const [referrer, setReferrer] = useState<string>("/projects");
 
   useEffect(() => {
     // Check if user came from the homepage with hash
-    if (typeof window !== 'undefined' && document.referrer) {
+    if (typeof window !== "undefined" && document.referrer) {
       const ref = new URL(document.referrer);
-      if (ref.pathname === '/' && ref.hash === '#projects') {
-        setReferrer('/#projects');
+      if (ref.pathname === "/" && ref.hash === "#projects") {
+        setReferrer("/#projects");
       }
     }
   }, []);
@@ -36,7 +36,7 @@ export default function ProjectDetailPage() {
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
     window.scroll(0, 0);
-    
+
     const timeout1 = setTimeout(() => {
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
@@ -48,7 +48,7 @@ export default function ProjectDetailPage() {
       document.body.scrollTop = 0;
       window.scroll(0, 0);
     }, 50);
-    
+
     return () => {
       clearTimeout(timeout1);
       clearTimeout(timeout2);
@@ -62,11 +62,11 @@ export default function ProjectDetailPage() {
         setError(null);
         const id = params.id as string;
         const response = await getProjectById(id, locale);
-        console.log('Fetched project detail:', response.project);
-        console.log('Project imageUrl:', response.project.imageUrl);
+        console.log("Fetched project detail:", response.project);
+        console.log("Project imageUrl:", response.project.imageUrl);
         setProject(response.project);
       } catch (err: any) {
-        console.error('Error fetching project:', err);
+        console.error("Error fetching project:", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -82,7 +82,9 @@ export default function ProjectDetailPage() {
     return (
       <main className={styles.projectDetail}>
         <div className={styles.container}>
-          <p style={{ color: '#666', textAlign: 'center' }}>{t('dashboard.loading')}</p>
+          <p style={{ color: "#666", textAlign: "center" }}>
+            {t("dashboard.loading")}
+          </p>
         </div>
       </main>
     );
@@ -92,8 +94,12 @@ export default function ProjectDetailPage() {
     return (
       <main className={styles.projectDetail}>
         <div className={styles.container}>
-          <Link href={referrer} scroll={false} className={styles.backLink}>← {t('projects.allProjects')}</Link>
-          <p style={{ color: '#666', textAlign: 'center' }}>{error || t('dashboard.error')}</p>
+          <Link href={referrer} scroll={false} className={styles.backLink}>
+            ← {t("projects.allProjects")}
+          </Link>
+          <p style={{ color: "#666", textAlign: "center" }}>
+            {error || t("dashboard.error")}
+          </p>
         </div>
       </main>
     );
@@ -107,9 +113,14 @@ export default function ProjectDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <Link href={referrer} scroll={false} className={styles.backLink}>← {t('projects.allProjects')}</Link>
+          <Link href={referrer} scroll={false} className={styles.backLink}>
+            ← {t("projects.allProjects")}
+          </Link>
 
-          <div className={styles.hero} style={{ backgroundColor: project.color || '#2a2b2c' }}>
+          <div
+            className={styles.hero}
+            style={{ backgroundColor: project.color || "#2a2b2c" }}
+          >
             <motion.div
               className={styles.imageContainer}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -117,10 +128,13 @@ export default function ProjectDetailPage() {
               transition={{ duration: 0.8, delay: 0.2 }}
             >
               <Image
-                src={project.imageUrl || "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg"}
+                src={
+                  project.imageUrl ||
+                  "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg"
+                }
                 alt={project.title}
                 fill
-                style={{ objectFit: 'cover' }}
+                style={{ objectFit: "cover" }}
                 priority
                 unoptimized
               />
@@ -164,7 +178,7 @@ export default function ProjectDetailPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.6 }}
                 >
-                  <h3>{t('projects.client')}</h3>
+                  <h3>{t("projects.client")}</h3>
                   <p>{project.client}</p>
                 </motion.div>
               )}
@@ -176,12 +190,21 @@ export default function ProjectDetailPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.7 }}
                 >
-                  <h3>{t('projects.timeline')}</h3>
+                  <h3>{t("projects.timeline")}</h3>
                   <p>
-                    {project.startDate && new Date(project.startDate).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US', { year: 'numeric', month: 'long' })}
-                    {project.endDate && ` - ${new Date(project.endDate).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US', { year: 'numeric', month: 'long' })}`}
-                    {!project.endDate && project.inProgress && ` - ${t('dashboardProjects.inProgress')}`}
-                    {!project.endDate && !project.inProgress && ` - ${t('experience.present')}`}
+                    {project.startDate &&
+                      new Date(project.startDate).toLocaleDateString(
+                        locale === "fr" ? "fr-FR" : "en-US",
+                        { year: "numeric", month: "long" },
+                      )}
+                    {project.endDate &&
+                      ` - ${new Date(project.endDate).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-US", { year: "numeric", month: "long" })}`}
+                    {!project.endDate &&
+                      project.inProgress &&
+                      ` - ${t("dashboardProjects.inProgress")}`}
+                    {!project.endDate &&
+                      !project.inProgress &&
+                      ` - ${t("experience.present")}`}
                   </p>
                 </motion.div>
               )}
@@ -193,10 +216,12 @@ export default function ProjectDetailPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.8 }}
                 >
-                  <h3>{t('projects.technologies')}</h3>
+                  <h3>{t("projects.technologies")}</h3>
                   <div className={styles.technologies}>
                     {project.technologies.map((tech, index) => (
-                      <span key={index} className={styles.techTag}>{tech}</span>
+                      <span key={index} className={styles.techTag}>
+                        {tech}
+                      </span>
                     ))}
                   </div>
                 </motion.div>
@@ -210,13 +235,23 @@ export default function ProjectDetailPage() {
               transition={{ duration: 0.6, delay: 0.9 }}
             >
               {project.projectUrl && (
-                <a href={project.projectUrl} target="_blank" rel="noopener noreferrer" className={styles.linkButton}>
-                  {t('projects.visitWebsite')}
+                <a
+                  href={project.projectUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.linkButton}
+                >
+                  {t("projects.visitWebsite")}
                 </a>
               )}
               {project.githubUrl && (
-                <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className={styles.linkButton}>
-                  {t('projects.viewCode')}
+                <a
+                  href={project.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.linkButton}
+                >
+                  {t("projects.viewCode")}
                 </a>
               )}
             </motion.div>

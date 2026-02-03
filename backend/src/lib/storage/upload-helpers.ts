@@ -2,7 +2,12 @@
  * File upload helper utilities
  */
 
-import { uploadFile, deleteFile, extractKeyFromUrl, getPublicUrl } from "./spaces-client";
+import {
+  uploadFile,
+  deleteFile,
+  extractKeyFromUrl,
+  getPublicUrl,
+} from "./spaces-client";
 
 /**
  * Allowed file types for different upload categories
@@ -10,7 +15,11 @@ import { uploadFile, deleteFile, extractKeyFromUrl, getPublicUrl } from "./space
 export const ALLOWED_FILE_TYPES = {
   image: ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"],
   pdf: ["application/pdf"],
-  document: ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+  document: [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ],
 };
 
 /**
@@ -112,7 +121,13 @@ export async function uploadPDF(params: {
   folder?: string;
   userId?: string;
 }): Promise<{ url: string; key: string }> {
-  const { file, originalName, contentType, folder = "documents", userId } = params;
+  const {
+    file,
+    originalName,
+    contentType,
+    folder = "documents",
+    userId,
+  } = params;
 
   // Validate file
   const validation = validateFile({
@@ -149,7 +164,15 @@ export async function replaceFile(params: {
   userId?: string;
   fileType: "image" | "pdf";
 }): Promise<{ url: string; key: string }> {
-  const { oldUrl, newFile, originalName, contentType, folder, userId, fileType } = params;
+  const {
+    oldUrl,
+    newFile,
+    originalName,
+    contentType,
+    folder,
+    userId,
+    fileType,
+  } = params;
 
   // Delete old file if it exists
   if (oldUrl) {
@@ -166,8 +189,20 @@ export async function replaceFile(params: {
 
   // Upload new file
   if (fileType === "image") {
-    return await uploadImage({ file: newFile, originalName, contentType, folder, userId });
+    return await uploadImage({
+      file: newFile,
+      originalName,
+      contentType,
+      folder,
+      userId,
+    });
   } else {
-    return await uploadPDF({ file: newFile, originalName, contentType, folder, userId });
+    return await uploadPDF({
+      file: newFile,
+      originalName,
+      contentType,
+      folder,
+      userId,
+    });
   }
 }

@@ -3,7 +3,12 @@ import { db, resumes } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/jwt-verification";
 import { eq } from "drizzle-orm";
 import { validateNotEmpty, sanitizeText } from "@/lib/utils/validation";
-import { uploadPDF, deleteFile, extractKeyFromUrl, getPublicUrl } from "@/lib/storage";
+import {
+  uploadPDF,
+  deleteFile,
+  extractKeyFromUrl,
+  getPublicUrl,
+} from "@/lib/storage";
 
 export const runtime = "nodejs";
 
@@ -30,15 +35,15 @@ export async function GET(request: NextRequest) {
       }
 
       // Return public URL
-      const publicUrl = resume.fileKey 
+      const publicUrl = resume.fileKey
         ? getPublicUrl(resume.fileKey)
         : resume.fileUrl;
 
-      return NextResponse.json({ 
+      return NextResponse.json({
         resume: {
           ...resume,
-          fileUrl: publicUrl
-        }
+          fileUrl: publicUrl,
+        },
       });
     }
 
@@ -49,7 +54,7 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching resume:", error);
     return NextResponse.json(
       { error: "Failed to fetch resume" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -64,20 +69,17 @@ export async function PUT(request: NextRequest) {
     // Get form data
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
-    const language = formData.get("language") as string || "en";
+    const language = (formData.get("language") as string) || "en";
 
     if (!file) {
-      return NextResponse.json(
-        { error: "No file provided" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
     // Validate file type
     if (file.type !== "application/pdf") {
       return NextResponse.json(
         { error: "Only PDF files are allowed" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -101,7 +103,7 @@ export async function PUT(request: NextRequest) {
     // Convert file to buffer and upload
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    
+
     const uploadResult = await uploadPDF({
       file: buffer,
       originalName: file.name,
@@ -124,15 +126,15 @@ export async function PUT(request: NextRequest) {
         })
         .where(eq(resumes.id, activeResume.id))
         .returning();
-      
+
       // Return public URL
       const publicUrl = getPublicUrl(updatedResume.fileKey!);
-      
-      return NextResponse.json({ 
+
+      return NextResponse.json({
         resume: {
           ...updatedResume,
-          fileUrl: publicUrl
-        }
+          fileUrl: publicUrl,
+        },
       });
     } else {
       const [newResume] = await db
@@ -146,22 +148,28 @@ export async function PUT(request: NextRequest) {
           isActive: true,
         })
         .returning();
-      
+
       // Return public URL
       const publicUrl = getPublicUrl(newResume.fileKey!);
-      
-      return NextResponse.json({ 
-        resume: {
-          ...newResume,
-          fileUrl: publicUrl
-        }
-      }, { status: 201 });
+
+      return NextResponse.json(
+        {
+          resume: {
+            ...newResume,
+            fileUrl: publicUrl,
+          },
+        },
+        { status: 201 },
+      );
     }
   } catch (error) {
     console.error("Error updating resume:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to update resume" },
-      { status: 500 }
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to update resume",
+      },
+      { status: 500 },
     );
   }
 }
