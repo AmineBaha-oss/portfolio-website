@@ -27,6 +27,7 @@ export default function Resume() {
       );
       if (response.ok) {
         const data = await response.json();
+        console.log('Resume data:', data);
         setResumeData(data);
       }
     } catch (error) {
@@ -37,12 +38,14 @@ export default function Resume() {
   };
   
   const handleDownload = () => {
+    console.log('Attempting download with URL:', resumeData?.file_url);
     if (resumeData?.file_url) {
       window.open(resumeData.file_url, '_blank');
       // Track the download
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/public/resume?lang=${locale}&track=true`)
         .catch(err => console.error('Failed to track download:', err));
     } else {
+      console.error('No file URL available');
       alert('Resume not available');
     }
   };

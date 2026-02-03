@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, resumes, resumeDownloads } from "@/lib/db";
 import { validateLanguage } from "@/lib/utils/validation";
 import { eq } from "drizzle-orm";
-import { getPresignedUrl } from "@/lib/storage";
+import { getPublicUrl } from "@/lib/storage";
 
 export async function GET(request: NextRequest) {
   try {
@@ -40,14 +40,14 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    // Generate pre-signed URL for secure temporary access
-    const presignedUrl = resume.fileKey 
-      ? await getPresignedUrl(resume.fileKey)
-      : null;
+    // Get public URL - use fileKey if available, otherwise fallback to stored fileUrl
+    const publicUrl = resume.fileKey 
+      ? getPublicUrl(resume.fileKey)
+      : resume.fileUrl;
     
     return NextResponse.json({
       filename: resume.filename,
-      file_url: presignedUrl,
+      file_url: publicUrl,
     });
   } catch (error) {
     console.error("Error fetching resume:", error);

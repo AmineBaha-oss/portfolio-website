@@ -180,7 +180,8 @@ export default function ProjectDetailPage() {
                   <p>
                     {project.startDate && new Date(project.startDate).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US', { year: 'numeric', month: 'long' })}
                     {project.endDate && ` - ${new Date(project.endDate).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US', { year: 'numeric', month: 'long' })}`}
-                    {!project.endDate && ` - ${t('experience.present')}`}
+                    {!project.endDate && project.inProgress && ` - ${t('dashboardProjects.inProgress')}`}
+                    {!project.endDate && !project.inProgress && ` - ${t('experience.present')}`}
                   </p>
                 </motion.div>
               )}

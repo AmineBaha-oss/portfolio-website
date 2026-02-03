@@ -217,6 +217,7 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
     color: '',
     startDate: '',
     endDate: '',
+    inProgress: false,
     status: 'draft',
     featured: false,
   });
@@ -245,6 +246,7 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
         color: project.color || '',
         startDate: project.startDate || '',
         endDate: project.endDate || '',
+        inProgress: project.inProgress || false,
         status: project.status || 'draft',
         featured: project.featured || false,
       });
@@ -413,8 +415,20 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
                 type="date"
                 value={formData.endDate}
                 onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                disabled={formData.inProgress}
               />
             </div>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={formData.inProgress}
+                onChange={(e) => setFormData({ ...formData, inProgress: e.target.checked, endDate: e.target.checked ? '' : formData.endDate })}
+              />
+              {t('dashboardProjects.inProgress')}
+            </label>
           </div>
 
           <div className={styles.formGroup}>

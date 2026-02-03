@@ -249,6 +249,7 @@ export const translations = {
       startDate: 'Start Date',
       endDate: 'End Date',
       ongoing: 'Ongoing',
+      inProgress: 'In Progress',
       client: 'Client/Company',
       clientPlaceholder: 'Client name (optional)',
       color: 'Color',
@@ -688,6 +689,7 @@ export const translations = {
       startDate: 'Date de début',
       endDate: 'Date de fin',
       ongoing: 'En cours',
+      inProgress: 'En cours',
       client: 'Client/Entreprise',
       clientPlaceholder: 'Nom du client (optionnel)',
       color: 'Couleur',
@@ -772,7 +774,7 @@ export const translations = {
     },
     // Dashboard - Resume
     dashboardResume: {
-      title: 'CV',
+      title: 'CV / Curriculum Vitae',
       subtitle: 'Gérer votre fichier CV téléchargeable',
       download: 'Télécharger',
       upload: 'Téléverser le CV',

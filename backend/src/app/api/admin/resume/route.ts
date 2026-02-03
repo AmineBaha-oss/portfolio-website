@@ -3,7 +3,7 @@ import { db, resumes } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/jwt-verification";
 import { eq } from "drizzle-orm";
 import { validateNotEmpty, sanitizeText } from "@/lib/utils/validation";
-import { uploadPDF, deleteFile, extractKeyFromUrl, getPresignedUrl } from "@/lib/storage";
+import { uploadPDF, deleteFile, extractKeyFromUrl, getPublicUrl } from "@/lib/storage";
 
 export const runtime = "nodejs";
 
@@ -29,15 +29,15 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ resume: null });
       }
 
-      // Generate pre-signed URL
-      const presignedUrl = resume.fileKey 
-        ? await getPresignedUrl(resume.fileKey)
+      // Return public URL
+      const publicUrl = resume.fileKey 
+        ? getPublicUrl(resume.fileKey)
         : resume.fileUrl;
 
       return NextResponse.json({ 
         resume: {
           ...resume,
-          fileUrl: presignedUrl
+          fileUrl: publicUrl
         }
       });
     }
@@ -125,13 +125,13 @@ export async function PUT(request: NextRequest) {
         .where(eq(resumes.id, activeResume.id))
         .returning();
       
-      // Generate pre-signed URL for response
-      const presignedUrl = await getPresignedUrl(updatedResume.fileKey!);
+      // Return public URL
+      const publicUrl = getPublicUrl(updatedResume.fileKey!);
       
       return NextResponse.json({ 
         resume: {
           ...updatedResume,
-          fileUrl: presignedUrl
+          fileUrl: publicUrl
         }
       });
     } else {
@@ -147,13 +147,13 @@ export async function PUT(request: NextRequest) {
         })
         .returning();
       
-      // Generate pre-signed URL for response
-      const presignedUrl = await getPresignedUrl(newResume.fileKey!);
+      // Return public URL
+      const publicUrl = getPublicUrl(newResume.fileKey!);
       
       return NextResponse.json({ 
         resume: {
           ...newResume,
-          fileUrl: presignedUrl
+          fileUrl: publicUrl
         }
       }, { status: 201 });
     }

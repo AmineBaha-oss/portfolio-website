@@ -166,6 +166,7 @@ export default function SkillsManagementPage() {
         {showAddModal && (
           <SkillModal 
             skill={editingSkill}
+            skills={skills}
             onClose={() => {
               setShowAddModal(false);
               setEditingSkill(null);
@@ -178,10 +179,18 @@ export default function SkillsManagementPage() {
   );
 }
 
-function SkillModal({ skill, onClose, onSuccess }: { skill: any; onClose: () => void; onSuccess: () => void }) {
+function SkillModal({ skill, skills, onClose, onSuccess }: { skill: any; skills: any[]; onClose: () => void; onSuccess: () => void }) {
   const { t } = useTranslations();
   const { showAlert } = useDialog();
   const isEditing = !!skill;
+  
+  // Calculate the default order as max order + 1
+  const getDefaultOrder = () => {
+    if (skills.length === 0) return 0;
+    const maxOrder = Math.max(...skills.map(s => s.order ?? 0));
+    return maxOrder + 1;
+  };
+  
   const [formData, setFormData] = useState({
     name: { en: '', fr: '' },
     category: '',
@@ -200,9 +209,11 @@ function SkillModal({ skill, onClose, onSuccess }: { skill: any; onClose: () => 
       });
       setOrderInput(String(skill.order ?? 0));
     } else {
-      setOrderInput('0');
+      const defaultOrder = getDefaultOrder();
+      setFormData(prev => ({ ...prev, order: defaultOrder }));
+      setOrderInput(String(defaultOrder));
     }
-  }, [skill]);
+  }, [skill, skills]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -8,6 +8,7 @@ import { ResumeUpload } from "@/components/ui/ResumeUpload";
 import { getResume, deleteResume, getResumeStats } from "@/lib/api/admin-client";
 import { Toast } from "@/components/ui/Toast";
 import { useDialog } from "@/components/ui/ConfirmDialog";
+import { triggerDataRefresh } from "@/lib/hooks/useDataRefresh";
 
 interface Resume {
   id: string;
@@ -66,6 +67,7 @@ export default function ResumeManagementPage() {
     await fetchStats();
     setShowUpload(false);
     setToast({ message: "Resume uploaded successfully!", type: "success" });
+    triggerDataRefresh();
   };
 
   const handleDelete = async () => {

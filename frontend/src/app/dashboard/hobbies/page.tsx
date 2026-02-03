@@ -79,7 +79,7 @@ export default function HobbiesManagementPage() {
           );})}
         </div>
 
-        {showAddModal && <HobbyModal hobby={editingHobby} onClose={() => { setShowAddModal(false); setEditingHobby(null); }} onSuccess={fetchHobbies} />}
+        {showAddModal && <HobbyModal hobby={editingHobby} hobbies={hobbies} onClose={() => { setShowAddModal(false); setEditingHobby(null); }} onSuccess={fetchHobbies} />}
       </div>
     </div>
   );
@@ -91,9 +91,17 @@ function toBilingual(v: unknown): { en: string; fr: string } {
   return { en: s, fr: s };
 }
 
-function HobbyModal({ hobby, onClose, onSuccess }: { hobby: any; onClose: () => void; onSuccess: () => void }) {
+function HobbyModal({ hobby, hobbies, onClose, onSuccess }: { hobby: any; hobbies: any[]; onClose: () => void; onSuccess: () => void }) {
   const { t } = useTranslations();
   const { showAlert } = useDialog();
+  
+  // Calculate the default order as max order + 1
+  const getDefaultOrder = () => {
+    if (hobbies.length === 0) return 1;
+    const maxOrder = Math.max(...hobbies.map(h => h.order ?? 0));
+    return maxOrder + 1;
+  };
+  
   const [formData, setFormData] = useState<{ title: { en: string; fr: string }; description: { en: string; fr: string }; color: string; order: number }>({
     title: { en: '', fr: '' },
     description: { en: '', fr: '' },
@@ -117,11 +125,12 @@ function HobbyModal({ hobby, onClose, onSuccess }: { hobby: any; onClose: () => 
       setImageKey(hobby.imageKey || null);
       setOrderInput(String(hobby.order ?? 1));
     } else {
-      setFormData({ title: { en: '', fr: '' }, description: { en: '', fr: '' }, color: '', order: 1 });
+      const defaultOrder = getDefaultOrder();
+      setFormData({ title: { en: '', fr: '' }, description: { en: '', fr: '' }, color: '', order: defaultOrder });
       setImageKey(null);
-      setOrderInput('1');
+      setOrderInput(String(defaultOrder));
     }
-  }, [hobby]);
+  }, [hobby, hobbies]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

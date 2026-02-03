@@ -25,6 +25,7 @@ export const projects = pgTable("projects", {
   color: text("color"),
   startDate: date("start_date"),
   endDate: date("end_date"),
+  inProgress: boolean("in_progress").notNull().default(false),
   status: text("status").notNull().default("draft"),
   featured: boolean("featured").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),

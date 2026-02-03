@@ -8,6 +8,7 @@ import { useTranslations } from "@/lib/i18n/hooks";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 import { Toast } from "@/components/ui/Toast";
 import { useDialog } from "@/components/ui/ConfirmDialog";
+import { triggerDataRefresh } from "@/lib/hooks/useDataRefresh";
 
 interface ContactInfo {
   id: string;
@@ -133,7 +134,8 @@ export default function ContactInfoPage() {
                 className={`${styles.button} ${styles.primary}`}
                 onClick={() => {
                   setEditingItem(null);
-                  setFormData({ type: "", value: "", order: contactInfo.length });
+                  const maxOrder = contactInfo.length > 0 ? Math.max(...contactInfo.map(c => c.order ?? 0)) : 0;
+                  setFormData({ type: "", value: "", order: maxOrder + 1 });
                   setShowAddModal(true);
                 }}
               >
@@ -175,6 +177,7 @@ export default function ContactInfoPage() {
                         setProfilePicKey(pendingProfilePicKey);
                         setPendingProfilePicKey("");
                         await fetchContactInfo();
+                        triggerDataRefresh();
                         setToast({ message: 'Profile picture saved!', type: 'success' });
                       } catch (error) {
                         console.error('Error saving profile picture:', error);

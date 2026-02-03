@@ -13,6 +13,7 @@ export interface Project {
   color?: string | null;
   startDate?: string | null;
   endDate?: string | null;
+  inProgress?: boolean;
   status: string;
   featured: boolean;
 }

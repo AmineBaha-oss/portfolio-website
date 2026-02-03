@@ -109,6 +109,15 @@ export async function getPresignedUrl(key: string, expiresIn: number = 604800): 
 }
 
 /**
+ * Get public URL for a file (for files uploaded with public-read ACL)
+ */
+export function getPublicUrl(key: string): string {
+  const bucket = SPACES_BUCKET();
+  const region = getEnvVar("DO_SPACES_REGION");
+  return `https://${bucket}.${region}.digitaloceanspaces.com/${key}`;
+}
+
+/**
  * Extract key from full URL
  */
 export function extractKeyFromUrl(url: string): string | null {

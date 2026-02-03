@@ -2,7 +2,7 @@
  * File upload helper utilities
  */
 
-import { uploadFile, deleteFile, extractKeyFromUrl } from "./spaces-client";
+import { uploadFile, deleteFile, extractKeyFromUrl, getPublicUrl } from "./spaces-client";
 
 /**
  * Allowed file types for different upload categories
