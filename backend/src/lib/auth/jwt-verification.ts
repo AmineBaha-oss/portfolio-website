@@ -44,21 +44,48 @@ export function verifyJwtToken(token: string): JwtPayload | null {
 }
 
 /**
- * Extract JWT token from Authorization header
+ * Extract JWT token from Authorization header or cookies
  */
 export function extractTokenFromRequest(request: NextRequest): string | null {
+  // First, try to get token from Authorization header
   const authHeader = request.headers.get("authorization");
   
-  if (!authHeader) {
-    return null;
+  if (authHeader) {
+    console.log("Found Authorization header");
+    // Support both "Bearer <token>" and just "<token>"
+    if (authHeader.startsWith("Bearer ")) {
+      return authHeader.substring(7);
+    }
+    return authHeader;
   }
 
-  // Support both "Bearer <token>" and just "<token>"
-  if (authHeader.startsWith("Bearer ")) {
-    return authHeader.substring(7);
+  // If not in header, try to get from cookies
+  // Better Auth stores JWT token in cookies by default
+  const cookieHeader = request.headers.get("cookie");
+  console.log("Cookie header:", cookieHeader);
+  
+  if (cookieHeader) {
+    // Parse cookies
+    const cookies = cookieHeader.split(";").map(c => c.trim());
+    console.log("All cookies:", cookies);
+    
+    // Look for better-auth token cookie
+    // Better Auth typically uses 'better-auth.session_token' or similar
+    for (const cookie of cookies) {
+      if (cookie.startsWith("better-auth.session_token=")) {
+        console.log("Found better-auth.session_token");
+        return cookie.substring("better-auth.session_token=".length);
+      }
+      // Also check for just 'session_token'
+      if (cookie.startsWith("session_token=")) {
+        console.log("Found session_token");
+        return cookie.substring("session_token=".length);
+      }
+    }
   }
   
-  return authHeader;
+  console.log("No token found in request");
+  return null;
 }
 
 /**

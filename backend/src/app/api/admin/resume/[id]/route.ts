@@ -3,6 +3,7 @@ import { db, resumes } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/jwt-verification";
 import { eq } from "drizzle-orm";
 import { validateUUID } from "@/lib/utils/validation";
+import { deleteFile } from "@/lib/storage";
 
 export async function DELETE(
   request: NextRequest,
@@ -29,6 +30,16 @@ export async function DELETE(
 
     if (!existingResume) {
       return NextResponse.json({ error: "Resume not found" }, { status: 404 });
+    }
+
+    // Delete file from storage if it exists
+    if (existingResume.fileKey) {
+      try {
+        await deleteFile(existingResume.fileKey);
+      } catch (error) {
+        console.error("Error deleting file from storage:", error);
+        // Continue with database deletion even if file deletion fails
+      }
     }
 
     await db.delete(resumes).where(eq(resumes.id, id));

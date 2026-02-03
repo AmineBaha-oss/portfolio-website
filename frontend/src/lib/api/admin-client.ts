@@ -243,3 +243,56 @@ export async function deleteContactInfo(id: string) {
     method: 'DELETE',
   });
 }
+
+// Resume
+export async function getResume(language?: string) {
+  const url = language ? `/api/admin/resume?lang=${language}` : '/api/admin/resume';
+  return fetchAdminAPI<{ resume: any }>(url);
+}
+
+export async function uploadResume(file: File, language: string = 'en') {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error('Not authenticated. Please log in.');
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('language', language);
+
+  const url = `${API_BASE_URL}/api/admin/resume`;
+  
+  try {
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      throw new Error('Unauthorized. Please log in.');
+    }
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Request failed' }));
+      throw new Error(error.error || `HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Resume upload error:', error);
+    throw error;
+  }
+}
+
+export async function deleteResume(id: string) {
+  return fetchAdminAPI<{ success: boolean }>(`/api/admin/resume/${id}`, {
+    method: 'DELETE',
+  });
+}

@@ -1,21 +1,73 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
 import { useTranslations } from "@/lib/i18n/hooks";
+import { ResumeUpload } from "@/components/ui/ResumeUpload";
+import { getResume, deleteResume } from "@/lib/api/admin-client";
+
+interface Resume {
+  id: string;
+  filename: string;
+  fileUrl: string;
+  fileKey?: string;
+  fileSize?: number;
+  language: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function ResumeManagementPage() {
   const { t } = useTranslations();
-  const [uploadedCV, setUploadedCV] = useState<{
-    filename: string;
-    uploadedAt: string;
-    size: string;
-  } | null>({
-    filename: "Amine_Baha_Resume.pdf",
-    uploadedAt: "2024-01-15",
-    size: "245 KB",
-  });
+  const [uploadedCV, setUploadedCV] = useState<Resume | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showUpload, setShowUpload] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<"en" | "fr">("en");
+
+  useEffect(() => {
+    fetchResume();
+  }, [selectedLanguage]);
+
+  const fetchResume = async () => {
+    try {
+      const data = await getResume(selectedLanguage);
+      setUploadedCV(data.resume);
+    } catch (error) {
+      console.error("Error fetching resume:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUploadSuccess = async () => {
+    await fetchResume();
+    setShowUpload(false);
+    alert("Resume uploaded successfully!");
+  };
+
+  const handleDelete = async () => {
+    if (!uploadedCV || !confirm("Are you sure you want to delete this resume?")) {
+      return;
+    }
+
+    try {
+      await deleteResume(uploadedCV.id);
+      setUploadedCV(null);
+      alert("Resume deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting resume:", error);
+      alert(`Failed to delete resume: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  };
+
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return "Unknown size";
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${kb.toFixed(0)} KB`;
+    return `${(kb / 1024).toFixed(1)} MB`;
+  };
 
   return (
     <div className={styles.pageContainer}>
@@ -36,6 +88,27 @@ export default function ResumeManagementPage() {
           <div className={styles.pageTitle}>
             <h1>{t('dashboardResume.title')}</h1>
             <p>{t('dashboardResume.subtitle')}</p>
+          </div>
+          
+          {/* Language Selector */}
+          <div style={{ marginTop: "1.5rem", display: "flex", gap: "1rem", alignItems: "center" }}>
+            <label style={{ color: "white", fontWeight: "500" }}>View Resume:</label>
+            <select
+              value={selectedLanguage}
+              onChange={(e) => setSelectedLanguage(e.target.value as "en" | "fr")}
+              style={{
+                padding: "0.5rem 1rem",
+                fontSize: "1rem",
+                borderRadius: "8px",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+                color: "white",
+                cursor: "pointer",
+              }}
+            >
+              <option value="en" style={{ backgroundColor: "#1a1a1a" }}>English</option>
+              <option value="fr" style={{ backgroundColor: "#1a1a1a" }}>Français</option>
+            </select>
           </div>
         </motion.div>
 
@@ -66,33 +139,56 @@ export default function ResumeManagementPage() {
                         {uploadedCV.filename}
                       </p>
                       <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.5)", margin: 0 }}>
-                        {uploadedCV.size}
+                        {formatFileSize(uploadedCV.fileSize)}
                       </p>
                     </div>
                   </div>
                   
                   <div style={{ fontSize: "0.75rem", color: "rgba(255, 255, 255, 0.4)" }}>
-                    {t('dashboardResume.uploaded')}: {new Date(uploadedCV.uploadedAt).toLocaleDateString()}
+                    {t('dashboardResume.uploaded')}: {new Date(uploadedCV.createdAt).toLocaleDateString()}
                   </div>
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                  <button className={`${styles.button} ${styles.primary}`}>
+                  <a 
+                    href={uploadedCV.fileUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={`${styles.button} ${styles.primary}`}
+                  >
                     {t('dashboardResume.download')}
-                  </button>
-                  <button className={`${styles.button} ${styles.secondary}`}>
+                  </a>
+                  <button 
+                    className={`${styles.button} ${styles.secondary}`}
+                    onClick={() => setShowUpload(true)}
+                  >
                     {t('dashboardResume.replace')}
                   </button>
-                  <button className={`${styles.button} ${styles.danger}`}>
+                  <button 
+                    className={`${styles.button} ${styles.danger}`}
+                    onClick={handleDelete}
+                  >
                     {t('dashboard.delete')}
                   </button>
                 </div>
+              </div>
+            ) : loading ? (
+              <div className={styles.emptyState}>
+                <div className={styles.icon}>⏳</div>
+                <h3>Loading...</h3>
               </div>
             ) : (
               <div className={styles.emptyState}>
                 <div className={styles.icon}>📄</div>
                 <h3>{t('dashboardResume.noResume')}</h3>
                 <p>{t('dashboardResume.noResumeDesc')}</p>
+                <button 
+                  className={`${styles.button} ${styles.primary}`}
+                  onClick={() => setShowUpload(true)}
+                  style={{ marginTop: "1rem" }}
+                >
+                  Upload Resume
+                </button>
               </div>
             )}
           </motion.div>
@@ -108,46 +204,44 @@ export default function ResumeManagementPage() {
               {t('dashboardResume.uploadNew')}
             </h3>
 
-            <div style={{
-              border: "2px dashed rgba(255, 255, 255, 0.2)",
-              borderRadius: "12px",
-              padding: "3rem 2rem",
-              textAlign: "center",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              background: "rgba(255, 255, 255, 0.02)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.4)";
-              e.currentTarget.style.background = "rgba(255, 255, 255, 0.04)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.2)";
-              e.currentTarget.style.background = "rgba(255, 255, 255, 0.02)";
-            }}
-            >
-              <div style={{ fontSize: "3rem", marginBottom: "1rem", opacity: 0.5 }}>
-                ⬆️
+            {showUpload || !uploadedCV ? (
+              <div>
+                <ResumeUpload
+                  onUploadSuccess={handleUploadSuccess}
+                  onUploadError={(error) => alert(error)}
+                  currentFileUrl={uploadedCV?.fileUrl}
+                  language={selectedLanguage}
+                />
+                
+                {showUpload && uploadedCV && (
+                  <button 
+                    className={`${styles.button} ${styles.secondary}`}
+                    onClick={() => setShowUpload(false)}
+                    style={{ marginTop: "1rem" }}
+                  >
+                    Cancel
+                  </button>
+                )}
               </div>
-              <h4 style={{ fontSize: "1rem", color: "white", margin: "0 0 0.5rem 0" }}>
-                {t('dashboardResume.uploadPrompt')}
-              </h4>
-              <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.5)", margin: 0 }}>
-                {t('dashboardResume.uploadDesc')}
-              </p>
-              <input 
-                type="file" 
-                accept=".pdf"
-                style={{ display: "none" }}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    // Handle file upload
-                    console.log("File selected:", file.name);
-                  }
-                }}
-              />
-            </div>
+            ) : (
+              <div style={{
+                border: "2px dashed rgba(255, 255, 255, 0.2)",
+                borderRadius: "12px",
+                padding: "3rem 2rem",
+                textAlign: "center",
+                background: "rgba(255, 255, 255, 0.02)",
+              }}>
+                <div style={{ fontSize: "3rem", marginBottom: "1rem", opacity: 0.5 }}>
+                  ✅
+                </div>
+                <h4 style={{ fontSize: "1rem", color: "white", margin: "0 0 0.5rem 0" }}>
+                  Resume Uploaded
+                </h4>
+                <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.5)", margin: 0 }}>
+                  Use the "Replace" button to upload a new version
+                </p>
+              </div>
+            )}
 
             <div style={{ marginTop: "2rem", padding: "1rem", background: "rgba(59, 130, 246, 0.1)", border: "1px solid rgba(59, 130, 246, 0.2)", borderRadius: "8px" }}>
               <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.7)", margin: 0, lineHeight: "1.6" }}>

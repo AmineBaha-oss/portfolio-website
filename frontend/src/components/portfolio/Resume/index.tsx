@@ -1,16 +1,47 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import styles from './style.module.scss';
 import { motion } from 'framer-motion';
 import RoundedButton from '@/common/RoundedButton';
 import { useTranslations } from '@/lib/i18n/hooks';
 
+interface ResumeData {
+  filename: string;
+  file_url: string;
+}
+
 export default function Resume() {
-  const { t } = useTranslations();
+  const { t, locale } = useTranslations();
+  const [resumeData, setResumeData] = useState<ResumeData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchResume();
+  }, [locale]);
+
+  const fetchResume = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/public/resume?lang=${locale}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setResumeData(data);
+      }
+    } catch (error) {
+      console.error('Error fetching resume:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   
   const handleDownload = () => {
-    // Placeholder - will be dynamic from backend later
-    alert(t('dashboardResume.download'));
+    if (resumeData?.file_url) {
+      window.open(resumeData.file_url, '_blank');
+    } else {
+      alert('Resume not available');
+    }
   };
 
   return (
@@ -36,15 +67,17 @@ export default function Resume() {
                 <path d="M12 18V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M9 15L12 12L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              <p>Resume.pdf</p>
+              <p>{loading ? 'Loading...' : resumeData ? resumeData.filename : 'No resume available'}</p>
             </div>
           </div>
 
-          <div className={styles.buttonWrapper} onClick={handleDownload}>
-            <RoundedButton backgroundColor="#2a2b2c">
-              <p>{t('dashboardResume.download')}</p>
-            </RoundedButton>
-          </div>
+          {resumeData && (
+            <div className={styles.buttonWrapper} onClick={handleDownload}>
+              <RoundedButton backgroundColor="#2a2b2c">
+                <p>{t('dashboardResume.download')}</p>
+              </RoundedButton>
+            </div>
+          )}
         </motion.div>
       </div>
     </section>

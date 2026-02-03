@@ -105,6 +105,9 @@ export const resumes = pgTable("resumes", {
   id: uuid("id").defaultRandom().primaryKey(),
   filename: text("filename").notNull(),
   fileUrl: text("file_url").notNull(),
+  fileKey: text("file_key"), // Storage key for deletion
+  fileSize: integer("file_size"), // File size in bytes
+  language: text("language").notNull().default("en"), // 'en' or 'fr'
   isActive: boolean("is_active").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
