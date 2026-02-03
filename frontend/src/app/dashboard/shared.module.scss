@@ -20,7 +20,7 @@
   display: flex;
   flex-direction: column;
   z-index: 100;
-  transition: width 0.3s ease;
+  transition: width 0.3s ease, transform 0.3s ease;
 
   /* Hide scrollbar */
   scrollbar-width: none; /* Firefox */
@@ -28,6 +28,54 @@
   
   &::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
+  }
+
+  @media (max-width: 768px) {
+    transform: translateX(-100%);
+    width: 280px !important;
+
+    &.mobileOpen {
+      transform: translateX(0);
+    }
+  }
+}
+
+.mobileMenuToggle {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 101;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 0.75rem;
+  color: white;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+  @media (max-width: 768px) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.mobileOverlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 99;
+
+  @media (max-width: 768px) {
+    &.visible {
+      display: block;
+    }
   }
 }
 
@@ -111,6 +159,11 @@
   flex: 1;
   min-height: 100vh;
   overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 
 .pageContainer {
@@ -141,10 +194,18 @@
   overflow-x: hidden;
   width: 100%;
   box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    padding: 5rem 1rem 2rem;
+  }
 }
 
 .header {
   margin-bottom: 4rem;
+
+  @media (max-width: 768px) {
+    margin-bottom: 2rem;
+  }
 
   .topBar {
     display: flex;
@@ -153,6 +214,14 @@
     margin-bottom: 3rem;
     padding-bottom: 2rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+    }
 
     .breadcrumb {
       display: flex;
@@ -179,6 +248,11 @@
     .actions {
       display: flex;
       gap: 1rem;
+
+      @media (max-width: 768px) {
+        width: 100%;
+        flex-wrap: wrap;
+      }
     }
   }
 
@@ -190,6 +264,10 @@
       margin: 0 0 1rem 0;
       letter-spacing: -0.03em;
       line-height: 1.1;
+
+      @media (max-width: 768px) {
+        font-size: 2rem;
+      }
     }
 
     p {
@@ -197,6 +275,10 @@
       color: rgba(255, 255, 255, 0.5);
       margin: 0;
       font-weight: 300;
+
+      @media (max-width: 768px) {
+        font-size: 1rem;
+      }
     }
   }
 }
@@ -265,6 +347,10 @@
   padding-top: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+
   button {
     flex: 1;
   }
@@ -277,6 +363,10 @@
   padding: 2rem;
   transition: all 0.3s ease;
 
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+
   &:hover {
     border-color: rgba(255, 255, 255, 0.15);
   }
@@ -286,12 +376,24 @@
   display: grid;
   gap: 1.5rem;
 
+  @media (max-width: 768px) {
+    gap: 1rem;
+  }
+
   &.cols2 {
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
   }
 
   &.cols3 {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
   }
 }
 
@@ -302,13 +404,25 @@
   overflow-x: auto;
   display: block;
 
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
+
   thead, tbody {
     display: table;
     width: 100%;
     table-layout: fixed;
+
+    @media (max-width: 768px) {
+      display: block;
+    }
   }
 
   thead {
+    @media (max-width: 768px) {
+      display: none;
+    }
+
     tr {
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
@@ -332,6 +446,16 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       transition: background 0.2s ease;
 
+      @media (max-width: 768px) {
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
       &:hover {
         background: rgba(255, 255, 255, 0.02);
       }
@@ -342,6 +466,20 @@
         font-size: 0.875rem;
         overflow: hidden;
         text-overflow: ellipsis;
+
+        @media (max-width: 768px) {
+          padding: 0.5rem 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+
+          &::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.5);
+            margin-right: 1rem;
+          }
+        }
       }
     }
   }
@@ -460,6 +598,11 @@
   padding: 2rem;
   overflow-y: auto;
   backdrop-filter: blur(8px);
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    align-items: flex-start;
+  }
 }
 
 .modalCard {
@@ -475,6 +618,13 @@
   margin: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    max-height: 90vh;
+    margin: 0;
+    border-radius: 8px;
+  }
+
   h2 {
     font-size: 1.75rem;
     font-weight: 700;
@@ -482,6 +632,11 @@
     margin: 0 0 2rem 0;
     padding-bottom: 1rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    @media (max-width: 768px) {
+      font-size: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
   }
 
   /* Custom scrollbar */
@@ -625,4 +780,107 @@
       font-weight: 500;
     }
   }
+}
+
+// Responsive utility classes for inline-styled components
+.filterButtons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+    
+    button {
+      padding: 0.625rem 1rem;
+      font-size: 0.813rem;
+    }
+  }
+}
+
+.cardContent {
+  @media (max-width: 768px) {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+  }
+}
+
+.cardActions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    gap: 0.5rem;
+    
+    button {
+      flex: 1;
+      min-width: 80px;
+      padding: 0.625rem 0.75rem;
+      font-size: 0.813rem;
+    }
+  }
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+.cardFooter {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    width: 100%;
+
+    button {
+      width: 100% !important;
+      flex: none !important;
+    }
+  }
+}
+
+.cardActions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+.cardMeta {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+
+  @media (max-width: 768px) {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.badgeGroup {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
 }

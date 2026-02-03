@@ -18,12 +18,22 @@ interface ContactInfo {
 export default function Contact() {
     const { t, locale } = useTranslations();
     const container = useRef(null);
+    const [isMobile, setIsMobile] = useState(false);
+
+    // Check for mobile on mount
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     const { scrollYProgress } = useScroll({
         target: container,
         offset: ["start end", "end end"]
     })
     const x = useTransform(scrollYProgress, [0, 1], [0, 100])
-    const y = useTransform(scrollYProgress, [0, 1], [-500, 0])
+    const y = useTransform(scrollYProgress, [0, 1], isMobile ? [0, 0] : [-500, 0])
     const rotate = useTransform(scrollYProgress, [0, 1], [120, 90])
 
     // Contact info state

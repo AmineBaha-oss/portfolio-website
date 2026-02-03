@@ -5,6 +5,12 @@
   display: flex;
   align-items: center;
 
+  @media (max-width: 768px) {
+    padding: 80px 1.5rem 120px;
+    min-height: unset;
+    align-items: flex-start;
+  }
+
   .container {
     max-width: 1400px;
     margin: 0 auto;
@@ -164,12 +170,21 @@
       border-radius: 20px;
       text-align: left;
 
+      @media (max-width: 768px) {
+        padding: 2rem 1.5rem;
+        margin: 1.5rem auto 0;
+      }
+
       h3 {
         font-size: 2rem;
         font-weight: 600;
         color: white;
         margin: 0 0 0.5rem 0;
         text-align: center;
+
+        @media (max-width: 768px) {
+          font-size: 1.5rem;
+        }
       }
 
       .formSubtitle {

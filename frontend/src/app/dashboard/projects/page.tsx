@@ -128,8 +128,8 @@ export default function ProjectsManagementPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 + index * 0.1 }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "1rem" }}>
-                  <div>
+                <div className={styles.cardHeader} style={{ marginBottom: "1rem" }}>
+                  <div className={styles.badgeGroup}>
                     <h3 style={{ fontSize: "1.25rem", color: "white", margin: "0 0 0.5rem 0" }}>
                       {title}
                     </h3>
@@ -146,7 +146,7 @@ export default function ProjectsManagementPage() {
                   {description}
                 </p>
 
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.5rem" }}>
+                <div className={styles.badgeGroup} style={{ marginBottom: "1.5rem" }}>
                   {(project.technologies || []).map((tech: string) => (
                     <span
                       key={tech}
@@ -164,7 +164,7 @@ export default function ProjectsManagementPage() {
                   ))}
                 </div>
 
-                <div style={{ display: "flex", gap: "0.75rem", paddingTop: "1rem", borderTop: "1px solid rgba(255, 255, 255, 0.08)" }}>
+                <div className={styles.cardFooter}>
                   <button 
                     className={`${styles.button} ${styles.secondary}`} 
                     style={{ flex: 1 }}

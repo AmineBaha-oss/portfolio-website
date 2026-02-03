@@ -90,7 +90,7 @@ export default function TestimonialsManagementPage() {
           <div className={styles.pageTitle}><h1>{t('testimonials.title')}</h1><p>{t('dashboardTestimonials.subtitle')}</p></div>
         </motion.div>
 
-        <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem" }}>
+        <div className={styles.filterButtons}>
           <button className={`${styles.button} ${filter === 'all' ? styles.primary : styles.secondary}`} onClick={() => setFilter('all')}>{t('dashboardTestimonials.all')} ({testimonials.length})</button>
           <button className={`${styles.button} ${filter === 'pending' ? styles.primary : styles.secondary}`} onClick={() => setFilter('pending')}>{t('dashboardTestimonials.pending')} ({testimonials.filter(t => t.status === "pending").length})</button>
           <button className={`${styles.button} ${filter === 'approved' ? styles.primary : styles.secondary}`} onClick={() => setFilter('approved')}>{t('dashboardTestimonials.approved')} ({testimonials.filter(t => t.status === "approved").length})</button>
@@ -100,12 +100,12 @@ export default function TestimonialsManagementPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           {filteredTestimonials.map((testimonial, index) => (
             <motion.div key={testimonial.id} className={styles.card} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: index * 0.05 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "1rem" }}>
+              <div className={styles.cardHeader}>
                 <div>
                   <h3 style={{ fontSize: "1.125rem", color: "white", margin: "0 0 0.25rem 0" }}>{testimonial.name}</h3>
                   <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.6)", margin: 0 }}>{testimonial.position}</p>
                 </div>
-                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                <div className={styles.badgeGroup}>
                   <span className={styles.badge}>{testimonial.status}</span>
                   {testimonial.active ? (
                     <span className={styles.badge} style={{ backgroundColor: "rgba(34, 197, 94, 0.2)", color: "#22c55e" }}>Active</span>
@@ -115,12 +115,12 @@ export default function TestimonialsManagementPage() {
                 </div>
               </div>
               <p style={{ color: "rgba(255, 255, 255, 0.7)", fontSize: "0.875rem", lineHeight: "1.6", marginBottom: "1rem" }}>"{testimonial.message}"</p>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "1rem", borderTop: "1px solid rgba(255, 255, 255, 0.08)" }}>
-                <div style={{ fontSize: "0.75rem", color: "rgba(255, 255, 255, 0.4)" }}>
+              <div className={styles.cardFooter}>
+                <div className={styles.cardMeta}>
                   <div>{t('dashboardTestimonials.email')}: {testimonial.email}</div>
                   <div>{t('dashboardTestimonials.submitted')}: {new Date(testimonial.submittedAt).toLocaleDateString()}</div>
                 </div>
-                <div style={{ display: "flex", gap: "0.75rem" }}>
+                <div className={styles.cardActions}>
                   {testimonial.status === "pending" && (
                     <>
                       <button className={`${styles.button} ${styles.primary}`} onClick={() => handleApprove(testimonial.id)}>{t('dashboardTestimonials.approve')}</button>

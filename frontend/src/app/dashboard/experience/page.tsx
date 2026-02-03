@@ -64,19 +64,19 @@ export default function ExperienceManagementPage() {
             const desc = typeof exp.description === 'object' && exp.description && locale in exp.description ? exp.description[locale] : String(exp.description ?? '');
             return (
             <motion.div key={exp.id} className={styles.card} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: index * 0.1 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.5rem" }}>
+              <div className={styles.cardHeader}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className={styles.badgeGroup}>
                     <h3 style={{ fontSize: "1.25rem", color: "white", margin: 0 }}>{pos}</h3>
                     {exp.current && <span className={styles.badge}>{t('experience.current')}</span>}
                   </div>
                   <p style={{ fontSize: "1rem", color: "rgba(255, 255, 255, 0.7)", margin: "0 0 0.5rem 0" }}>{co} • {loc}</p>
-                  <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.5)", margin: "0 0 1rem 0" }}>
+                  <p className={styles.cardMeta}>
                     {new Date(exp.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - {exp.current ? t('experience.present') : (exp.endDate ? new Date(exp.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '')}
                   </p>
                   <p style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "0.875rem", lineHeight: "1.6" }}>{desc}</p>
                 </div>
-                <div style={{ display: "flex", gap: "0.75rem", marginLeft: "2rem" }}>
+                <div className={styles.cardActions}>
                   <button className={`${styles.button} ${styles.secondary}`} onClick={() => { setEditingExp(exp); setShowAddModal(true); }}>{t('dashboard.edit')}</button>
                   <button className={`${styles.button} ${styles.danger}`} onClick={() => handleDelete(exp.id)}>{t('dashboard.delete')}</button>
                 </div>

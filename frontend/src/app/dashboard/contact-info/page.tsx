@@ -153,11 +153,11 @@ export default function ContactInfoPage() {
           transition={{ duration: 0.6, delay: 0.05 }}
           style={{ marginBottom: "2rem" }}
         >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+          <div className={styles.cardHeader} style={{ marginBottom: "1.5rem" }}>
             <h3 style={{ fontSize: "1.25rem", fontWeight: 600, margin: 0, color: "white" }}>
               {t('dashboardContactInfo.profilePicture')}
             </h3>
-            <div style={{ display: "flex", gap: "0.5rem" }}>
+            <div className={styles.cardActions}>
               {pendingProfilePicKey && (
                 <>
                   <button
@@ -337,7 +337,7 @@ export default function ContactInfoPage() {
                     <td>{item.value}</td>
                     <td>{item.order}</td>
                     <td>
-                      <div style={{ display: "flex", gap: "0.5rem" }}>
+                      <div className={styles.cardActions}>
                         <button
                           className={`${styles.button} ${styles.secondary}`}
                           onClick={() => handleEdit(item)}

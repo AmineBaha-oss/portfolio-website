@@ -68,7 +68,7 @@ export default function HobbiesManagementPage() {
                 <h3 style={{ fontSize: "1.125rem", color: "white", margin: "0 0 0.5rem 0" }}>{title}</h3>
                 <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.6)", margin: 0 }}>{desc}</p>
               </div>
-              <div style={{ display: "flex", gap: "0.75rem", paddingTop: "1rem", borderTop: "1px solid rgba(255, 255, 255, 0.08)" }}>
+              <div className={styles.cardFooter}>
                 <button className={`${styles.button} ${styles.secondary}`} style={{ flex: 1 }} onClick={() => { setEditingHobby(hobby); setShowAddModal(true); }}>{t('dashboard.edit')}</button>
                 <button className={`${styles.button} ${styles.danger}`} onClick={() => handleDelete(hobby.id)}>{t('dashboard.delete')}</button>
               </div>

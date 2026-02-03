@@ -68,7 +68,7 @@ export default function MessagesManagementPage() {
           <div className={styles.pageTitle}><h1>{t('dashboardMessages.title')}</h1><p>{t('dashboardMessages.subtitle')}</p></div>
         </motion.div>
 
-        <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem" }}>
+        <div className={styles.filterButtons}>
           <button className={`${styles.button} ${filter === 'all' ? styles.primary : styles.secondary}`} onClick={() => setFilter('all')}>{t('dashboardMessages.all')} ({messages.length})</button>
           <button className={`${styles.button} ${filter === 'unread' ? styles.primary : styles.secondary}`} onClick={() => setFilter('unread')}>{t('dashboardMessages.unread')} ({unreadCount})</button>
           <button className={`${styles.button} ${filter === 'read' ? styles.primary : styles.secondary}`} onClick={() => setFilter('read')}>{t('dashboardMessages.read')} ({messages.length - unreadCount})</button>
@@ -88,19 +88,19 @@ export default function MessagesManagementPage() {
               }}
               onClick={() => setSelectedMessage(message)}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
-                <div style={{ flex: 1 }}>
+              <div className={styles.cardHeader}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.5rem" }}>
                     <h3 style={{ fontSize: "1rem", color: "white", margin: 0, fontWeight: message.status === "unread" ? 600 : 500 }}>{message.name}</h3>
-                    {message.status === "unread" && <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "white" }} />}
+                    {message.status === "unread" && <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "white", flexShrink: 0 }} />}
                   </div>
                   <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.6)", margin: "0 0 0.5rem 0" }}>{message.email}</p>
                   <p style={{ fontSize: "0.875rem", color: "white", margin: "0 0 0.5rem 0", fontWeight: 500 }}>{message.subject}</p>
                   <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.5)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{message.message}</p>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.75rem", marginLeft: "2rem" }}>
-                  <span style={{ fontSize: "0.75rem", color: "rgba(255, 255, 255, 0.4)" }}>{new Date(message.createdAt).toLocaleDateString()}</span>
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.75rem" }}>
+                  <span className={styles.cardMeta}>{new Date(message.createdAt).toLocaleDateString()}</span>
+                  <div className={styles.cardActions}>
                     <button 
                       className={`${styles.button} ${styles.secondary}`}
                       onClick={(e) => {

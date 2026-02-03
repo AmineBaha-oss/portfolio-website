@@ -64,19 +64,19 @@ export default function EducationManagementPage() {
             const desc = typeof edu.description === 'object' && edu.description && locale in edu.description ? edu.description[locale] : String(edu.description ?? '');
             return (
             <motion.div key={edu.id} className={styles.card} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: index * 0.1 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
-                <div style={{ flex: 1 }}>
+              <div className={styles.cardHeader}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <h3 style={{ fontSize: "1.25rem", color: "white", margin: "0 0 0.5rem 0" }}>{deg}</h3>
                   <p style={{ fontSize: "1rem", color: "rgba(255, 255, 255, 0.7)", margin: "0 0 0.5rem 0" }}>{inst} • {loc}</p>
-                  <div style={{ display: "flex", gap: "1.5rem", marginBottom: "1rem" }}>
-                    <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.5)", margin: 0 }}>
+                  <div className={styles.badgeGroup}>
+                    <span className={styles.cardMeta}>
                       {new Date(edu.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - {edu.endDate ? new Date(edu.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Present'}
-                    </p>
-                    {edu.gpa && <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.5)", margin: 0 }}>GPA: {edu.gpa}/4.0</p>}
+                    </span>
+                    {edu.gpa && <span className={styles.cardMeta}>GPA: {edu.gpa}/4.0</span>}
                   </div>
-                  {desc && <p style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "0.875rem", lineHeight: "1.6" }}>{desc}</p>}
+                  {desc && <p style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "0.875rem", lineHeight: "1.6", marginTop: "0.5rem" }}>{desc}</p>}
                 </div>
-                <div style={{ display: "flex", gap: "0.75rem", marginLeft: "2rem" }}>
+                <div className={styles.cardActions}>
                   <button className={`${styles.button} ${styles.secondary}`} onClick={() => { setEditingEdu(edu); setShowAddModal(true); }}>{t('dashboard.edit')}</button>
                   <button className={`${styles.button} ${styles.danger}`} onClick={() => handleDelete(edu.id)}>{t('dashboard.delete')}</button>
                 </div>

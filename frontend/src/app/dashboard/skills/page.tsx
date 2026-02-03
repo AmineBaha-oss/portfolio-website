@@ -138,7 +138,7 @@ export default function SkillsManagementPage() {
                     <td>{getCategoryTranslation(skill.category)}</td>
                     <td>{skill.order}</td>
                     <td>
-                      <div style={{ display: "flex", gap: "0.5rem" }}>
+                      <div className={styles.cardActions}>
                         <button 
                           className={`${styles.button} ${styles.secondary}`}
                           onClick={() => handleEdit(skill)}
