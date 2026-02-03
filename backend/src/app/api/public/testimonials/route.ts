@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, testimonials } from "@/lib/db";
 import { validateLanguage } from "@/lib/utils/validation";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { desc } from "drizzle-orm";
 import {
   validateEmail,
@@ -15,11 +15,11 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const lang = validateLanguage(searchParams.get("lang")); // For consistency
 
-    // Only return approved testimonials
+    // Only return approved and active testimonials
     const approvedTestimonials = await db
       .select()
       .from(testimonials)
-      .where(eq(testimonials.status, "approved"))
+      .where(and(eq(testimonials.status, "approved"), eq(testimonials.active, true)))
       .orderBy(desc(testimonials.submittedAt));
 
     return NextResponse.json({ testimonials: approvedTestimonials });

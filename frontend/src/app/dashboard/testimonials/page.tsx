@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
-import { getTestimonials, approveTestimonial, rejectTestimonial, deleteTestimonial } from "@/lib/api/admin-client";
+import { getTestimonials, approveTestimonial, rejectTestimonial, deleteTestimonial, toggleTestimonialActive } from "@/lib/api/admin-client";
 import { useTranslations } from "@/lib/i18n/hooks";
 
 export default function TestimonialsManagementPage() {
@@ -57,6 +57,15 @@ export default function TestimonialsManagementPage() {
     }
   };
 
+  const handleToggleActive = async (id: string) => {
+    try {
+      await toggleTestimonialActive(id);
+      await fetchTestimonials();
+    } catch (err: any) {
+      alert(err.message || t('dashboard.error'));
+    }
+  };
+
   const filteredTestimonials = filter === 'all' 
     ? testimonials 
     : testimonials.filter(t => t.status === filter);
@@ -91,12 +100,14 @@ export default function TestimonialsManagementPage() {
                   <h3 style={{ fontSize: "1.125rem", color: "white", margin: "0 0 0.25rem 0" }}>{testimonial.name}</h3>
                   <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.6)", margin: 0 }}>{testimonial.position}</p>
                 </div>
-                <span className={styles.badge}>{testimonial.status}</span>
-              </div>
-              <div style={{ display: "flex", gap: "0.25rem", marginBottom: "1rem" }}>
-                {[...Array(5)].map((_, i) => (
-                  <span key={i} style={{ color: i < testimonial.rating ? "#fbbf24" : "rgba(255, 255, 255, 0.2)", fontSize: "1.25rem" }}>★</span>
-                ))}
+                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                  <span className={styles.badge}>{testimonial.status}</span>
+                  {testimonial.active ? (
+                    <span className={styles.badge} style={{ backgroundColor: "rgba(34, 197, 94, 0.2)", color: "#22c55e" }}>Active</span>
+                  ) : (
+                    <span className={styles.badge} style={{ backgroundColor: "rgba(239, 68, 68, 0.2)", color: "#ef4444" }}>Inactive</span>
+                  )}
+                </div>
               </div>
               <p style={{ color: "rgba(255, 255, 255, 0.7)", fontSize: "0.875rem", lineHeight: "1.6", marginBottom: "1rem" }}>"{testimonial.message}"</p>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "1rem", borderTop: "1px solid rgba(255, 255, 255, 0.08)" }}>
@@ -112,7 +123,15 @@ export default function TestimonialsManagementPage() {
                     </>
                   )}
                   {testimonial.status !== "pending" && (
-                    <button className={`${styles.button} ${styles.danger}`} onClick={() => handleDelete(testimonial.id)}>{t('dashboard.delete')}</button>
+                    <>
+                      <button 
+                        className={`${styles.button} ${testimonial.active ? styles.secondary : styles.primary}`} 
+                        onClick={() => handleToggleActive(testimonial.id)}
+                      >
+                        {testimonial.active ? 'Deactivate' : 'Activate'}
+                      </button>
+                      <button className={`${styles.button} ${styles.danger}`} onClick={() => handleDelete(testimonial.id)}>{t('dashboard.delete')}</button>
+                    </>
                   )}
                 </div>
               </div>

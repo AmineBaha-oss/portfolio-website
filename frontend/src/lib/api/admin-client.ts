@@ -202,6 +202,12 @@ export async function deleteTestimonial(id: string) {
   });
 }
 
+export async function toggleTestimonialActive(id: string) {
+  return fetchAdminAPI<{ success: boolean; message: string; testimonial: any }>(`/api/admin/testimonials/${id}/toggle`, {
+    method: 'PATCH',
+  });
+}
+
 // Messages
 export async function getMessages() {
   return fetchAdminAPI<{ messages: any[] }>('/api/admin/messages');

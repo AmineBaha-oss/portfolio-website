@@ -19,8 +19,7 @@ export default function Testimonials() {
     role: '',
     company: '',
     testimonial: '',
-    email: '',
-    rating: 5
+    email: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -65,11 +64,11 @@ export default function Testimonials() {
         company: formData.company || undefined,
         email: formData.email,
         message: formData.testimonial,
-        rating: formData.rating
+        rating: 5
       });
       
       setSubmitSuccess(true);
-      setFormData({ name: '', role: '', company: '', testimonial: '', email: '', rating: 5 });
+      setFormData({ name: '', role: '', company: '', testimonial: '', email: '' });
       setTimeout(() => {
         setShowForm(false);
         setSubmitSuccess(false);
@@ -107,7 +106,7 @@ export default function Testimonials() {
             </p>
           ) : (
             <div className={styles.testimonialsGrid}>
-              {testimonialsData.length > 0 ? testimonialsData.map((testimonial, index) => (
+              {testimonialsData.length > 0 ? testimonialsData.slice(0, 6).map((testimonial, index) => (
               <motion.div
                 key={testimonial.id}
                 className={styles.testimonialCard}
@@ -126,11 +125,6 @@ export default function Testimonials() {
                       <p className={styles.role}>{testimonial.role}</p>
                       <p className={styles.company}>{testimonial.company}</p>
                     </div>
-                  </div>
-                  <div className={styles.rating}>
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <span key={i}>★</span>
-                    ))}
                   </div>
                 </div>
                 <p className={styles.quote}>"{testimonial.testimonial}"</p>
@@ -233,32 +227,6 @@ export default function Testimonials() {
                       required
                       rows={5}
                     />
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>{t('testimonials.rating')} *</label>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                      {[1, 2, 3, 4, 5].map((rating) => (
-                        <button
-                          key={rating}
-                          type="button"
-                          onClick={() => setFormData({ ...formData, rating })}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontSize: '1.5rem',
-                            color: formData.rating >= rating ? '#fbbf24' : 'rgba(255, 255, 255, 0.3)',
-                            transition: 'color 0.2s'
-                          }}
-                        >
-                          ★
-                        </button>
-                      ))}
-                      <span style={{ marginLeft: '0.5rem', color: 'rgba(255, 255, 255, 0.6)' }}>
-                        {formData.rating} / 5
-                      </span>
-                    </div>
                   </div>
 
                   <div className={styles.formActions}>

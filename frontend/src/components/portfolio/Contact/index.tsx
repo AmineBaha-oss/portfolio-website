@@ -146,6 +146,20 @@ export default function Contact() {
                             <p>{email}</p>
                         </Rounded>
                     )}
+                    {socialLinks.github && (
+                        <Rounded backgroundColor="#2a2b2c">
+                            <a href={socialLinks.github} target="_blank" rel="noopener noreferrer">
+                                <p>GitHub</p>
+                            </a>
+                        </Rounded>
+                    )}
+                    {socialLinks.linkedin && (
+                        <Rounded backgroundColor="#2a2b2c">
+                            <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer">
+                                <p>LinkedIn</p>
+                            </a>
+                        </Rounded>
+                    )}
                 </div>
 
                 {/* Message Form Section */}

@@ -78,6 +78,15 @@
             margin-left: 200px;
             margin-right: 200px;
             margin-bottom: 80px;
+            
+            a {
+                text-decoration: none;
+                color: inherit;
+                
+                p {
+                    margin: 0;
+                }
+            }
         }
         .info{
             display: flex;

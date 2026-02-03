@@ -110,6 +110,10 @@ export async function getProjects(lang: string = 'en', featured?: boolean): Prom
   return fetchAPI<{ projects: Project[] }>(`/api/public/projects?${params.toString()}`);
 }
 
+export async function getProjectById(id: string, lang: string = 'en'): Promise<{ project: Project }> {
+  return fetchAPI<{ project: Project }>(`/api/public/projects/${id}?lang=${lang}`);
+}
+
 export async function getSkills(lang: string = 'en'): Promise<{ skills: Skill[] }> {
   return fetchAPI<{ skills: Skill[] }>(`/api/public/skills?lang=${lang}`);
 }

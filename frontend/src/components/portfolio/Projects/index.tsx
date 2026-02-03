@@ -9,6 +9,7 @@ import Rounded from '@/common/RoundedButton';
 import { useLanguage } from '@/lib/i18n/context';
 import { getProjects } from '@/lib/api/client';
 import { useTranslations } from '@/lib/i18n/hooks';
+import Link from 'next/link';
 
 const scaleAnimation = {
     initial: {scale: 0, x:"-50%", y:"-50%"},
@@ -19,7 +20,7 @@ const scaleAnimation = {
 export default function Home() {
   const { locale } = useLanguage();
   const { t } = useTranslations();
-  const [projects, setProjects] = useState<Array<{ title: string; src: string; color: string }>>([]);
+  const [projects, setProjects] = useState<Array<{ id: string; title: string; description: string; src: string; color: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,11 +43,15 @@ export default function Home() {
         setLoading(true);
         setError(null);
         const response = await getProjects(locale, true);
+        console.log('Fetched projects:', response.projects);
         const mappedProjects = response.projects.map(project => ({
+          id: project.id,
           title: project.title,
+          description: project.description,
           src: project.imageUrl || "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg",
           color: project.color || "#2a2b2c"
         }));
+        console.log('Mapped projects:', mappedProjects);
         setProjects(mappedProjects);
       } catch (err: any) {
         console.error('Error fetching projects:', err);
@@ -113,15 +118,15 @@ export default function Home() {
   }
 
   return (
-  <main onMouseMove={(e) => {moveItems(e.clientX, e.clientY)}} className={styles.projects}>
+  <main id="projects" onMouseMove={(e) => {moveItems(e.clientX, e.clientY)}} className={styles.projects}>
     <div className={styles.header}>
       <h2 className={styles.title}>{t('projects.title')}</h2>
       <p className={styles.subtitle}>{t('projects.subtitle')}</p>
     </div>
     <div className={styles.body}>
       {
-        projects.length > 0 ? projects.map( (project, index) => {
-          return <Project index={index} title={project.title} manageModal={manageModal} key={index}/>
+        projects.length > 0 ? projects.slice(0, 4).map( (project, index) => {
+          return <Project index={index} title={project.title} description={project.description} projectId={project.id} manageModal={manageModal} key={index}/>
         }) : (
           <p style={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center', padding: '2rem' }}>
             {t('dashboard.noData')}
@@ -129,9 +134,20 @@ export default function Home() {
         )
       }
     </div>
-    <Rounded backgroundColor="#2a2b2c">
-      <p>{t('projects.moreWork')}</p>
-    </Rounded>
+    <Link href="/projects" scroll={false} onClick={(e) => {
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      window.scroll(0, 0);
+      setTimeout(() => {
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        window.scroll(0, 0);
+      }, 10);
+    }}>
+      <Rounded backgroundColor="#2a2b2c">
+        <p>{t('projects.moreWork')}</p>
+      </Rounded>
+    </Link>
     <>
         <motion.div ref={modalContainer} variants={scaleAnimation} initial="initial" animate={active ? "enter" : "closed"} className={styles.modalContainer}>
             <div style={{top: index * -100 + "%"}} className={styles.modalSlider}>

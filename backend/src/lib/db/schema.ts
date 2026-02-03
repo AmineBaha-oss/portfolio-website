@@ -84,6 +84,7 @@ export const testimonials = pgTable("testimonials", {
   message: text("message").notNull(),
   rating: integer("rating").notNull(),
   status: text("status").notNull().default("pending"),
+  active: boolean("active").notNull().default(true),
   submittedAt: timestamp("submitted_at").defaultNow().notNull(),
   reviewedAt: timestamp("reviewed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

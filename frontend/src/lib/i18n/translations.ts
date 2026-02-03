@@ -65,6 +65,11 @@ export const translations = {
       description: 'Description',
       liveDemo: 'Live Demo',
       sourceCode: 'Source Code',
+      allProjects: 'All Projects',
+      allProjectsSubtitle: 'Explore all of my work',
+      client: 'Client',
+      timeline: 'Timeline',
+      visitWebsite: 'Visit Website',
     },
     // Skills
     skills: {
@@ -508,6 +513,11 @@ export const translations = {
       description: 'Description',
       liveDemo: 'Démo en direct',
       sourceCode: 'Code source',
+      allProjects: 'Tous les projets',
+      allProjectsSubtitle: 'Explorez tous mes travaux',
+      client: 'Client',
+      timeline: 'Chronologie',
+      visitWebsite: 'Visiter le site',
     },
     // Skills
     skills: {

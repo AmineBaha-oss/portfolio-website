@@ -29,7 +29,7 @@ export default function ContactInfoPage() {
     value: "",
     order: 0,
   });
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [profilePicKey, setProfilePicKey] = useState<string>("");
   const [pendingProfilePicKey, setPendingProfilePicKey] = useState<string>("");
   const profilePicRef = useRef<HTMLInputElement>(null);
