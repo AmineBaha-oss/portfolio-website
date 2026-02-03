@@ -296,3 +296,7 @@ export async function deleteResume(id: string) {
     method: 'DELETE',
   });
 }
+
+export async function getResumeStats() {
+  return fetchAdminAPI<{ total: number; thisMonth: number; today: number }>('/api/admin/resume/stats');
+}

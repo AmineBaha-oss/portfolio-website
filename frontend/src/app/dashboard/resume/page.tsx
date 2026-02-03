@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
 import { useTranslations } from "@/lib/i18n/hooks";
 import { ResumeUpload } from "@/components/ui/ResumeUpload";
-import { getResume, deleteResume } from "@/lib/api/admin-client";
+import { getResume, deleteResume, getResumeStats } from "@/lib/api/admin-client";
+import { Toast } from "@/components/ui/Toast";
 
 interface Resume {
   id: string;
@@ -25,10 +26,27 @@ export default function ResumeManagementPage() {
   const [loading, setLoading] = useState(true);
   const [showUpload, setShowUpload] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<"en" | "fr">("en");
+  const [stats, setStats] = useState({ total: 0, thisMonth: 0, today: 0 });
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
+  };
 
   useEffect(() => {
     fetchResume();
+    fetchStats();
   }, [selectedLanguage]);
+
+  const fetchStats = async () => {
+    try {
+      const data = await getResumeStats();
+      setStats(data);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  };
 
   const fetchResume = async () => {
     try {
@@ -43,22 +61,31 @@ export default function ResumeManagementPage() {
 
   const handleUploadSuccess = async () => {
     await fetchResume();
+    await fetchStats();
     setShowUpload(false);
-    alert("Resume uploaded successfully!");
+    setToast({ message: "Resume uploaded successfully!", type: "success" });
   };
 
   const handleDelete = async () => {
-    if (!uploadedCV || !confirm("Are you sure you want to delete this resume?")) {
+    if (!uploadedCV) {
+      return;
+    }
+
+    if (!confirm("Are you sure you want to delete this resume?")) {
       return;
     }
 
     try {
       await deleteResume(uploadedCV.id);
       setUploadedCV(null);
-      alert("Resume deleted successfully!");
+      setToast({ message: "Resume deleted successfully!", type: "success" });
+      await fetchStats();
     } catch (error) {
       console.error("Error deleting resume:", error);
-      alert(`Failed to delete resume: ${error instanceof Error ? error.message : "Unknown error"}`);
+      setToast({ 
+        message: `Failed to delete resume: ${error instanceof Error ? error.message : "Unknown error"}`,
+        type: "error"
+      });
     }
   };
 
@@ -71,6 +98,13 @@ export default function ResumeManagementPage() {
 
   return (
     <div className={styles.pageContainer}>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <div className={styles.container}>
         <motion.div
           className={styles.header}
@@ -92,7 +126,7 @@ export default function ResumeManagementPage() {
           
           {/* Language Selector */}
           <div style={{ marginTop: "1.5rem", display: "flex", gap: "1rem", alignItems: "center" }}>
-            <label style={{ color: "white", fontWeight: "500" }}>View Resume:</label>
+            <label style={{ color: "white", fontWeight: "500" }}>{t('dashboardResume.viewResume')}:</label>
             <select
               value={selectedLanguage}
               onChange={(e) => setSelectedLanguage(e.target.value as "en" | "fr")}
@@ -160,7 +194,7 @@ export default function ResumeManagementPage() {
                   </a>
                   <button 
                     className={`${styles.button} ${styles.secondary}`}
-                    onClick={() => setShowUpload(true)}
+                    onClick={triggerFileUpload}
                   >
                     {t('dashboardResume.replace')}
                   </button>
@@ -174,17 +208,25 @@ export default function ResumeManagementPage() {
               </div>
             ) : loading ? (
               <div className={styles.emptyState}>
-                <div className={styles.icon}>⏳</div>
+                <svg className={styles.icon} width="48" height="48" viewBox="0 0 24 24" fill="none" style={{ animation: "spin 1s linear infinite" }}>
+                  <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.2)" strokeWidth="2"/>
+                  <path d="M12 2a10 10 0 0 1 10 10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
                 <h3>Loading...</h3>
               </div>
             ) : (
               <div className={styles.emptyState}>
-                <div className={styles.icon}>📄</div>
+                <svg className={styles.icon} width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
+                  <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M14 2V8H20" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M9 15H15" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M9 11H15" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
                 <h3>{t('dashboardResume.noResume')}</h3>
                 <p>{t('dashboardResume.noResumeDesc')}</p>
                 <button 
                   className={`${styles.button} ${styles.primary}`}
-                  onClick={() => setShowUpload(true)}
+                  onClick={triggerFileUpload}
                   style={{ marginTop: "1rem" }}
                 >
                   Upload Resume
@@ -204,24 +246,38 @@ export default function ResumeManagementPage() {
               {t('dashboardResume.uploadNew')}
             </h3>
 
-            {showUpload || !uploadedCV ? (
-              <div>
-                <ResumeUpload
-                  onUploadSuccess={handleUploadSuccess}
-                  onUploadError={(error) => alert(error)}
-                  currentFileUrl={uploadedCV?.fileUrl}
-                  language={selectedLanguage}
-                />
-                
-                {showUpload && uploadedCV && (
-                  <button 
-                    className={`${styles.button} ${styles.secondary}`}
-                    onClick={() => setShowUpload(false)}
-                    style={{ marginTop: "1rem" }}
-                  >
-                    Cancel
-                  </button>
-                )}
+            <div style={{ display: "none" }}>
+              <ResumeUpload
+                fileInputRef={fileInputRef}
+                onUploadSuccess={handleUploadSuccess}
+                onUploadError={(error) => setToast({ message: error, type: "error" })}
+                currentFileUrl={uploadedCV?.fileUrl}
+                language={selectedLanguage}
+              />
+            </div>
+
+            {!uploadedCV ? (
+              <div style={{
+                border: "2px dashed rgba(255, 255, 255, 0.2)",
+                borderRadius: "12px",
+                padding: "3rem 2rem",
+                textAlign: "center",
+                background: "rgba(255, 255, 255, 0.02)",
+                cursor: "pointer",
+              }}
+              onClick={triggerFileUpload}
+              >
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ margin: "0 auto 1rem", opacity: 0.7 }}>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeLinecap="round" strokeLinejoin="round"/>
+                  <polyline points="17 8 12 3 7 8" strokeLinecap="round" strokeLinejoin="round"/>
+                  <line x1="12" y1="3" x2="12" y2="15" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <h4 style={{ fontSize: "1rem", color: "white", margin: "0 0 0.5rem 0" }}>
+                  Click to Upload Resume
+                </h4>
+                <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.5)", margin: 0 }}>
+                  Select a PDF file (max 10MB)
+                </p>
               </div>
             ) : (
               <div style={{
@@ -231,23 +287,18 @@ export default function ResumeManagementPage() {
                 textAlign: "center",
                 background: "rgba(255, 255, 255, 0.02)",
               }}>
-                <div style={{ fontSize: "3rem", marginBottom: "1rem", opacity: 0.5 }}>
-                  ✅
-                </div>
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" style={{ margin: "0 auto 1rem" }}>
+                  <circle cx="12" cy="12" r="10" stroke="rgba(255, 255, 255, 0.3)" strokeWidth="2" fill="rgba(255, 255, 255, 0.05)"/>
+                  <path d="M8 12L11 15L16 9" stroke="rgba(255, 255, 255, 0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
                 <h4 style={{ fontSize: "1rem", color: "white", margin: "0 0 0.5rem 0" }}>
-                  Resume Uploaded
+                  {t('dashboardResume.uploadedTitle')}
                 </h4>
                 <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.5)", margin: 0 }}>
-                  Use the "Replace" button to upload a new version
+                  {t('dashboardResume.uploadedDesc')}
                 </p>
               </div>
             )}
-
-            <div style={{ marginTop: "2rem", padding: "1rem", background: "rgba(59, 130, 246, 0.1)", border: "1px solid rgba(59, 130, 246, 0.2)", borderRadius: "8px" }}>
-              <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.7)", margin: 0, lineHeight: "1.6" }}>
-                <strong style={{ color: "white" }}>{t('dashboardResume.tipLabel')}:</strong> {t('dashboardResume.tipText')}
-              </p>
-            </div>
           </motion.div>
         </div>
 
@@ -264,25 +315,40 @@ export default function ResumeManagementPage() {
           </h3>
 
           <div className={`${styles.grid} ${styles.cols3}`}>
-            <div style={{ textAlign: "center", padding: "1.5rem" }}>
+            <div style={{ textAlign: "center", padding: "1.5rem", background: "rgba(255, 255, 255, 0.02)", borderRadius: "8px" }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 255, 255, 0.6)" strokeWidth="2" style={{ margin: "0 auto 0.75rem" }}>
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
               <p style={{ fontSize: "2.5rem", color: "white", margin: "0 0 0.5rem 0", fontWeight: 600 }}>
-                127
+                {stats.total}
               </p>
               <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.6)", margin: 0 }}>
                 {t('dashboardResume.totalDownloads')}
               </p>
             </div>
-            <div style={{ textAlign: "center", padding: "1.5rem" }}>
+            <div style={{ textAlign: "center", padding: "1.5rem", background: "rgba(255, 255, 255, 0.02)", borderRadius: "8px" }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 255, 255, 0.6)" strokeWidth="2" style={{ margin: "0 auto 0.75rem" }}>
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1="16" y1="2" x2="16" y2="6" strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1="8" y1="2" x2="8" y2="6" strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1="3" y1="10" x2="21" y2="10" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
               <p style={{ fontSize: "2.5rem", color: "white", margin: "0 0 0.5rem 0", fontWeight: 600 }}>
-                23
+                {stats.thisMonth}
               </p>
               <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.6)", margin: 0 }}>
                 {t('dashboardResume.thisMonth')}
               </p>
             </div>
-            <div style={{ textAlign: "center", padding: "1.5rem" }}>
+            <div style={{ textAlign: "center", padding: "1.5rem", background: "rgba(255, 255, 255, 0.02)", borderRadius: "8px" }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 255, 255, 0.6)" strokeWidth="2" style={{ margin: "0 auto 0.75rem" }}>
+                <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="12 6 12 12 16 14" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
               <p style={{ fontSize: "2.5rem", color: "white", margin: "0 0 0.5rem 0", fontWeight: 600 }}>
-                5
+                {stats.today}
               </p>
               <p style={{ fontSize: "0.875rem", color: "rgba(255, 255, 255, 0.6)", margin: 0 }}>
                 {t('dashboardResume.today')}

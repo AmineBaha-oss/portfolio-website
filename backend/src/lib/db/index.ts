@@ -43,5 +43,6 @@ export {
   testimonials,
   contactMessages,
   resumes,
+  resumeDownloads,
   contactInfo,
 } from "./schema";

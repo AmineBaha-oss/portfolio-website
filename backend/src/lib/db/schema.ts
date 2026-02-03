@@ -113,6 +113,15 @@ export const resumes = pgTable("resumes", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Resume Downloads Tracking Table
+export const resumeDownloads = pgTable("resume_downloads", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  resumeId: uuid("resume_id").notNull().references(() => resumes.id, { onDelete: "cascade" }),
+  downloadedAt: timestamp("downloaded_at").defaultNow().notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+});
+
 // Contact Information Table
 export const contactInfo = pgTable("contact_info", {
   id: uuid("id").defaultRandom().primaryKey(),

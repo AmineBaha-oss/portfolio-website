@@ -6,7 +6,7 @@ import { authClient } from "@/lib/auth";
 import { motion } from "framer-motion";
 import styles from "./shared.module.scss";
 import { useTranslations } from "@/lib/i18n/hooks";
-import { getProjects, getSkills, getExperience, getTestimonials, getMessages, getHobbies, getEducation } from "@/lib/api/admin-client";
+import { getProjects, getSkills, getExperience, getTestimonials, getMessages, getHobbies, getEducation, getResume } from "@/lib/api/admin-client";
 
 function DashboardContent() {
   const { t } = useTranslations();
@@ -37,14 +37,16 @@ function DashboardContent() {
         
         // Fetch stats
         try {
-          const [projectsRes, skillsRes, experienceRes, testimonialsRes, messagesRes, hobbiesRes, educationRes] = await Promise.all([
+          const [projectsRes, skillsRes, experienceRes, testimonialsRes, messagesRes, hobbiesRes, educationRes, resumeEnRes, resumeFrRes] = await Promise.all([
             getProjects().catch(() => ({ projects: [] })),
             getSkills().catch(() => ({ skills: [] })),
             getExperience().catch(() => ({ experiences: [] })),
             getTestimonials().catch(() => ({ testimonials: [] })),
             getMessages().catch(() => ({ messages: [] })),
             getHobbies().catch(() => ({ hobbies: [] })),
-            getEducation().catch(() => ({ education: [] }))
+            getEducation().catch(() => ({ education: [] })),
+            getResume("en").catch(() => ({ resume: null })),
+            getResume("fr").catch(() => ({ resume: null }))
           ]);
 
           const counts = {
@@ -177,6 +179,25 @@ function DashboardContent() {
                 message: key,
                 params: { title },
                 timestamp: recentHobby.updatedAt || recentHobby.createdAt
+              });
+            }
+          }
+
+          // Add recent resume uploads
+          const resumes = [resumeEnRes.resume, resumeFrRes.resume].filter(Boolean);
+          if (resumes.length > 0) {
+            const sortedResumes = [...resumes].sort((a, b) => 
+              new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime()
+            );
+            const recentResume = sortedResumes[0];
+            if (recentResume) {
+              const languageName = recentResume.language === 'fr' ? 'French' : 'English';
+              const key = recentResume.updatedAt ? 'dashboard.resumeUpdated' : 'dashboard.resumeUploaded';
+              activities.push({
+                type: 'resume',
+                message: key,
+                params: { language: languageName },
+                timestamp: recentResume.updatedAt || recentResume.createdAt
               });
             }
           }

@@ -39,6 +39,9 @@ export default function Resume() {
   const handleDownload = () => {
     if (resumeData?.file_url) {
       window.open(resumeData.file_url, '_blank');
+      // Track the download
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/public/resume?lang=${locale}&track=true`)
+        .catch(err => console.error('Failed to track download:', err));
     } else {
       alert('Resume not available');
     }
@@ -55,9 +58,6 @@ export default function Resume() {
           className={styles.content}
         >
           <h2 className={styles.title}>{t('dashboardResume.title')}</h2>
-          <p className={styles.subtitle}>
-            {t('dashboardResume.download')}
-          </p>
           
           <div className={styles.resumePreview}>
             <div className={styles.previewBox}>

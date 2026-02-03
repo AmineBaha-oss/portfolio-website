@@ -1,8 +1,8 @@
 -- Seed default contact information
 -- This script adds default contact info to the database
 
--- Clear existing contact info (optional - remove if you want to keep existing data)
--- DELETE FROM contact_info;
+-- Ensure unique constraint exists
+CREATE UNIQUE INDEX IF NOT EXISTS contact_info_type_value_unique ON contact_info(type, value);
 
 -- Insert default email
 INSERT INTO contact_info (id, type, value, "order", created_at, updated_at)
@@ -14,7 +14,7 @@ VALUES (
     NOW(),
     NOW()
 )
-ON CONFLICT DO NOTHING;
+ON CONFLICT (type, value) DO NOTHING;
 
 -- Insert GitHub link
 INSERT INTO contact_info (id, type, value, "order", created_at, updated_at)
@@ -26,7 +26,7 @@ VALUES (
     NOW(),
     NOW()
 )
-ON CONFLICT DO NOTHING;
+ON CONFLICT (type, value) DO NOTHING;
 
 -- Insert LinkedIn link
 INSERT INTO contact_info (id, type, value, "order", created_at, updated_at)
@@ -38,4 +38,4 @@ VALUES (
     NOW(),
     NOW()
 )
-ON CONFLICT DO NOTHING;
+ON CONFLICT (type, value) DO NOTHING;
