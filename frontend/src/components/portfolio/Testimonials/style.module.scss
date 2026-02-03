@@ -193,12 +193,18 @@
       }
 
       .formGroup {
+        .labelRow {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.5rem;
+        }
+        
         label {
           display: block;
           font-size: 0.875rem;
           font-weight: 600;
           color: white;
-          margin-bottom: 0.5rem;
         }
 
         input,
@@ -222,12 +228,29 @@
             border-color: white;
             background: rgba(255, 255, 255, 0.08);
           }
+          
+          &.errorInput {
+            border-color: #ef4444;
+          }
         }
 
         textarea {
           resize: vertical;
           min-height: 120px;
           line-height: 1.6;
+        }
+        
+        .errorText {
+          display: block;
+          color: #ef4444;
+          font-size: 0.75rem;
+          margin-top: 0.25rem;
+        }
+        
+        .charCount {
+          font-size: 0.75rem;
+          color: rgba(255, 255, 255, 0.5);
+          font-weight: 500;
         }
       }
 

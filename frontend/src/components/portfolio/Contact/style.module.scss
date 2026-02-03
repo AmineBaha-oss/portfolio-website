@@ -167,6 +167,36 @@
                     grid-template-columns: 1fr 1fr;
                     gap: 1.5rem;
                 }
+                
+                .formGroup {
+                    display: flex;
+                    flex-direction: column;
+                    
+                    .labelRow {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 0.5rem;
+                        
+                        label {
+                            font-size: 0.875rem;
+                            font-weight: 600;
+                            color: white;
+                        }
+                    }
+                    
+                    .errorText {
+                        color: #ef4444;
+                        font-size: 0.75rem;
+                        margin-top: 0.25rem;
+                    }
+                    
+                    .charCount {
+                        font-size: 0.75rem;
+                        color: rgba(255, 255, 255, 0.5);
+                        font-weight: 500;
+                    }
+                }
 
                 input, textarea{
                     width: 100%;
@@ -187,6 +217,10 @@
                         outline: none;
                         border-color: white;
                         background-color: rgba(255, 255, 255, 0.08);
+                    }
+                    
+                    &.errorInput {
+                        border-color: #ef4444;
                     }
                 }
 

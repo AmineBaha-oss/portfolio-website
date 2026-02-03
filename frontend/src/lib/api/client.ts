@@ -103,7 +103,8 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
 }
 
 export async function getProjects(lang: string = 'en', featured?: boolean): Promise<{ projects: Project[] }> {
-  const params = new URLSearchParams({ lang });
+  const timestamp = new Date().getTime();
+  const params = new URLSearchParams({ lang, t: timestamp.toString() });
   if (featured) {
     params.append('featured', 'true');
   }
@@ -111,7 +112,8 @@ export async function getProjects(lang: string = 'en', featured?: boolean): Prom
 }
 
 export async function getProjectById(id: string, lang: string = 'en'): Promise<{ project: Project }> {
-  return fetchAPI<{ project: Project }>(`/api/public/projects/${id}?lang=${lang}`);
+  const timestamp = new Date().getTime();
+  return fetchAPI<{ project: Project }>(`/api/public/projects/${id}?lang=${lang}&t=${timestamp}`);
 }
 
 export async function getSkills(lang: string = 'en'): Promise<{ skills: Skill[] }> {

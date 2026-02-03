@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
 import { getSkills, createSkill, updateSkill, deleteSkill } from "@/lib/api/admin-client";
 import { useTranslations } from "@/lib/i18n/hooks";
+import { triggerDataRefresh } from "@/lib/hooks/useDataRefresh";
 
 export default function SkillsManagementPage() {
   const { t, locale } = useTranslations();
@@ -51,6 +52,7 @@ export default function SkillsManagementPage() {
     try {
       await deleteSkill(id);
       await fetchSkills();
+      triggerDataRefresh();
     } catch (err: any) {
       alert(err.message || t('dashboard.error'));
     }
@@ -211,6 +213,7 @@ function SkillModal({ skill, onClose, onSuccess }: { skill: any; onClose: () => 
         await createSkill(payload);
       }
       
+      triggerDataRefresh();
       onSuccess();
       onClose();
     } catch (err: any) {

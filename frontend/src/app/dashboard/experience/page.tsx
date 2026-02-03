@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
 import { getExperience, createExperience, updateExperience, deleteExperience } from "@/lib/api/admin-client";
 import { useTranslations } from "@/lib/i18n/hooks";
+import { triggerDataRefresh } from "@/lib/hooks/useDataRefresh";
 
 export default function ExperienceManagementPage() {
   const { t, locale } = useTranslations();
@@ -34,6 +35,7 @@ export default function ExperienceManagementPage() {
     try {
       await deleteExperience(id);
       await fetchExperiences();
+      triggerDataRefresh();
     } catch (err: any) {
       alert(err.message || t('dashboard.error'));
     }
@@ -146,6 +148,7 @@ function ExperienceModal({ exp, onClose, onSuccess }: { exp: any; onClose: () =>
     try {
       if (exp) await updateExperience(exp.id, payload);
       else await createExperience(payload);
+      triggerDataRefresh();
       onSuccess();
       onClose();
     } catch (err: any) {

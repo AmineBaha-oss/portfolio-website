@@ -94,9 +94,48 @@ export default function Contact() {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | null>(null);
+    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+    const validateContactForm = () => {
+        const errors: Record<string, string> = {};
+        
+        if (!formData.name.trim()) {
+            errors.name = 'Name is required';
+        } else if (formData.name.length > 50) {
+            errors.name = 'Name must be less than 50 characters';
+        }
+        
+        if (!formData.email.trim()) {
+            errors.email = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            errors.email = 'Please enter a valid email address';
+        }
+        
+        if (!formData.subject.trim()) {
+            errors.subject = 'Subject is required';
+        } else if (formData.subject.length > 100) {
+            errors.subject = 'Subject must be less than 100 characters';
+        }
+        
+        if (!formData.message.trim()) {
+            errors.message = 'Message is required';
+        } else if (formData.message.length > 300) {
+            errors.message = 'Message must be less than 300 characters';
+        }
+        
+        return errors;
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setValidationErrors({});
+        
+        const errors = validateContactForm();
+        if (Object.keys(errors).length > 0) {
+            setValidationErrors(errors);
+            return;
+        }
+        
         setIsSubmitting(true);
         setSubmitStatus(null);
         
@@ -173,35 +212,66 @@ export default function Contact() {
                             <div className={styles.errorMessage}>{t('contact.error')}</div>
                         )}
                         <div className={styles.formRow}>
+                            <div className={styles.formGroup}>
+                                <input
+                                    type="text"
+                                    placeholder={t('contact.namePlaceholder')}
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    required
+                                    maxLength={50}
+                                    className={validationErrors.name ? styles.errorInput : ''}
+                                />
+                                {validationErrors.name && (
+                                    <span className={styles.errorText}>{validationErrors.name}</span>
+                                )}
+                            </div>
+                            <div className={styles.formGroup}>
+                                <input
+                                    type="email"
+                                    placeholder={t('contact.emailPlaceholder')}
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    required
+                                    className={validationErrors.email ? styles.errorInput : ''}
+                                />
+                                {validationErrors.email && (
+                                    <span className={styles.errorText}>{validationErrors.email}</span>
+                                )}
+                            </div>
+                        </div>
+                        <div className={styles.formGroup}>
                             <input
                                 type="text"
-                                placeholder={t('contact.namePlaceholder')}
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                placeholder={t('contact.subjectPlaceholder')}
+                                value={formData.subject}
+                                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                                 required
+                                maxLength={100}
+                                className={validationErrors.subject ? styles.errorInput : ''}
                             />
-                            <input
-                                type="email"
-                                placeholder={t('contact.emailPlaceholder')}
-                                value={formData.email}
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                required
-                            />
+                            {validationErrors.subject && (
+                                <span className={styles.errorText}>{validationErrors.subject}</span>
+                            )}
                         </div>
-                        <input
-                            type="text"
-                            placeholder={t('contact.subjectPlaceholder')}
-                            value={formData.subject}
-                            onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                            required
-                        />
-                        <textarea
-                            placeholder={t('contact.messagePlaceholder')}
-                            value={formData.message}
-                            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                            required
-                            rows={5}
-                        />
+                        <div className={styles.formGroup}>
+                            <div className={styles.labelRow}>
+                                <label>{t('contact.message')}</label>
+                                <span className={styles.charCount}>{formData.message.length}/300</span>
+                            </div>
+                            <textarea
+                                placeholder={t('contact.messagePlaceholder')}
+                                value={formData.message}
+                                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                required
+                                rows={5}
+                                maxLength={300}
+                                className={validationErrors.message ? styles.errorInput : ''}
+                            />
+                            {validationErrors.message && (
+                                <span className={styles.errorText}>{validationErrors.message}</span>
+                            )}
+                        </div>
                         <button type="submit" disabled={isSubmitting}>
                             {isSubmitting ? t('contact.sending') : t('contact.send')}
                         </button>

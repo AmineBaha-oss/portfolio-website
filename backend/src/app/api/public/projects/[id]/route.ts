@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, projects } from "@/lib/db";
 import { validateLanguage, validateUUID } from "@/lib/utils/validation";
 import { eq, and } from "drizzle-orm";
+import { getPresignedUrl } from "@/lib/storage";
 
 export async function GET(
   request: NextRequest,
@@ -26,6 +27,12 @@ export async function GET(
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
+    // Generate presigned URL if imageKey exists
+    let imageUrl = project.imageUrl;
+    if (project.imageKey) {
+      imageUrl = await getPresignedUrl(project.imageKey);
+    }
+
     // Transform to localized format
     const localizedProject = {
       id: project.id,
@@ -42,8 +49,7 @@ export async function GET(
       projectUrl: project.projectUrl,
       githubUrl: project.githubUrl,
       technologies: project.technologies,
-      imageUrl: project.imageUrl,
-      imageKey: project.imageKey,
+      imageUrl,
       color: project.color,
       startDate: project.startDate,
       endDate: project.endDate,

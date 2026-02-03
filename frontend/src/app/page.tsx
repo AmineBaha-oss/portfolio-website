@@ -16,23 +16,15 @@ import Testimonials from '../components/portfolio/Testimonials';
 import Description from '../components/portfolio/Description';
 import SlidingImages from '../components/portfolio/SlidingImages';
 import Contact from '../components/portfolio/Contact';
+import { useDataRefresh } from '@/lib/hooks/useDataRefresh';
 
 export default function HomePage() {
-  // Initialize isLoading based on whether there's a hash in the URL
-  const [isLoading, setIsLoading] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return !window.location.hash;
-    }
-    return true;
-  });
+  // Enable automatic data refresh
+  useDataRefresh();
   
-  // Track if we should show preloader at all
-  const [showPreloader, setShowPreloader] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return !window.location.hash;
-    }
-    return true;
-  });
+  // Always initialize as true for consistent SSR/CSR
+  const [isLoading, setIsLoading] = useState(true);
+  const [showPreloader, setShowPreloader] = useState(true);
 
   useEffect(() => {
     // Check if navigating to a hash (like #projects)
@@ -50,6 +42,8 @@ export default function HomePage() {
         if (element) {
           element.scrollIntoView({ behavior: 'smooth' });
         }
+        // Clear the hash from URL after scrolling
+        window.history.replaceState(null, '', '/');
       }, 50);
       return;
     }
@@ -92,7 +86,9 @@ export default function HomePage() {
         </AnimatePresence>
       )}
       
-      {!isLoading && <Navigation />}
+      <div style={{ opacity: isLoading ? 0 : 1, pointerEvents: isLoading ? 'none' : 'auto', transition: 'opacity 0.3s ease' }}>
+        <Navigation />
+      </div>
       
       <div id="home">
         <Landing />

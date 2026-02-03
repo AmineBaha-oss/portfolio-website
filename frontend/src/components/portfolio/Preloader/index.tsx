@@ -9,7 +9,7 @@ const words = ["Hello", "Bonjour", "Ciao", "Olà", "やあ", "Hallå", "Guten ta
 
 export default function Preloader() {
   const [index, setIndex] = useState(0);
-  const [dimension, setDimension] = useState({ width: 0, height: 0 });
+  const [dimension, setDimension] = useState({ width: 1920, height: 1080 });
 
   useEffect(() => {
     setDimension({ width: window.innerWidth, height: window.innerHeight });
@@ -38,16 +38,14 @@ export default function Preloader() {
 
   return (
     <motion.div variants={slideUp} initial="initial" exit="exit" className={styles.introduction}>
-      {dimension.width > 0 && 
-        <>
-          <motion.p variants={opacity} initial="initial" animate="enter">
-            <span></span>{words[index]}
-          </motion.p>
-          <svg>
-            <motion.path variants={curve} initial="initial" exit="exit"></motion.path>
-          </svg>
-        </>
-      }
+      <>
+        <motion.p variants={opacity} initial="initial" animate="enter">
+          <span></span>{words[index]}
+        </motion.p>
+        <svg>
+          <motion.path variants={curve} initial="initial" exit="exit"></motion.path>
+        </svg>
+      </>
     </motion.div>
   );
 }

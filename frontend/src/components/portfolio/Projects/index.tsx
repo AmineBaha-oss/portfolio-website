@@ -158,8 +158,10 @@ export default function Home() {
                     <Image 
                     src={src}
                     width={300}
-                    height={0}
-                    alt="image"
+                    height={300}
+                    alt={project.title || "project image"}
+                    style={{ objectFit: 'cover' }}
+                    unoptimized
                     />
                 </div>
                 })

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
 import { getEducation, createEducation, updateEducation, deleteEducation } from "@/lib/api/admin-client";
 import { useTranslations } from "@/lib/i18n/hooks";
+import { triggerDataRefresh } from "@/lib/hooks/useDataRefresh";
 
 export default function EducationManagementPage() {
   const { t, locale } = useTranslations();
@@ -34,6 +35,7 @@ export default function EducationManagementPage() {
     try {
       await deleteEducation(id);
       await fetchEducation();
+      triggerDataRefresh();
     } catch (err: any) {
       alert(err.message || t('dashboard.error'));
     }
@@ -145,6 +147,7 @@ function EducationModal({ edu, onClose, onSuccess }: { edu: any; onClose: () => 
     try {
       if (edu) await updateEducation(edu.id, payload);
       else await createEducation(payload);
+      triggerDataRefresh();
       onSuccess();
       onClose();
     } catch (err: any) {

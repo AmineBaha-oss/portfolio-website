@@ -23,6 +23,7 @@ export default function Testimonials() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const fetchTestimonials = async () => {
@@ -52,8 +53,50 @@ export default function Testimonials() {
     fetchTestimonials();
   }, [locale]);
 
+  const validateTestimonialForm = () => {
+    const errors: Record<string, string> = {};
+    
+    if (!formData.name.trim()) {
+      errors.name = 'Name is required';
+    } else if (formData.name.length > 50) {
+      errors.name = 'Name must be less than 50 characters';
+    }
+    
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    
+    if (!formData.role.trim()) {
+      errors.role = 'Role is required';
+    } else if (formData.role.length > 60) {
+      errors.role = 'Role must be less than 60 characters';
+    }
+    
+    if (formData.company.length > 60) {
+      errors.company = 'Company must be less than 60 characters';
+    }
+    
+    if (!formData.testimonial.trim()) {
+      errors.testimonial = 'Testimonial is required';
+    } else if (formData.testimonial.length > 150) {
+      errors.testimonial = 'Testimonial must be less than 150 characters';
+    }
+    
+    return errors;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationErrors({});
+    
+    const errors = validateTestimonialForm();
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+    
     setIsSubmitting(true);
     setSubmitSuccess(false);
 
@@ -182,7 +225,12 @@ export default function Testimonials() {
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         required
+                        maxLength={50}
+                        className={validationErrors.name ? styles.errorInput : ''}
                       />
+                      {validationErrors.name && (
+                        <span className={styles.errorText}>{validationErrors.name}</span>
+                      )}
                     </div>
                     <div className={styles.formGroup}>
                       <label>{t('testimonials.yourEmail')} *</label>
@@ -192,7 +240,11 @@ export default function Testimonials() {
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         required
+                        className={validationErrors.email ? styles.errorInput : ''}
                       />
+                      {validationErrors.email && (
+                        <span className={styles.errorText}>{validationErrors.email}</span>
+                      )}
                     </div>
                   </div>
 
@@ -205,7 +257,12 @@ export default function Testimonials() {
                         value={formData.role}
                         onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                         required
+                        maxLength={60}
+                        className={validationErrors.role ? styles.errorInput : ''}
                       />
+                      {validationErrors.role && (
+                        <span className={styles.errorText}>{validationErrors.role}</span>
+                      )}
                     </div>
                     <div className={styles.formGroup}>
                       <label>{t('testimonials.schoolCompany')}</label>
@@ -214,19 +271,32 @@ export default function Testimonials() {
                         placeholder={t('testimonials.companyPlaceholder')}
                         value={formData.company}
                         onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                        maxLength={60}
+                        className={validationErrors.company ? styles.errorInput : ''}
                       />
+                      {validationErrors.company && (
+                        <span className={styles.errorText}>{validationErrors.company}</span>
+                      )}
                     </div>
                   </div>
 
                   <div className={styles.formGroup}>
-                    <label>{t('testimonials.yourTestimonial')} *</label>
+                    <div className={styles.labelRow}>
+                      <label>{t('testimonials.yourTestimonial')} *</label>
+                      <span className={styles.charCount}>{formData.testimonial.length}/150</span>
+                    </div>
                     <textarea
                       placeholder={t('testimonials.testimonialPlaceholder')}
                       value={formData.testimonial}
                       onChange={(e) => setFormData({ ...formData, testimonial: e.target.value })}
                       required
                       rows={5}
+                      maxLength={150}
+                      className={validationErrors.testimonial ? styles.errorInput : ''}
                     />
+                    {validationErrors.testimonial && (
+                      <span className={styles.errorText}>{validationErrors.testimonial}</span>
+                    )}
                   </div>
 
                   <div className={styles.formActions}>

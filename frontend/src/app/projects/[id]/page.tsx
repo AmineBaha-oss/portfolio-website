@@ -19,6 +19,17 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [referrer, setReferrer] = useState<string>('/projects');
+
+  useEffect(() => {
+    // Check if user came from the homepage with hash
+    if (typeof window !== 'undefined' && document.referrer) {
+      const ref = new URL(document.referrer);
+      if (ref.pathname === '/' && ref.hash === '#projects') {
+        setReferrer('/#projects');
+      }
+    }
+  }, []);
 
   // Force scroll to top on pathname change
   useEffect(() => {
@@ -51,6 +62,8 @@ export default function ProjectDetailPage() {
         setError(null);
         const id = params.id as string;
         const response = await getProjectById(id, locale);
+        console.log('Fetched project detail:', response.project);
+        console.log('Project imageUrl:', response.project.imageUrl);
         setProject(response.project);
       } catch (err: any) {
         console.error('Error fetching project:', err);
@@ -79,7 +92,7 @@ export default function ProjectDetailPage() {
     return (
       <main className={styles.projectDetail}>
         <div className={styles.container}>
-          <Link href="/projects" scroll={false} className={styles.backLink}>← {t('projects.allProjects')}</Link>
+          <Link href={referrer} scroll={false} className={styles.backLink}>← {t('projects.allProjects')}</Link>
           <p style={{ color: '#666', textAlign: 'center' }}>{error || t('dashboard.error')}</p>
         </div>
       </main>
@@ -94,7 +107,7 @@ export default function ProjectDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <Link href="/projects" scroll={false} className={styles.backLink}>← {t('projects.allProjects')}</Link>
+          <Link href={referrer} scroll={false} className={styles.backLink}>← {t('projects.allProjects')}</Link>
 
           <div className={styles.hero} style={{ backgroundColor: project.color || '#2a2b2c' }}>
             <motion.div
@@ -109,6 +122,7 @@ export default function ProjectDetailPage() {
                 fill
                 style={{ objectFit: 'cover' }}
                 priority
+                unoptimized
               />
             </motion.div>
           </div>

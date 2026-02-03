@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
 import { getTestimonials, approveTestimonial, rejectTestimonial, deleteTestimonial, toggleTestimonialActive } from "@/lib/api/admin-client";
 import { useTranslations } from "@/lib/i18n/hooks";
+import { triggerDataRefresh } from "@/lib/hooks/useDataRefresh";
 
 export default function TestimonialsManagementPage() {
   const { t } = useTranslations();
@@ -32,6 +33,7 @@ export default function TestimonialsManagementPage() {
     try {
       await approveTestimonial(id);
       await fetchTestimonials();
+      triggerDataRefresh();
     } catch (err: any) {
       alert(err.message || t('dashboard.error'));
     }
@@ -42,6 +44,7 @@ export default function TestimonialsManagementPage() {
     try {
       await rejectTestimonial(id);
       await fetchTestimonials();
+      triggerDataRefresh();
     } catch (err: any) {
       alert(err.message || t('dashboard.error'));
     }
@@ -52,6 +55,7 @@ export default function TestimonialsManagementPage() {
     try {
       await deleteTestimonial(id);
       await fetchTestimonials();
+      triggerDataRefresh();
     } catch (err: any) {
       alert(err.message || t('dashboard.error'));
     }
@@ -61,6 +65,7 @@ export default function TestimonialsManagementPage() {
     try {
       await toggleTestimonialActive(id);
       await fetchTestimonials();
+      triggerDataRefresh();
     } catch (err: any) {
       alert(err.message || t('dashboard.error'));
     }

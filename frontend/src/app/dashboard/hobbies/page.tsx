@@ -7,6 +7,7 @@ import { getHobbies, createHobby, updateHobby, deleteHobby } from "@/lib/api/adm
 import { useTranslations } from "@/lib/i18n/hooks";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 import { Toast } from "@/components/ui/Toast";
+import { triggerDataRefresh } from "@/lib/hooks/useDataRefresh";
 
 export default function HobbiesManagementPage() {
   const { t, locale } = useTranslations();
@@ -36,6 +37,7 @@ export default function HobbiesManagementPage() {
     try {
       await deleteHobby(id);
       await fetchHobbies();
+      triggerDataRefresh();
     } catch (err: any) {
       alert(err.message || t('dashboard.error'));
     }
@@ -125,6 +127,7 @@ function HobbyModal({ hobby, onClose, onSuccess }: { hobby: any; onClose: () => 
     try {
       if (hobby) await updateHobby(hobby.id, payload);
       else await createHobby(payload);
+      triggerDataRefresh();
       onSuccess();
       onClose();
     } catch (err: any) {

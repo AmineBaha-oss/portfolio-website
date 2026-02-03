@@ -7,6 +7,7 @@ import { getProjects, createProject, updateProject, deleteProject } from "@/lib/
 import { useTranslations } from "@/lib/i18n/hooks";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 import { Toast } from "@/components/ui/Toast";
+import { triggerDataRefresh } from "@/lib/hooks/useDataRefresh";
 
 export default function ProjectsManagementPage() {
   const { t, locale } = useTranslations();
@@ -44,6 +45,7 @@ export default function ProjectsManagementPage() {
     try {
       await deleteProject(id);
       await fetchProjects();
+      triggerDataRefresh(); // Notify landing page
     } catch (err: any) {
       alert(err.message || t('dashboard.error'));
     }
@@ -263,6 +265,7 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
         await createProject(data);
       }
       
+      triggerDataRefresh(); // Notify landing page
       onSuccess();
       onClose();
     } catch (err: any) {
