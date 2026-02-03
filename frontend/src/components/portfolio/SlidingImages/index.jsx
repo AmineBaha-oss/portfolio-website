@@ -6,38 +6,38 @@ import Image from 'next/image';
 const slider1 = [
     {
         color: "#e3e5e7",
-        src: "background.jpg"
+        src: "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg"
     },
     {
         color: "#d6d7dc",
-        src: "background.jpg"
+        src: "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg"
     },
     {
         color: "#e3e3e3",
-        src: "background.jpg"
+        src: "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg"
     },
     {
         color: "#21242b",
-        src: "background.jpg"
+        src: "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg"
     }
 ]
 
 const slider2 = [
     {
         color: "#d4e3ec",
-        src: "background.jpg"
+        src: "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg"
     },
     {
         color: "#e5e0e1",
-        src: "background.jpg"
+        src: "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg"
     },
     {
         color: "#d7d4cf",
-        src: "background.jpg"
+        src: "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg"
     },
     {
         color: "#e1dad6",
-        src: "background.jpg"
+        src: "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg"
     }
 ]
 
@@ -63,7 +63,7 @@ export default function SlidingImages() {
                                     <Image 
                                     fill={true}
                                     alt={"image"}
-                                    src={`/images/${project.src}`}/>
+                                    src={project.src}/>
                                 </div>
                             </div>
                         })
@@ -77,7 +77,7 @@ export default function SlidingImages() {
                                     <Image 
                                     fill={true}
                                     alt={"image"}
-                                    src={`/images/${project.src}`}/>
+                                    src={project.src}/>
                                 </div>
                             </div>
                         })

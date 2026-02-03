@@ -8,6 +8,7 @@ import {
   validateURL,
   validateDate,
 } from "@/lib/utils/validation";
+import { getPresignedUrl } from "@/lib/storage";
 
 export async function GET(request: NextRequest) {
   const authResult = requireAdmin(request);
@@ -20,7 +21,19 @@ export async function GET(request: NextRequest) {
       .select()
       .from(projects)
       .orderBy(projects.createdAt);
-    return NextResponse.json({ projects: allProjects });
+    
+    // Generate pre-signed URLs for images
+    const projectsWithUrls = await Promise.all(
+      allProjects.map(async (project) => {
+        if (project.imageKey) {
+          const imageUrl = await getPresignedUrl(project.imageKey);
+          return { ...project, imageUrl };
+        }
+        return project;
+      })
+    );
+    
+    return NextResponse.json({ projects: projectsWithUrls });
   } catch (error) {
     console.error("Error fetching projects:", error);
     return NextResponse.json(
@@ -47,6 +60,7 @@ export async function POST(request: NextRequest) {
       githubUrl,
       technologies,
       imageUrl,
+      imageKey,
       color,
       startDate,
       endDate,
@@ -133,6 +147,7 @@ export async function POST(request: NextRequest) {
         githubUrl: githubUrl || null,
         technologies: Array.isArray(technologies) ? technologies : [],
         imageUrl: imageUrl || null,
+        imageKey: imageKey || null,
         color: color || null,
         startDate: startDate || null,
         endDate: endDate || null,

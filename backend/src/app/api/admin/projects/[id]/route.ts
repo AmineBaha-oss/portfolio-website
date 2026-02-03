@@ -118,6 +118,10 @@ export async function PUT(
       updateData.imageUrl = body.imageUrl || null;
     }
 
+    if (body.imageKey !== undefined) {
+      updateData.imageKey = body.imageKey || null;
+    }
+
     if (body.color !== undefined) {
       updateData.color = body.color || null;
     }

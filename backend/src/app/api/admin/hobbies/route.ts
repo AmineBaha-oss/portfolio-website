@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth/jwt-verification";
 import { eq } from "drizzle-orm";
 import { asc } from "drizzle-orm";
 import { validateNotEmpty, sanitizeText, validateURL } from "@/lib/utils/validation";
+import { getPresignedUrl } from "@/lib/storage";
 
 export async function GET(request: NextRequest) {
   const authResult = requireAdmin(request);
@@ -16,7 +17,19 @@ export async function GET(request: NextRequest) {
       .select()
       .from(hobbies)
       .orderBy(asc(hobbies.order));
-    return NextResponse.json({ hobbies: allHobbies });
+    
+    // Generate pre-signed URLs for images
+    const hobbiesWithUrls = await Promise.all(
+      allHobbies.map(async (hobby) => {
+        if (hobby.imageKey) {
+          const imageUrl = await getPresignedUrl(hobby.imageKey);
+          return { ...hobby, imageUrl };
+        }
+        return hobby;
+      })
+    );
+    
+    return NextResponse.json({ hobbies: hobbiesWithUrls });
   } catch (error) {
     console.error("Error fetching hobbies:", error);
     return NextResponse.json(
@@ -34,7 +47,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { title, description, imageUrl, color, order } = body;
+    const { title, description, imageUrl, imageKey, color, order } = body;
 
     if (!title || typeof title !== "object" || !("en" in title) || !validateNotEmpty(String((title as { en?: string }).en ?? ""))) {
       return NextResponse.json({ error: "Title (English) is required" }, { status: 400 });
@@ -61,6 +74,7 @@ export async function POST(request: NextRequest) {
         title: toBilingual(title as { en?: string; fr?: string }),
         description: toBilingualOpt(description),
         imageUrl: imageUrl || null,
+        imageKey: imageKey || null,
         color: color || null,
         order: orderValue,
       })

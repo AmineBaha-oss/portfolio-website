@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
 import { getHobbies, createHobby, updateHobby, deleteHobby } from "@/lib/api/admin-client";
 import { useTranslations } from "@/lib/i18n/hooks";
+import { ImageUpload } from "@/components/ui/ImageUpload";
+import { Toast } from "@/components/ui/Toast";
 
 export default function HobbiesManagementPage() {
   const { t, locale } = useTranslations();
@@ -92,8 +94,11 @@ function HobbyModal({ hobby, onClose, onSuccess }: { hobby: any; onClose: () => 
     color: '',
     order: 1,
   });
+  const [imageKey, setImageKey] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const [orderInput, setOrderInput] = useState('1');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (hobby) {
@@ -103,9 +108,11 @@ function HobbyModal({ hobby, onClose, onSuccess }: { hobby: any; onClose: () => 
         color: hobby.color || '',
         order: hobby.order ?? 1,
       });
+      setImageKey(hobby.imageKey || null);
       setOrderInput(String(hobby.order ?? 1));
     } else {
       setFormData({ title: { en: '', fr: '' }, description: { en: '', fr: '' }, color: '', order: 1 });
+      setImageKey(null);
       setOrderInput('1');
     }
   }, [hobby]);
@@ -114,7 +121,7 @@ function HobbyModal({ hobby, onClose, onSuccess }: { hobby: any; onClose: () => 
     e.preventDefault();
     setIsSubmitting(true);
     const order = parseInt(orderInput, 10) || 1;
-    const payload = { title: formData.title, description: formData.description, color: formData.color || undefined, order };
+    const payload = { title: formData.title, description: formData.description, color: formData.color || undefined, order, imageKey };
     try {
       if (hobby) await updateHobby(hobby.id, payload);
       else await createHobby(payload);
@@ -129,9 +136,32 @@ function HobbyModal({ hobby, onClose, onSuccess }: { hobby: any; onClose: () => 
 
   return (
     <motion.div className={styles.modalOverlay} initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={onClose}>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <motion.div className={styles.modalCard} initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={(e) => e.stopPropagation()}>
         <h2 style={{ fontSize: "1.5rem", color: "white", marginBottom: "1.5rem" }}>{hobby ? t('dashboardHobbies.editTitle') : t('dashboardHobbies.addNew')}</h2>
         <form onSubmit={handleSubmit}>
+          <div className={styles.formGroup}>
+            <label>Hobby Image</label>
+            <ImageUpload
+              fileInputRef={fileInputRef}
+              onUploadSuccess={(key) => {
+                setImageKey(key);
+                setToast({ message: "Image uploaded successfully!", type: "success" });
+              }}
+              onUploadError={(error) => setToast({ message: error, type: "error" })}
+              onRemove={() => {
+                setImageKey(null);
+                setToast({ message: "Image removed!", type: "success" });
+              }}
+              currentImageUrl={imageKey ? `https://portfolio-app.nyc3.digitaloceanspaces.com/${imageKey}` : undefined}
+            />
+          </div>
           <div className={styles.formGroup}><label>{t('dashboardHobbies.title')} (English)</label><input type="text" placeholder="e.g. Photography" value={formData.title.en} onChange={(e) => setFormData({ ...formData, title: { ...formData.title, en: e.target.value } })} required /></div>
           <div className={styles.formGroup}><label>{t('dashboardHobbies.title')} (French)</label><input type="text" placeholder="e.g. Photographie" value={formData.title.fr} onChange={(e) => setFormData({ ...formData, title: { ...formData.title, fr: e.target.value } })} /></div>
           <div className={styles.formGroup}><label>{t('dashboardHobbies.description')} (English)</label><textarea placeholder="Brief description of your hobby..." rows={2} value={formData.description.en} onChange={(e) => setFormData({ ...formData, description: { ...formData.description, en: e.target.value } })} /></div>

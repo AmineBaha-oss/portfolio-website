@@ -44,7 +44,7 @@ export default function Home() {
         const mappedHobbies = response.hobbies.map(hobby => ({
           title: hobby.title,
           description: hobby.description || '',
-          src: hobby.imageUrl || "background.jpg",
+          src: hobby.imageUrl || "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg",
           color: hobby.color || "#2a2b2c"
         }));
         setHobbies(mappedHobbies);
@@ -135,7 +135,7 @@ export default function Home() {
                 const { src, color } = project
                 return <div className={styles.modal} style={{backgroundColor: color}} key={`modal_${index}`}>
                     <Image 
-                    src={`/images/${src}`}
+                    src={src}
                     width={300}
                     height={0}
                     alt="image"

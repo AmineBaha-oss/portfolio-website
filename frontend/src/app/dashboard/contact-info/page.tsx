@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
 import { getContactInfo, createContactInfo, updateContactInfo, deleteContactInfo } from "@/lib/api/admin-client";
 import { useTranslations } from "@/lib/i18n/hooks";
+import { ImageUpload } from "@/components/ui/ImageUpload";
+import { Toast } from "@/components/ui/Toast";
 
 interface ContactInfo {
   id: string;
@@ -27,6 +29,10 @@ export default function ContactInfoPage() {
     value: "",
     order: 0,
   });
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [profilePicKey, setProfilePicKey] = useState<string>("");
+  const [pendingProfilePicKey, setPendingProfilePicKey] = useState<string>("");
+  const profilePicRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchContactInfo();
@@ -38,6 +44,12 @@ export default function ContactInfoPage() {
       setError(null);
       const data = await getContactInfo();
       setContactInfo(data.contactInfo || []);
+      
+      // Find profile picture
+      const profilePic = data.contactInfo?.find((item: ContactInfo) => item.type === 'profile_picture');
+      if (profilePic) {
+        setProfilePicKey(profilePic.value);
+      }
     } catch (err: any) {
       console.error('Error fetching contact info:', err);
       setError(err.message || 'Failed to load contact info');
@@ -133,6 +145,156 @@ export default function ContactInfoPage() {
           </div>
         </motion.div>
 
+        {/* Profile Picture Section */}
+        <motion.div
+          className={styles.card}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.05 }}
+          style={{ marginBottom: "2rem" }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+            <h3 style={{ fontSize: "1.25rem", fontWeight: 600, margin: 0, color: "white" }}>
+              {t('dashboardContactInfo.profilePicture')}
+            </h3>
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              {pendingProfilePicKey && (
+                <>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const existing = contactInfo.find(item => item.type === 'profile_picture');
+                        if (existing) {
+                          await updateContactInfo(existing.id, { type: 'profile_picture', value: pendingProfilePicKey, order: existing.order });
+                        } else {
+                          await createContactInfo({ type: 'profile_picture', value: pendingProfilePicKey, order: 999 });
+                        }
+                        setProfilePicKey(pendingProfilePicKey);
+                        setPendingProfilePicKey("");
+                        await fetchContactInfo();
+                        setToast({ message: 'Profile picture saved!', type: 'success' });
+                      } catch (error) {
+                        console.error('Error saving profile picture:', error);
+                        setToast({ message: 'Failed to save profile picture', type: 'error' });
+                      }
+                    }}
+                    className={`${styles.button} ${styles.primary}`}
+                    style={{ padding: "0.5rem 1rem" }}
+                  >
+                    {t('dashboard.save')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setPendingProfilePicKey("");
+                      setToast({ message: 'Changes cancelled', type: 'info' });
+                    }}
+                    className={`${styles.button} ${styles.secondary}`}
+                    style={{ padding: "0.5rem 1rem" }}
+                  >
+                    {t('dashboard.cancel')}
+                  </button>
+                </>
+              )}
+              {profilePicKey && (
+                <button
+                  onClick={async () => {
+                    if (!confirm(t('dashboardContactInfo.remove') + " profile picture?")) return;
+                    try {
+                      const existing = contactInfo.find(item => item.type === 'profile_picture');
+                      if (existing) {
+                        await deleteContactInfo(existing.id);
+                        setProfilePicKey("");
+                        setPendingProfilePicKey("");
+                        await fetchContactInfo();
+                        setToast({ message: 'Profile picture removed!', type: 'success' });
+                      }
+                    } catch (error) {
+                      console.error('Error removing profile picture:', error);
+                      setToast({ message: 'Failed to remove profile picture', type: 'error' });
+                    }
+                  }}
+                  className={`${styles.button} ${styles.danger}`}
+                  style={{ padding: "0.5rem 1rem" }}
+                >
+                  {t('dashboardContactInfo.remove')}
+                </button>
+              )}
+            </div>
+          </div>
+          
+          {/* Preview how it will look */}
+          {(pendingProfilePicKey || profilePicKey) && (
+            <div style={{ 
+              marginBottom: "1rem", 
+              padding: "1rem", 
+              background: "rgba(255, 255, 255, 0.02)", 
+              borderRadius: "8px",
+              border: "1px solid rgba(255, 255, 255, 0.1)"
+            }}>
+              <p style={{ fontSize: "0.75rem", opacity: 0.5, marginBottom: "0.75rem", color: "white" }}>{t('dashboardContactInfo.preview')}</p>
+              <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                <div 
+                  style={{ 
+                    width: "60px", 
+                    height: "60px", 
+                    borderRadius: "50%", 
+                    overflow: "hidden",
+                    border: "2px solid rgba(255, 255, 255, 0.2)",
+                    flexShrink: 0
+                  }}
+                >
+                  <img 
+                    src={`https://portfolio-app.nyc3.digitaloceanspaces.com/${pendingProfilePicKey || profilePicKey}`}
+                    alt="Profile" 
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                </div>
+                <div style={{ overflow: "hidden" }}>
+                  <h3 style={{ fontSize: "1.25rem", margin: 0, fontWeight: 400, color: "white", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{t('contact.title')}</h3>
+                  <p style={{ fontSize: "1rem", margin: "0.25rem 0 0 0", opacity: 0.7, color: "white", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{t('contact.subtitle')}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <button
+            onClick={() => profilePicRef.current?.click()}
+            className={`${styles.button} ${styles.primary}`}
+            style={{ padding: "0.75rem 1.5rem", marginBottom: "1rem", width: "100%" }}
+          >
+            {(pendingProfilePicKey || profilePicKey) ? t('dashboardContactInfo.changePicture') : t('dashboardContactInfo.uploadPicture')}
+          </button>
+          
+          <div style={{ display: 'none' }}>
+            <ImageUpload
+              onUploadSuccess={(key) => {
+                setPendingProfilePicKey(key);
+                setToast({ message: 'Image uploaded! Click Save to apply.', type: 'success' });
+              }}
+              onUploadError={(error) => {
+                setToast({ message: error, type: 'error' });
+              }}
+              onRemove={async () => {
+                try {
+                  const existing = contactInfo.find(item => item.type === 'profile_picture');
+                  if (existing) {
+                    await deleteContactInfo(existing.id);
+                    setProfilePicKey("");
+                    setPendingProfilePicKey("");
+                    await fetchContactInfo();
+                    setToast({ message: 'Profile picture removed!', type: 'success' });
+                  }
+                } catch (error) {
+                  console.error('Error removing profile picture:', error);
+                  setToast({ message: 'Failed to remove profile picture', type: 'error' });
+                }
+              }}
+              currentImageUrl={pendingProfilePicKey || (profilePicKey ? `https://portfolio-app.nyc3.digitaloceanspaces.com/${profilePicKey}` : undefined)}
+              fileInputRef={profilePicRef}
+            />
+          </div>
+        </motion.div>
+
         {error && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -164,7 +326,7 @@ export default function ContactInfoPage() {
                 </tr>
               </thead>
               <tbody>
-                {contactInfo.map((item, index) => (
+                {contactInfo.filter(item => item.type !== 'profile_picture').map((item, index) => (
                   <motion.tr
                     key={item.id}
                     initial={{ opacity: 0, x: -20 }}
@@ -273,6 +435,14 @@ export default function ContactInfoPage() {
               </form>
             </motion.div>
           </motion.div>
+        )}
+        
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
         )}
       </div>
     </div>

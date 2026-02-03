@@ -42,6 +42,11 @@ const nextConfig = {
         port: '8080',
         pathname: '/api/files/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'portfolio-app.nyc3.digitaloceanspaces.com',
+        pathname: '/**',
+      },
     ],
   },
 }

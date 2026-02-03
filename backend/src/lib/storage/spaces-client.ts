@@ -50,14 +50,14 @@ export async function uploadFile(params: {
   contentType: string;
   isPublic?: boolean;
 }): Promise<string> {
-  const { key, body, contentType } = params;
+  const { key, body, contentType, isPublic = true } = params;
 
   const command = new PutObjectCommand({
     Bucket: SPACES_BUCKET(),
     Key: key,
     Body: body,
     ContentType: contentType,
-    // Note: ACL removed - configure bucket permissions in DigitalOcean Spaces settings
+    ACL: isPublic ? "public-read" : "private",
   });
 
   await spacesClient().send(command);

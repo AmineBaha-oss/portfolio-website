@@ -44,9 +44,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!["email", "phone", "address", "social_links"].includes(type)) {
+    if (!["email", "phone", "address", "social_links", "github", "linkedin", "profile_picture"].includes(type)) {
       return NextResponse.json(
-        { error: "Type must be one of: email, phone, address, social_links" },
+        { error: "Type must be one of: email, phone, address, social_links, github, linkedin, profile_picture" },
         { status: 400 }
       );
     }

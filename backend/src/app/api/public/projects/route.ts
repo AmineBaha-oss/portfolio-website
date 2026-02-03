@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, projects } from "@/lib/db";
 import { eq, and } from "drizzle-orm";
 import { validateLanguage, extractLanguageFromJsonb } from "@/lib/utils/validation";
+import { getPresignedUrl } from "@/lib/storage";
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,26 +23,35 @@ export async function GET(request: NextRequest) {
       .orderBy(projects.createdAt);
 
     // Extract requested language from JSONB fields
-    const projectsWithLanguage = allProjects.map((project) => ({
-      id: project.id,
-      title: extractLanguageFromJsonb(project.title, lang),
-      description: extractLanguageFromJsonb(project.description, lang),
-      fullDescription: project.fullDescription
-        ? extractLanguageFromJsonb(project.fullDescription, lang)
-        : null,
-      client: project.client,
-      projectUrl: project.projectUrl,
-      githubUrl: project.githubUrl,
-      technologies: project.technologies || [],
-      imageUrl: project.imageUrl,
-      color: project.color,
-      startDate: project.startDate,
-      endDate: project.endDate,
-      status: project.status,
-      featured: project.featured,
-      createdAt: project.createdAt,
-      updatedAt: project.updatedAt,
-    }));
+    const projectsWithLanguage = await Promise.all(
+      allProjects.map(async (project) => {
+        let imageUrl = project.imageUrl;
+        if (project.imageKey) {
+          imageUrl = await getPresignedUrl(project.imageKey);
+        }
+        
+        return {
+          id: project.id,
+          title: extractLanguageFromJsonb(project.title, lang),
+          description: extractLanguageFromJsonb(project.description, lang),
+          fullDescription: project.fullDescription
+            ? extractLanguageFromJsonb(project.fullDescription, lang)
+            : null,
+          client: project.client,
+          projectUrl: project.projectUrl,
+          githubUrl: project.githubUrl,
+          technologies: project.technologies || [],
+          imageUrl,
+          color: project.color,
+          startDate: project.startDate,
+          endDate: project.endDate,
+          status: project.status,
+          featured: project.featured,
+          createdAt: project.createdAt,
+          updatedAt: project.updatedAt,
+        };
+      })
+    );
 
     return NextResponse.json({ projects: projectsWithLanguage });
   } catch (error) {

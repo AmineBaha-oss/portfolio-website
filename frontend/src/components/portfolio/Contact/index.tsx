@@ -30,6 +30,7 @@ export default function Contact() {
     const [contactInfo, setContactInfo] = useState<ContactInfo[]>([]);
     const [email, setEmail] = useState('');
     const [socialLinks, setSocialLinks] = useState<{ github?: string; linkedin?: string }>({});
+    const [profilePicture, setProfilePicture] = useState('https://portfolio-app.nyc3.digitaloceanspaces.com/images/pfp.png');
 
     // Fetch contact info
     useEffect(() => {
@@ -53,8 +54,14 @@ export default function Contact() {
                         if (info.type === 'email') {
                             console.log('Setting email:', info.value);
                             setEmail(info.value);
+                        } else if (info.type === 'profile_picture') {
+                            setProfilePicture(`https://portfolio-app.nyc3.digitaloceanspaces.com/${info.value}`);
+                        } else if (info.type === 'github') {
+                            links.github = info.value;
+                        } else if (info.type === 'linkedin') {
+                            links.linkedin = info.value;
                         } else if (info.type === 'social_links') {
-                            // Parse social links by URL
+                            // Parse social links by URL (legacy support)
                             const url = info.value.toLowerCase();
                             if (url.includes('github.com')) {
                                 links.github = info.value;
@@ -117,13 +124,13 @@ export default function Contact() {
                         <div className={styles.imageContainer}>
                             <Image 
                             fill={true}
-                            alt={"image"}
-                            src={`/images/background.jpg`}
+                            alt={"profile picture"}
+                            src={profilePicture}
                             />
                         </div>
-                        <h2>{t('contact.title').split(' ')[0]} {t('contact.title').split(' ')[1]}</h2>
+                        <h2>{t('contact.title')}</h2>
                     </span>
-                    <h2>{t('contact.subtitle').split(' ')[0]}</h2>
+                    <h2>{t('contact.subtitle')}</h2>
                     <motion.div style={{x}} className={styles.buttonContainer}>
                         <Rounded backgroundColor={"#2a2b2c"} className={styles.button}>
                             <p>{t('contact.title')}</p>

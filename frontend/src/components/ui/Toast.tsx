@@ -20,19 +20,19 @@ export function Toast({ message, type = "info", onClose, duration = 3000 }: Toas
 
   const colors = {
     success: {
-      bg: "rgba(255, 255, 255, 0.05)",
-      border: "rgba(255, 255, 255, 0.2)",
-      icon: "rgba(255, 255, 255, 0.6)",
+      bg: "rgba(0, 0, 0, 0.95)",
+      border: "rgba(255, 255, 255, 0.3)",
+      icon: "rgba(255, 255, 255, 0.8)",
     },
     error: {
-      bg: "rgba(255, 255, 255, 0.05)",
-      border: "rgba(255, 255, 255, 0.2)",
-      icon: "rgba(255, 255, 255, 0.6)",
+      bg: "rgba(0, 0, 0, 0.95)",
+      border: "rgba(239, 68, 68, 0.5)",
+      icon: "rgba(239, 68, 68, 1)",
     },
     info: {
-      bg: "rgba(255, 255, 255, 0.05)",
-      border: "rgba(255, 255, 255, 0.2)",
-      icon: "rgba(255, 255, 255, 0.6)",
+      bg: "rgba(0, 0, 0, 0.95)",
+      border: "rgba(255, 255, 255, 0.3)",
+      icon: "rgba(255, 255, 255, 0.8)",
     },
   };
 

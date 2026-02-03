@@ -47,9 +47,9 @@ export async function PUT(
           { status: 400 }
         );
       }
-      if (!["email", "phone", "address", "social_links"].includes(body.type)) {
+      if (!["email", "phone", "address", "social_links", "github", "linkedin", "profile_picture"].includes(body.type)) {
         return NextResponse.json(
-          { error: "Type must be one of: email, phone, address, social_links" },
+          { error: "Type must be one of: email, phone, address, social_links, github, linkedin, profile_picture" },
           { status: 400 }
         );
       }

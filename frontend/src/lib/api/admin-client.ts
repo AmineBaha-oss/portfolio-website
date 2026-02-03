@@ -300,3 +300,42 @@ export async function deleteResume(id: string) {
 export async function getResumeStats() {
   return fetchAdminAPI<{ total: number; thisMonth: number; today: number }>('/api/admin/resume/stats');
 }
+export async function uploadImage(file: File): Promise<{ key: string; message: string }> {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error('Not authenticated. Please log in.');
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const url = `${API_BASE_URL}/api/admin/upload-image`;
+  
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      throw new Error('Unauthorized. Please log in.');
+    }
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Upload failed' }));
+      throw new Error(error.error || `HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Image upload error:', error);
+    throw error;
+  }
+}

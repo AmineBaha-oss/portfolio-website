@@ -358,6 +358,15 @@ export const translations = {
       type: 'Type',
       value: 'Value',
       selectType: 'Select type',
+      profilePicture: 'Profile Picture',
+      remove: 'Remove',
+      preview: 'Preview:',
+      uploadPicture: 'Upload Picture',
+      changePicture: 'Change Picture',
+      uploadFile: 'Upload File',
+      useUrl: 'Use URL',
+      setUrl: 'Set URL',
+      removeImage: 'Remove Image',
     },
     // Login
     login: {
@@ -783,6 +792,15 @@ export const translations = {
       type: 'Type',
       value: 'Valeur',
       selectType: 'Sélectionnez le type',
+      profilePicture: 'Photo de profil',
+      remove: 'Supprimer',
+      preview: 'Aperçu :',
+      uploadPicture: 'Télécharger une photo',
+      changePicture: 'Changer la photo',
+      uploadFile: 'Télécharger un fichier',
+      useUrl: 'Utiliser une URL',
+      setUrl: 'Définir l\'URL',
+      removeImage: 'Supprimer l\'image',
     },
     // Login
     login: {

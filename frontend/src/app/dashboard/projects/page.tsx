@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
 import { getProjects, createProject, updateProject, deleteProject } from "@/lib/api/admin-client";
 import { useTranslations } from "@/lib/i18n/hooks";
+import { ImageUpload } from "@/components/ui/ImageUpload";
+import { Toast } from "@/components/ui/Toast";
 
 export default function ProjectsManagementPage() {
   const { t, locale } = useTranslations();
@@ -208,7 +210,11 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
     status: 'draft',
     featured: false,
   });
+  const [imageKey, setImageKey] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (project) {
@@ -232,6 +238,7 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
         status: project.status || 'draft',
         featured: project.featured || false,
       });
+      setImageKey(project.imageKey || null);
     }
   }, [project]);
 
@@ -243,6 +250,7 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
       const data = {
         ...formData,
         technologies: formData.technologies.split(',').map(t => t.trim()).filter(Boolean),
+        imageKey,
       };
 
       if (isEditing) {
@@ -267,6 +275,13 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
       animate={{ opacity: 1 }}
       onClick={onClose}
     >
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <motion.div
         className={styles.modalCard}
         initial={{ scale: 0.9, opacity: 0 }}
@@ -278,6 +293,23 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
         </h2>
 
         <form onSubmit={handleSubmit}>
+          <div className={styles.formGroup}>
+            <label>Project Image</label>
+            <ImageUpload
+              fileInputRef={fileInputRef}
+              onUploadSuccess={(key) => {
+                setImageKey(key);
+                setToast({ message: "Image uploaded successfully!", type: "success" });
+              }}
+              onUploadError={(error) => setToast({ message: error, type: "error" })}
+              onRemove={() => {
+                setImageKey(null);
+                setToast({ message: "Image removed!", type: "success" });
+              }}
+              currentImageUrl={imageKey ? `https://portfolio-app.nyc3.digitaloceanspaces.com/${imageKey}` : undefined}
+            />
+          </div>
+
           <div className={styles.formGroup}>
             <label>{t('dashboardProjects.title')} (English) *</label>
             <input 

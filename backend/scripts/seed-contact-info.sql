@@ -20,7 +20,7 @@ ON CONFLICT (type, value) DO NOTHING;
 INSERT INTO contact_info (id, type, value, "order", created_at, updated_at)
 VALUES (
     gen_random_uuid(),
-    'social_links',
+    'github',
     'https://github.com/AmineBaha-oss',
     1,
     NOW(),
@@ -32,7 +32,7 @@ ON CONFLICT (type, value) DO NOTHING;
 INSERT INTO contact_info (id, type, value, "order", created_at, updated_at)
 VALUES (
     gen_random_uuid(),
-    'social_links',
+    'linkedin',
     'https://www.linkedin.com/in/amine-baha-oss',
     2,
     NOW(),

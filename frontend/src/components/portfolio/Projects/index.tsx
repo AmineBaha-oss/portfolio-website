@@ -44,7 +44,7 @@ export default function Home() {
         const response = await getProjects(locale, true);
         const mappedProjects = response.projects.map(project => ({
           title: project.title,
-          src: project.imageUrl || "background.jpg",
+          src: project.imageUrl || "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg",
           color: project.color || "#2a2b2c"
         }));
         setProjects(mappedProjects);
@@ -140,7 +140,7 @@ export default function Home() {
                 const { src, color } = project
                 return <div className={styles.modal} style={{backgroundColor: color}} key={`modal_${index}`}>
                     <Image 
-                    src={`/images/${src}`}
+                    src={src}
                     width={300}
                     height={0}
                     alt="image"
