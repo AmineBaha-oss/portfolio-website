@@ -7,6 +7,7 @@ import { getContactInfo, createContactInfo, updateContactInfo, deleteContactInfo
 import { useTranslations } from "@/lib/i18n/hooks";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 import { Toast } from "@/components/ui/Toast";
+import { useDialog } from "@/components/ui/ConfirmDialog";
 
 interface ContactInfo {
   id: string;
@@ -19,6 +20,7 @@ interface ContactInfo {
 
 export default function ContactInfoPage() {
   const { t } = useTranslations();
+  const { showConfirm, showAlert } = useDialog();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<ContactInfo | null>(null);
   const [contactInfo, setContactInfo] = useState<ContactInfo[]>([]);
@@ -59,13 +61,14 @@ export default function ContactInfoPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('common.confirmDelete'))) return;
+    const confirmed = await showConfirm({ message: t('common.confirmDelete'), title: t('dashboard.delete') });
+    if (!confirmed) return;
 
     try {
       await deleteContactInfo(id);
       await fetchContactInfo();
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      await showAlert(err.message || t('dashboard.error'), 'error');
     }
   };
 
@@ -94,7 +97,7 @@ export default function ContactInfoPage() {
       setEditingItem(null);
       setFormData({ type: "", value: "", order: 0 });
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      await showAlert(err.message || t('dashboard.error'), 'error');
     }
   };
 
@@ -198,7 +201,8 @@ export default function ContactInfoPage() {
               {profilePicKey && (
                 <button
                   onClick={async () => {
-                    if (!confirm(t('dashboardContactInfo.remove') + " profile picture?")) return;
+                    const confirmed = await showConfirm({ message: t('dashboardContactInfo.remove') + " profile picture?", title: t('dashboardContactInfo.remove') });
+                    if (!confirmed) return;
                     try {
                       const existing = contactInfo.find(item => item.type === 'profile_picture');
                       if (existing) {

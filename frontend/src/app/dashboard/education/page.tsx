@@ -6,9 +6,11 @@ import styles from "../shared.module.scss";
 import { getEducation, createEducation, updateEducation, deleteEducation } from "@/lib/api/admin-client";
 import { useTranslations } from "@/lib/i18n/hooks";
 import { triggerDataRefresh } from "@/lib/hooks/useDataRefresh";
+import { useDialog } from "@/components/ui/ConfirmDialog";
 
 export default function EducationManagementPage() {
   const { t, locale } = useTranslations();
+  const { showConfirm, showAlert } = useDialog();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingEdu, setEditingEdu] = useState<any>(null);
   const [education, setEducation] = useState<any[]>([]);
@@ -24,20 +26,21 @@ export default function EducationManagementPage() {
       const response = await getEducation();
       setEducation(response.education);
     } catch (err: any) {
-      alert(err.message || 'Failed to load education');
+      showAlert(err.message || 'Failed to load education', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('dashboard.deleteConfirm'))) return;
+    const confirmed = await showConfirm({ message: t('dashboard.deleteConfirm'), title: t('dashboard.delete') });
+    if (!confirmed) return;
     try {
       await deleteEducation(id);
       await fetchEducation();
       triggerDataRefresh();
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      await showAlert(err.message || t('dashboard.error'), 'error');
     }
   };
 
@@ -99,6 +102,7 @@ function toBilingual(v: unknown): { en: string; fr: string } {
 
 function EducationModal({ edu, onClose, onSuccess }: { edu: any; onClose: () => void; onSuccess: () => void }) {
   const { t } = useTranslations();
+  const { showAlert } = useDialog();
   const [formData, setFormData] = useState<{
     degree: { en: string; fr: string };
     institution: { en: string; fr: string };
@@ -151,7 +155,7 @@ function EducationModal({ edu, onClose, onSuccess }: { edu: any; onClose: () => 
       onSuccess();
       onClose();
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      await showAlert(err.message || t('dashboard.error'), 'error');
     } finally {
       setIsSubmitting(false);
     }

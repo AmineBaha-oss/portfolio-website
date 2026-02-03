@@ -7,6 +7,7 @@ import { authClient } from "@/lib/auth";
 import styles from "./shared.module.scss";
 import { useTranslations } from "@/lib/i18n/hooks";
 import LanguageToggle from "@/components/portfolio/LanguageToggle";
+import { DialogProvider } from "@/components/ui/ConfirmDialog";
 // Icons used in getIcon function
 import { 
   MdDashboard, 
@@ -289,17 +290,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         transition={{ duration: 0.3 }}
         style={{ marginLeft: isMobile ? 0 : (sidebarCollapsed ? 70 : 280) }}
       >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={pathname}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-          >
-            {children}
-          </motion.div>
-        </AnimatePresence>
+        <DialogProvider>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
+        </DialogProvider>
       </motion.main>
     </div>
   );

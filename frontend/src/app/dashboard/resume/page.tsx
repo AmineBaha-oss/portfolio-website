@@ -7,6 +7,7 @@ import { useTranslations } from "@/lib/i18n/hooks";
 import { ResumeUpload } from "@/components/ui/ResumeUpload";
 import { getResume, deleteResume, getResumeStats } from "@/lib/api/admin-client";
 import { Toast } from "@/components/ui/Toast";
+import { useDialog } from "@/components/ui/ConfirmDialog";
 
 interface Resume {
   id: string;
@@ -22,6 +23,7 @@ interface Resume {
 
 export default function ResumeManagementPage() {
   const { t } = useTranslations();
+  const { showConfirm } = useDialog();
   const [uploadedCV, setUploadedCV] = useState<Resume | null>(null);
   const [loading, setLoading] = useState(true);
   const [showUpload, setShowUpload] = useState(false);
@@ -71,7 +73,8 @@ export default function ResumeManagementPage() {
       return;
     }
 
-    if (!confirm("Are you sure you want to delete this resume?")) {
+    const confirmed = await showConfirm({ message: "Are you sure you want to delete this resume?", title: t('dashboard.delete') });
+    if (!confirmed) {
       return;
     }
 

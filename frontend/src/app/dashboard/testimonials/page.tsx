@@ -6,9 +6,11 @@ import styles from "../shared.module.scss";
 import { getTestimonials, approveTestimonial, rejectTestimonial, deleteTestimonial, toggleTestimonialActive } from "@/lib/api/admin-client";
 import { useTranslations } from "@/lib/i18n/hooks";
 import { triggerDataRefresh } from "@/lib/hooks/useDataRefresh";
+import { useDialog } from "@/components/ui/ConfirmDialog";
 
 export default function TestimonialsManagementPage() {
   const { t } = useTranslations();
+  const { showConfirm, showAlert } = useDialog();
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +25,7 @@ export default function TestimonialsManagementPage() {
       const response = await getTestimonials();
       setTestimonials(response.testimonials);
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      showAlert(err.message || t('dashboard.error'), 'error');
     } finally {
       setLoading(false);
     }
@@ -35,29 +37,31 @@ export default function TestimonialsManagementPage() {
       await fetchTestimonials();
       triggerDataRefresh();
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      await showAlert(err.message || t('dashboard.error'), 'error');
     }
   };
 
   const handleReject = async (id: string) => {
-    if (!confirm(t('dashboardTestimonials.rejectConfirm'))) return;
+    const confirmed = await showConfirm({ message: t('dashboardTestimonials.rejectConfirm'), title: t('dashboardTestimonials.reject') });
+    if (!confirmed) return;
     try {
       await rejectTestimonial(id);
       await fetchTestimonials();
       triggerDataRefresh();
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      await showAlert(err.message || t('dashboard.error'), 'error');
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('dashboard.deleteConfirm'))) return;
+    const confirmed = await showConfirm({ message: t('dashboard.deleteConfirm'), title: t('dashboard.delete') });
+    if (!confirmed) return;
     try {
       await deleteTestimonial(id);
       await fetchTestimonials();
       triggerDataRefresh();
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      await showAlert(err.message || t('dashboard.error'), 'error');
     }
   };
 
@@ -67,7 +71,7 @@ export default function TestimonialsManagementPage() {
       await fetchTestimonials();
       triggerDataRefresh();
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      await showAlert(err.message || t('dashboard.error'), 'error');
     }
   };
 

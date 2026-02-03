@@ -8,9 +8,11 @@ import { useTranslations } from "@/lib/i18n/hooks";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 import { Toast } from "@/components/ui/Toast";
 import { triggerDataRefresh } from "@/lib/hooks/useDataRefresh";
+import { useDialog } from "@/components/ui/ConfirmDialog";
 
 export default function HobbiesManagementPage() {
   const { t, locale } = useTranslations();
+  const { showConfirm, showAlert } = useDialog();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingHobby, setEditingHobby] = useState<any>(null);
   const [hobbies, setHobbies] = useState<any[]>([]);
@@ -26,20 +28,21 @@ export default function HobbiesManagementPage() {
       const response = await getHobbies();
       setHobbies(response.hobbies);
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      showAlert(err.message || t('dashboard.error'), 'error');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('dashboard.deleteConfirm'))) return;
+    const confirmed = await showConfirm({ message: t('dashboard.deleteConfirm'), title: t('dashboard.delete') });
+    if (!confirmed) return;
     try {
       await deleteHobby(id);
       await fetchHobbies();
       triggerDataRefresh();
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      await showAlert(err.message || t('dashboard.error'), 'error');
     }
   };
 
@@ -90,6 +93,7 @@ function toBilingual(v: unknown): { en: string; fr: string } {
 
 function HobbyModal({ hobby, onClose, onSuccess }: { hobby: any; onClose: () => void; onSuccess: () => void }) {
   const { t } = useTranslations();
+  const { showAlert } = useDialog();
   const [formData, setFormData] = useState<{ title: { en: string; fr: string }; description: { en: string; fr: string }; color: string; order: number }>({
     title: { en: '', fr: '' },
     description: { en: '', fr: '' },
@@ -131,7 +135,7 @@ function HobbyModal({ hobby, onClose, onSuccess }: { hobby: any; onClose: () => 
       onSuccess();
       onClose();
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      await showAlert(err.message || t('dashboard.error'), 'error');
     } finally {
       setIsSubmitting(false);
     }

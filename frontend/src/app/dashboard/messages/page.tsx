@@ -5,9 +5,11 @@ import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
 import { getMessages, markMessageRead, deleteMessage } from "@/lib/api/admin-client";
 import { useTranslations } from "@/lib/i18n/hooks";
+import { useDialog } from "@/components/ui/ConfirmDialog";
 
 export default function MessagesManagementPage() {
   const { t } = useTranslations();
+  const { showConfirm, showAlert } = useDialog();
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -23,7 +25,7 @@ export default function MessagesManagementPage() {
       const response = await getMessages();
       setMessages(response.messages);
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      showAlert(err.message || t('dashboard.error'), 'error');
     } finally {
       setLoading(false);
     }
@@ -34,18 +36,19 @@ export default function MessagesManagementPage() {
       await markMessageRead(id);
       await fetchMessages();
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      await showAlert(err.message || t('dashboard.error'), 'error');
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('dashboard.deleteConfirm'))) return;
+    const confirmed = await showConfirm({ message: t('dashboard.deleteConfirm'), title: t('dashboard.delete') });
+    if (!confirmed) return;
     try {
       await deleteMessage(id);
       await fetchMessages();
       if (selectedMessage?.id === id) setSelectedMessage(null);
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      await showAlert(err.message || t('dashboard.error'), 'error');
     }
   };
 

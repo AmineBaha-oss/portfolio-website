@@ -8,9 +8,11 @@ import { useTranslations } from "@/lib/i18n/hooks";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 import { Toast } from "@/components/ui/Toast";
 import { triggerDataRefresh } from "@/lib/hooks/useDataRefresh";
+import { useDialog } from "@/components/ui/ConfirmDialog";
 
 export default function ProjectsManagementPage() {
   const { t, locale } = useTranslations();
+  const { showConfirm, showAlert } = useDialog();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
   const [projects, setProjects] = useState<any[]>([]);
@@ -40,14 +42,15 @@ export default function ProjectsManagementPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('dashboard.deleteConfirm'))) return;
+    const confirmed = await showConfirm({ message: t('dashboard.deleteConfirm'), title: t('dashboard.delete') });
+    if (!confirmed) return;
     
     try {
       await deleteProject(id);
       await fetchProjects();
       triggerDataRefresh(); // Notify landing page
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      await showAlert(err.message || t('dashboard.error'), 'error');
     }
   };
 
@@ -201,6 +204,7 @@ export default function ProjectsManagementPage() {
 
 function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: () => void; onSuccess: () => void }) {
   const { t } = useTranslations();
+  const { showAlert } = useDialog();
   const isEditing = !!project;
   const [formData, setFormData] = useState({
     title: { en: '', fr: '' },
@@ -269,7 +273,7 @@ function ProjectModal({ project, onClose, onSuccess }: { project: any; onClose: 
       onSuccess();
       onClose();
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      await showAlert(err.message || t('dashboard.error'), 'error');
     } finally {
       setIsSubmitting(false);
     }

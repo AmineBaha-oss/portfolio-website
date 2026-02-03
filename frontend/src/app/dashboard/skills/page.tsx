@@ -6,9 +6,11 @@ import styles from "../shared.module.scss";
 import { getSkills, createSkill, updateSkill, deleteSkill } from "@/lib/api/admin-client";
 import { useTranslations } from "@/lib/i18n/hooks";
 import { triggerDataRefresh } from "@/lib/hooks/useDataRefresh";
+import { useDialog } from "@/components/ui/ConfirmDialog";
 
 export default function SkillsManagementPage() {
   const { t, locale } = useTranslations();
+  const { showConfirm, showAlert } = useDialog();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingSkill, setEditingSkill] = useState<any>(null);
   const [skills, setSkills] = useState<any[]>([]);
@@ -47,14 +49,15 @@ export default function SkillsManagementPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('dashboard.deleteConfirm'))) return;
+    const confirmed = await showConfirm({ message: t('dashboard.deleteConfirm'), title: t('dashboard.delete') });
+    if (!confirmed) return;
     
     try {
       await deleteSkill(id);
       await fetchSkills();
       triggerDataRefresh();
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      await showAlert(err.message || t('dashboard.error'), 'error');
     }
   };
 
@@ -177,6 +180,7 @@ export default function SkillsManagementPage() {
 
 function SkillModal({ skill, onClose, onSuccess }: { skill: any; onClose: () => void; onSuccess: () => void }) {
   const { t } = useTranslations();
+  const { showAlert } = useDialog();
   const isEditing = !!skill;
   const [formData, setFormData] = useState({
     name: { en: '', fr: '' },
@@ -217,7 +221,7 @@ function SkillModal({ skill, onClose, onSuccess }: { skill: any; onClose: () => 
       onSuccess();
       onClose();
     } catch (err: any) {
-      alert(err.message || 'Failed to save skill');
+      await showAlert(err.message || 'Failed to save skill', 'error');
     } finally {
       setIsSubmitting(false);
     }

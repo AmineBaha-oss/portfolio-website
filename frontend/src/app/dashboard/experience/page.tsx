@@ -6,9 +6,11 @@ import styles from "../shared.module.scss";
 import { getExperience, createExperience, updateExperience, deleteExperience } from "@/lib/api/admin-client";
 import { useTranslations } from "@/lib/i18n/hooks";
 import { triggerDataRefresh } from "@/lib/hooks/useDataRefresh";
+import { useDialog } from "@/components/ui/ConfirmDialog";
 
 export default function ExperienceManagementPage() {
   const { t, locale } = useTranslations();
+  const { showConfirm, showAlert } = useDialog();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingExp, setEditingExp] = useState<any>(null);
   const [experiences, setExperiences] = useState<any[]>([]);
@@ -24,20 +26,21 @@ export default function ExperienceManagementPage() {
       const response = await getExperience();
       setExperiences(response.experiences);
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      showAlert(err.message || t('dashboard.error'), 'error');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('dashboard.deleteConfirm'))) return;
+    const confirmed = await showConfirm({ message: t('dashboard.deleteConfirm'), title: t('dashboard.delete') });
+    if (!confirmed) return;
     try {
       await deleteExperience(id);
       await fetchExperiences();
       triggerDataRefresh();
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      await showAlert(err.message || t('dashboard.error'), 'error');
     }
   };
 
@@ -100,6 +103,7 @@ function toBilingual(v: unknown): { en: string; fr: string } {
 
 function ExperienceModal({ exp, onClose, onSuccess }: { exp: any; onClose: () => void; onSuccess: () => void }) {
   const { t } = useTranslations();
+  const { showAlert } = useDialog();
   const [formData, setFormData] = useState<{
     position: { en: string; fr: string };
     company: { en: string; fr: string };
@@ -152,7 +156,7 @@ function ExperienceModal({ exp, onClose, onSuccess }: { exp: any; onClose: () =>
       onSuccess();
       onClose();
     } catch (err: any) {
-      alert(err.message || t('dashboard.error'));
+      await showAlert(err.message || t('dashboard.error'), 'error');
     } finally {
       setIsSubmitting(false);
     }
