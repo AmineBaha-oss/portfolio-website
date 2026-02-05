@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useLanguage } from '@/lib/i18n/context';
 import { getProjects, type Project } from '@/lib/api/client';
 import { useTranslations } from '@/lib/i18n/hooks';
+import { DEFAULT_BACKGROUND } from '@/lib/utils/cdn-url';
 
 const scaleAnimation = {
   initial: { scale: 0, x: "-50%", y: "-50%" },
@@ -174,7 +175,7 @@ export default function ProjectsPage() {
             {projects.map((project, index) => (
               <div className={styles.modal} style={{ backgroundColor: project.color || "#2a2b2c" }} key={`modal_${index}`}>
                 <Image
-                  src={project.imageUrl || "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg"}
+                  src={project.imageUrl || DEFAULT_BACKGROUND}
                   width={300}
                   height={0}
                   alt={project.title}

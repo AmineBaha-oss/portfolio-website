@@ -9,6 +9,7 @@ import styles from "./page.module.scss";
 import { useLanguage } from "@/lib/i18n/context";
 import { getProjectById, type Project } from "@/lib/api/client";
 import { useTranslations } from "@/lib/i18n/hooks";
+import { DEFAULT_BACKGROUND } from "@/lib/utils/cdn-url";
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -62,8 +63,6 @@ export default function ProjectDetailPage() {
         setError(null);
         const id = params.id as string;
         const response = await getProjectById(id, locale);
-        console.log("Fetched project detail:", response.project);
-        console.log("Project imageUrl:", response.project.imageUrl);
         setProject(response.project);
       } catch (err: any) {
         console.error("Error fetching project:", err);
@@ -130,7 +129,7 @@ export default function ProjectDetailPage() {
               <Image
                 src={
                   project.imageUrl ||
-                  "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg"
+                  DEFAULT_BACKGROUND
                 }
                 alt={project.title}
                 fill

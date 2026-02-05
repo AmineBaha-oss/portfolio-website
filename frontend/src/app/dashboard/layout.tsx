@@ -117,22 +117,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     );
   }
 
-  const getIcon = (label: string) => {
+  const getIcon = (path: string) => {
     const iconSize = sidebarCollapsed ? 24 : 20;
     const icons: { [key: string]: JSX.Element } = {
-      "Overview": <MdDashboard size={iconSize} />,
-      "Projects": <MdWork size={iconSize} />,
-      "Skills": <MdStars size={iconSize} />,
-      "Experience": <MdBusinessCenter size={iconSize} />,
-      "Education": <MdSchool size={iconSize} />,
-      "Resume": <MdDescription size={iconSize} />,
-      "Hobbies": <MdFavorite size={iconSize} />,
-      "Testimonials": <MdRateReview size={iconSize} />,
-      "Messages": <MdMail size={iconSize} />,
-      "Contact Information": <MdContactMail size={iconSize} />,
-      "Informations de contact": <MdContactMail size={iconSize} />
+      "/dashboard": <MdDashboard size={iconSize} />,
+      "/dashboard/projects": <MdWork size={iconSize} />,
+      "/dashboard/skills": <MdStars size={iconSize} />,
+      "/dashboard/experience": <MdBusinessCenter size={iconSize} />,
+      "/dashboard/education": <MdSchool size={iconSize} />,
+      "/dashboard/resume": <MdDescription size={iconSize} />,
+      "/dashboard/hobbies": <MdFavorite size={iconSize} />,
+      "/dashboard/testimonials": <MdRateReview size={iconSize} />,
+      "/dashboard/messages": <MdMail size={iconSize} />,
+      "/dashboard/contact-info": <MdContactMail size={iconSize} />,
     };
-    return icons[label] || <MdDashboard size={iconSize} />;
+    return icons[path] || <MdDashboard size={iconSize} />;
   };
 
   return (
@@ -255,7 +254,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 gap: sidebarCollapsed && !isMobile ? 0 : "0.75rem"
               }}
             >
-              {getIcon(item.label)}
+              {getIcon(item.path)}
               {(!sidebarCollapsed || isMobile) && <span>{item.label}</span>}
             </motion.button>
           ))}

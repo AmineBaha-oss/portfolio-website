@@ -1,33 +1,13 @@
 #!/bin/sh
-# Seed test users using Better Auth's signup API
+# Seed admin user using Better Auth's signup API
 # This ensures passwords are properly hashed
-#
-# SECURITY: This script is DISABLED in production to prevent unauthorized access
-# with default credentials. DO NOT run this in production environments.
+# Admin seeding runs in all environments to ensure an admin account exists
 
-# Check if running in production environment
-if [ "${NODE_ENV}" = "production" ] || [ "${SPRING_PROFILES_ACTIVE}" = "prod" ] || [ "${SPRING_PROFILES_ACTIVE}" = "production" ]; then
-  echo "❌ ERROR: User seeding is DISABLED in production for security reasons."
-  echo "   This script creates accounts with known passwords (admin@test.com / password123)."
-  echo "   To create admin accounts in production:"
-  echo "   1. Sign up normally at your production site"
-  echo "   2. Connect to the auth database"
-  echo "   3. Run: UPDATE \"user\" SET role = 'admin' WHERE email = 'your-email@example.com';"
-  exit 1
-fi
-
-# Additional safeguard: Check for production-like environment indicators
-if [ -n "${DATABASE_URL}" ] && echo "${DATABASE_URL}" | grep -q "digitalocean\|amazonaws\|azure"; then
-  echo "⚠️  WARNING: Detected production-like database URL. Seeding is disabled."
-  echo "   If this is a development environment, set NODE_ENV=development explicitly."
-  exit 1
-fi
-
-echo "🌱 Seeding test users..."
+echo "Seeding admin user..."
 
 # Validate required environment variables (check raw variables, apply defaults when using)
 if [ -z "${POSTGRES_USER}" ] || [ -z "${POSTGRES_DB}" ] || [ -z "${POSTGRES_PASSWORD}" ]; then
-  echo "⚠️  Warning: Some database environment variables are not set, using defaults"
+  echo "Warning: Some database environment variables are not set, using defaults"
   echo "   POSTGRES_USER=${POSTGRES_USER:-auth_user}"
   echo "   POSTGRES_DB=${POSTGRES_DB:-auth_db}"
   echo "   POSTGRES_PASSWORD is set: $([ -n "${POSTGRES_PASSWORD}" ] && echo "yes" || echo "no")"
@@ -58,8 +38,8 @@ while [ $attempt -lt $max_attempts ]; do
 done
 
 if [ $attempt -eq $max_attempts ]; then
-  echo "⚠️  Auth service not ready, skipping user seeding"
-  echo "   You can create test users manually via the signup page"
+  echo "WARNING: Auth service not ready, skipping user seeding"
+  echo "   You can create admin user manually via the signup page"
   exit 0
 fi
 
@@ -83,11 +63,11 @@ update_user_in_db() {
   
   PGPASSWORD=${POSTGRES_PASSWORD:-auth_pass} psql -h auth-db -U ${POSTGRES_USER:-auth_user} -d ${POSTGRES_DB:-auth_db} \
     -c "UPDATE \"user\" SET role = '$role_escaped', \"emailVerified\" = true, \"updatedAt\" = NOW() WHERE LOWER(email) = LOWER('$email_lower');" \
-    || { echo "   ❌ Failed to update user in database" >&2; return 1; }
+    || { echo "   Failed to update user in database" >&2; return 1; }
   
   PGPASSWORD=${POSTGRES_PASSWORD:-auth_pass} psql -h auth-db -U ${POSTGRES_USER:-auth_user} -d ${POSTGRES_DB:-auth_db} \
     -c "DELETE FROM login_attempt WHERE LOWER(email) = LOWER('$email_lower') AND success = false;" \
-    || { echo "   ❌ Failed to clear login attempts" >&2; return 1; }
+    || { echo "   Failed to clear login attempts" >&2; return 1; }
 }
 
 # Function to create user via signup API and set role
@@ -109,17 +89,17 @@ create_user() {
     -t -c "SELECT id FROM \"user\" WHERE LOWER(email) = LOWER('$email_lower');" 2>&1)
   psql_exit_code=$?
   if [ $psql_exit_code -ne 0 ]; then
-    echo "   ❌ Failed to check if user exists: $psql_output" >&2
+    echo "   Failed to check if user exists: $psql_output" >&2
     return 1
   fi
   existing_user=$(echo "$psql_output" | tr -d ' ')
   
   if [ -n "$existing_user" ]; then
-    echo "   ⏭️  User $email already exists, updating role, verifying email, and clearing lockout..."
+    echo "   User $email already exists, updating role, verifying email, and clearing lockout..."
     update_user_in_db "$email_lower" "$role_escaped" || return 1
-    echo "   ✅ Updated role to: $role"
-    echo "   ✅ Email verified"
-    echo "   ✅ Account unlocked"
+    echo "   Updated role to: $role"
+    echo "   Email verified"
+    echo "   Account unlocked"
     return 0
   fi
   
@@ -136,40 +116,32 @@ create_user() {
   
   # If extraction failed, log raw response for debugging
   if [ -z "$http_status" ]; then
-    echo "   ❌ Failed to parse HTTP status from response"
+    echo "   Failed to parse HTTP status from response"
     echo "   Raw response (first 500 chars):"
     echo "$response" | head -c 500
     return 1
   fi
   
   if [ "$http_status" != "200" ] && [ "$http_status" != "201" ]; then
-    echo "   ❌ Failed to create $email (HTTP $http_status)"
+    echo "   Failed to create $email (HTTP $http_status)"
     echo "   Response: $response"
     return 1
   else
-    echo "   ✅ Created: $email"
+    echo "   Created: $email"
     
     # Update role and verify email directly in database (bypassing admin API for dev seeding)
     update_user_in_db "$email_lower" "$role_escaped" || return 1
     if [ "$role" != "CUSTOMER" ]; then
-      echo "   ✅ Set role to: $role"
+      echo "   Set role to: $role"
     fi
-    echo "   ✅ Email verified"
-    echo "   ✅ Account unlocked"
+    echo "   Email verified"
+    echo "   Account unlocked"
     return 0
   fi
 }
 
-# Create test users
+# Create admin user
 create_user "admin@test.com" "password123" "Admin User" "ADMIN"
-create_user "customer@test.com" "password123" "Customer User" "CUSTOMER"
 
 echo ""
-echo "✅ User seeding complete!"
-echo ""
-echo "📝 Test User Credentials:"
-echo "   Admin:    admin@test.com / password123 (ADMIN role)"
-echo "   Customer: customer@test.com / password123 (CUSTOMER role)"
-echo ""
-echo "✅ All users created with correct roles!"
-
+echo "Admin seeding complete!"

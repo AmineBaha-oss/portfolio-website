@@ -54,11 +54,14 @@ export default function Skills() {
     const categoryMap: { [key: string]: string } = {
       'Languages': 'skills.categories.languages',
       'Backend': 'skills.categories.backend',
+      'Back-End': 'skills.categories.backend',
       'Frontend': 'skills.categories.frontend',
       'Front-End & Mobile': 'skills.categories.frontend',
       'Databases': 'skills.categories.databases',
       'DevOps': 'skills.categories.devops',
+      'DevOps & Tools': 'skills.categories.devops',
       'AI & Machine Learning': 'skills.categories.ai',
+      'AI & Data': 'skills.categories.ai',
     };
     return categoryMap[category] || category;
   };

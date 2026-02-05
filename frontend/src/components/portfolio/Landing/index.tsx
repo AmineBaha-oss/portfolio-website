@@ -7,6 +7,7 @@ import { ScrollTrigger } from 'gsap/all';
 import { slideUp } from './animation';
 import { motion } from 'framer-motion';
 import { useTranslations } from '@/lib/i18n/hooks';
+import { DEFAULT_BACKGROUND } from '@/lib/utils/cdn-url';
 
 export default function Home() {
   const { t, locale } = useTranslations();
@@ -48,7 +49,7 @@ export default function Home() {
   return (
     <motion.main variants={slideUp} initial="initial" animate="enter" className={styles.landing}>
       <Image 
-        src="https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg"
+        src={DEFAULT_BACKGROUND}
         fill={true}
         alt="background"
       />

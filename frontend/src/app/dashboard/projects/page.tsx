@@ -14,6 +14,8 @@ import { ImageUpload } from "@/components/ui/ImageUpload";
 import { Toast } from "@/components/ui/Toast";
 import { triggerDataRefresh } from "@/lib/hooks/useDataRefresh";
 import { useDialog } from "@/components/ui/ConfirmDialog";
+import { getCdnUrl } from "@/lib/utils/cdn-url";
+import { ColorPicker } from "@/components/ui/ColorPicker";
 
 export default function ProjectsManagementPage() {
   const { t, locale } = useTranslations();
@@ -393,7 +395,7 @@ function ProjectModal({
               }}
               currentImageUrl={
                 imageKey
-                  ? `https://portfolio-app.nyc3.digitaloceanspaces.com/${imageKey}`
+                  ? getCdnUrl(imageKey)
                   : undefined
               }
             />
@@ -478,13 +480,9 @@ function ProjectModal({
 
             <div className={styles.formGroup}>
               <label>{t("dashboardProjects.color")}</label>
-              <input
-                type="text"
-                placeholder="#EFE8D3"
+              <ColorPicker
                 value={formData.color}
-                onChange={(e) =>
-                  setFormData({ ...formData, color: e.target.value })
-                }
+                onChange={(color) => setFormData({ ...formData, color })}
               />
             </div>
           </div>

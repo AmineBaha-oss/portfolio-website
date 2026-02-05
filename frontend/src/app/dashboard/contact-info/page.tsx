@@ -14,6 +14,7 @@ import { ImageUpload } from "@/components/ui/ImageUpload";
 import { Toast } from "@/components/ui/Toast";
 import { useDialog } from "@/components/ui/ConfirmDialog";
 import { triggerDataRefresh } from "@/lib/hooks/useDataRefresh";
+import { getCdnUrl } from "@/lib/utils/cdn-url";
 
 interface ContactInfo {
   id: string;
@@ -315,7 +316,7 @@ export default function ContactInfoPage() {
                   }}
                 >
                   <img
-                    src={`https://portfolio-app.nyc3.digitaloceanspaces.com/${pendingProfilePicKey || profilePicKey}`}
+                    src={getCdnUrl(pendingProfilePicKey || profilePicKey)}
                     alt="Profile"
                     style={{
                       width: "100%",
@@ -408,7 +409,7 @@ export default function ContactInfoPage() {
               currentImageUrl={
                 pendingProfilePicKey ||
                 (profilePicKey
-                  ? `https://portfolio-app.nyc3.digitaloceanspaces.com/${profilePicKey}`
+                  ? getCdnUrl(profilePicKey)
                   : undefined)
               }
               fileInputRef={profilePicRef}

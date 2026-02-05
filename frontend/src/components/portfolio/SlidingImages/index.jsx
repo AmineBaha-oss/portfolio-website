@@ -6,8 +6,7 @@ import styles from './style.module.scss';
 import Image from 'next/image';
 import { getProjects, getHobbies } from '@/lib/api/client';
 import { useLanguage } from '@/lib/i18n/context';
-
-const defaultImage = "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg";
+import { DEFAULT_BACKGROUND } from '@/lib/utils/cdn-url';
 
 const defaultColors = [
     "#e3e5e7", "#d6d7dc", "#e3e3e3", "#21242b",
@@ -17,16 +16,16 @@ const defaultColors = [
 export default function SlidingImages() {
     const { locale } = useLanguage();
     const [slider1, setSlider1] = useState([
-        { color: defaultColors[0], src: defaultImage },
-        { color: defaultColors[1], src: defaultImage },
-        { color: defaultColors[2], src: defaultImage },
-        { color: defaultColors[3], src: defaultImage }
+        { color: defaultColors[0], src: DEFAULT_BACKGROUND },
+        { color: defaultColors[1], src: DEFAULT_BACKGROUND },
+        { color: defaultColors[2], src: DEFAULT_BACKGROUND },
+        { color: defaultColors[3], src: DEFAULT_BACKGROUND }
     ]);
     const [slider2, setSlider2] = useState([
-        { color: defaultColors[4], src: defaultImage },
-        { color: defaultColors[5], src: defaultImage },
-        { color: defaultColors[6], src: defaultImage },
-        { color: defaultColors[7], src: defaultImage }
+        { color: defaultColors[4], src: DEFAULT_BACKGROUND },
+        { color: defaultColors[5], src: DEFAULT_BACKGROUND },
+        { color: defaultColors[6], src: DEFAULT_BACKGROUND },
+        { color: defaultColors[7], src: DEFAULT_BACKGROUND }
     ]);
     const [loading, setLoading] = useState(true);
 
@@ -45,7 +44,7 @@ export default function SlidingImages() {
                 // First 4 images: Projects 1-4
                 const firstFour = projects.slice(0, 4).map((project, index) => ({
                     color: project.color || defaultColors[index],
-                    src: project.imageUrl || defaultImage
+                    src: project.imageUrl || DEFAULT_BACKGROUND
                 }));
 
                 // Last 4 images: Alternate between projects and hobbies (Project 5, Hobby 1, Project 6, Hobby 2)
@@ -59,10 +58,10 @@ export default function SlidingImages() {
                         if (remainingProjects[projectIndex]) {
                             lastFour.push({
                                 color: remainingProjects[projectIndex].color || defaultColors[4 + i],
-                                src: remainingProjects[projectIndex].imageUrl || defaultImage
+                                src: remainingProjects[projectIndex].imageUrl || DEFAULT_BACKGROUND
                             });
                         } else {
-                            lastFour.push({ color: defaultColors[4 + i], src: defaultImage });
+                            lastFour.push({ color: defaultColors[4 + i], src: DEFAULT_BACKGROUND });
                         }
                     } else {
                         // Add hobby
@@ -70,10 +69,10 @@ export default function SlidingImages() {
                         if (hobbies[hobbyIndex]) {
                             lastFour.push({
                                 color: hobbies[hobbyIndex].color || defaultColors[4 + i],
-                                src: hobbies[hobbyIndex].imageUrl || defaultImage
+                                src: hobbies[hobbyIndex].imageUrl || DEFAULT_BACKGROUND
                             });
                         } else {
-                            lastFour.push({ color: defaultColors[4 + i], src: defaultImage });
+                            lastFour.push({ color: defaultColors[4 + i], src: DEFAULT_BACKGROUND });
                         }
                     }
                 }
@@ -83,7 +82,7 @@ export default function SlidingImages() {
             } catch (error) {
                 console.error('Error fetching images:', error);
                 // Fallback to default images
-                const fallback = defaultColors.map(color => ({ color, src: defaultImage }));
+                const fallback = defaultColors.map(color => ({ color, src: DEFAULT_BACKGROUND }));
                 setSlider1(fallback.slice(0, 4));
                 setSlider2(fallback.slice(4, 8));
             } finally {

@@ -10,6 +10,7 @@ import { useLanguage } from '@/lib/i18n/context';
 import { getProjects } from '@/lib/api/client';
 import { useTranslations } from '@/lib/i18n/hooks';
 import Link from 'next/link';
+import { DEFAULT_BACKGROUND } from '@/lib/utils/cdn-url';
 
 const scaleAnimation = {
     initial: {scale: 0, x:"-50%", y:"-50%"},
@@ -43,15 +44,13 @@ export default function Home() {
         setLoading(true);
         setError(null);
         const response = await getProjects(locale, true);
-        console.log('Fetched projects:', response.projects);
         const mappedProjects = response.projects.map(project => ({
           id: project.id,
           title: project.title,
           description: project.description,
-          src: project.imageUrl || "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg",
+          src: project.imageUrl || DEFAULT_BACKGROUND,
           color: project.color || "#2a2b2c"
         }));
-        console.log('Mapped projects:', mappedProjects);
         setProjects(mappedProjects);
       } catch (err: any) {
         console.error('Error fetching projects:', err);

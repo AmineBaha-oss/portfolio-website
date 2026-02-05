@@ -7,6 +7,7 @@
 import { useState, useRef, ChangeEvent, RefObject } from "react";
 import { uploadImage } from "@/lib/api/admin-client";
 import { useTranslations } from "@/lib/i18n/hooks";
+import { getCdnUrl } from "@/lib/utils/cdn-url";
 
 interface ImageUploadProps {
   onUploadSuccess: (imageKey: string) => void;
@@ -68,7 +69,7 @@ export function ImageUpload({
     try {
       const data = await uploadImage(file);
       // After upload, set the local preview to the DO Spaces URL
-      const fullUrl = `https://portfolio-app.nyc3.digitaloceanspaces.com/${data.key}`;
+      const fullUrl = getCdnUrl(data.key);
       setLocalPreview(fullUrl);
       setImageUrl(fullUrl);
       onUploadSuccess(data.key);
@@ -104,7 +105,7 @@ export function ImageUpload({
     }
     
     // Set preview to show the image
-    const fullUrl = `https://portfolio-app.nyc3.digitaloceanspaces.com/${key}`;
+    const fullUrl = getCdnUrl(key);
     setLocalPreview(fullUrl);
     onUploadSuccess(key);
   };

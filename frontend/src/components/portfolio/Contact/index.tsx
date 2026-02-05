@@ -7,6 +7,7 @@ import { useRef, useState, useEffect } from 'react';
 import { useScroll, motion, useTransform } from 'framer-motion';
 import Magnetic from '@/common/Magnetic';
 import { useTranslations } from '@/lib/i18n/hooks';
+import { DEFAULT_PROFILE_PICTURE, getCdnUrl } from '@/lib/utils/cdn-url';
 
 interface ContactInfo {
     id: string;
@@ -40,32 +41,27 @@ export default function Contact() {
     const [contactInfo, setContactInfo] = useState<ContactInfo[]>([]);
     const [email, setEmail] = useState('');
     const [socialLinks, setSocialLinks] = useState<{ github?: string; linkedin?: string }>({});
-    const [profilePicture, setProfilePicture] = useState('https://portfolio-app.nyc3.digitaloceanspaces.com/images/pfp.png');
+    const [profilePicture, setProfilePicture] = useState(DEFAULT_PROFILE_PICTURE);
 
     // Fetch contact info
     useEffect(() => {
         const fetchContactInfo = async () => {
             try {
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-                console.log('Fetching contact info from:', `${apiUrl}/api/public/contact-info`);
                 const response = await fetch(`${apiUrl}/api/public/contact-info`);
-                console.log('Contact info response status:', response.status);
                 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('Contact info data:', data);
                     setContactInfo(data.contactInfo || []);
                     
                     // Update email and social links from API
                     const links: { github?: string; linkedin?: string } = {};
                     
                     data.contactInfo?.forEach((info: ContactInfo) => {
-                        console.log('Processing contact info:', info);
                         if (info.type === 'email') {
-                            console.log('Setting email:', info.value);
                             setEmail(info.value);
                         } else if (info.type === 'profile_picture') {
-                            setProfilePicture(`https://portfolio-app.nyc3.digitaloceanspaces.com/${info.value}`);
+                            setProfilePicture(getCdnUrl(info.value));
                         } else if (info.type === 'github') {
                             links.github = info.value;
                         } else if (info.type === 'linkedin') {
@@ -81,9 +77,7 @@ export default function Contact() {
                         }
                     });
                     
-                    console.log('Setting social links:', links);
                     setSocialLinks(links);
-                    console.log('Email state:', email);
                 } else {
                     console.error('Failed to fetch contact info:', response.status, response.statusText);
                 }

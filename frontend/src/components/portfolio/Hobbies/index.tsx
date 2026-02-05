@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { useLanguage } from '@/lib/i18n/context';
 import { getHobbies, type Hobby } from '@/lib/api/client';
 import { useTranslations } from '@/lib/i18n/hooks';
+import { DEFAULT_BACKGROUND } from '@/lib/utils/cdn-url';
 
 const scaleAnimation = {
     initial: {scale: 0, x:"-50%", y:"-50%"},
@@ -44,7 +45,7 @@ export default function Home() {
         const mappedHobbies = response.hobbies.map(hobby => ({
           title: hobby.title,
           description: hobby.description || '',
-          src: hobby.imageUrl || "https://portfolio-app.nyc3.digitaloceanspaces.com/images/background.jpg",
+          src: hobby.imageUrl || DEFAULT_BACKGROUND,
           color: hobby.color || "#2a2b2c"
         }));
         setHobbies(mappedHobbies);
