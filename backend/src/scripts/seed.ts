@@ -83,8 +83,8 @@ async function seed() {
       {
         title: { en: "PassionJerseysStore (Full-Stack E-commerce)", fr: "PassionJerseysStore (E-commerce Full-stack)" },
         description: { 
-          en: "Bilingual (EN/FR) full-stack e-commerce store — passionjerseys.me", 
-          fr: "Boutique e-commerce full-stack bilingue (FR/EN) — passionjerseys.me" 
+          en: "Bilingual (EN/FR) full-stack e-commerce store", 
+          fr: "Boutique e-commerce full-stack bilingue (FR/EN)" 
         },
         fullDescription: {
           en: "Product Owner and developer for a bilingual (EN/FR) full-stack e-commerce store; delivered iteratively using Agile/Scrum. Deployed the application; implemented Stripe checkout, authentication, and role-based admin access with transactional emails.",
