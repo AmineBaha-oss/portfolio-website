@@ -6,8 +6,11 @@ import { Providers } from '@/components/providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Portfolio Website',
-  description: 'Portfolio website',
+  title: 'Amine Baha | Portfolio',
+  description: 'Portfolio of Amine Baha — developer portfolio and projects',
+  icons: {
+    icon: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({
