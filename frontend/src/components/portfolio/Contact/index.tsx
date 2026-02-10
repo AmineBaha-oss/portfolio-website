@@ -8,6 +8,7 @@ import { useScroll, motion, useTransform } from 'framer-motion';
 import Magnetic from '@/common/Magnetic';
 import { useTranslations } from '@/lib/i18n/hooks';
 import { DEFAULT_PROFILE_PICTURE, getCdnUrl } from '@/lib/utils/cdn-url';
+import { getApiBaseUrl } from '@/lib/api/client';
 
 interface ContactInfo {
     id: string;
@@ -47,7 +48,7 @@ export default function Contact() {
     useEffect(() => {
         const fetchContactInfo = async () => {
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+                const apiUrl = getApiBaseUrl();
                 const response = await fetch(`${apiUrl}/api/public/contact-info`);
                 
                 if (response.ok) {

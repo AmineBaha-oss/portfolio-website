@@ -1,6 +1,7 @@
 import { authClient } from '@/lib/auth/auth-client';
+import { getApiBaseUrl } from './client';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_BASE_URL = getApiBaseUrl();
 
 async function getAuthToken(): Promise<string | null> {
   try {

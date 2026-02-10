@@ -1,4 +1,10 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+/** Base URL for API (origin only, no trailing /api). Prevents double /api when env includes /api. */
+export function getApiBaseUrl(): string {
+  const url = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").trim().replace(/\/api\/?$/, "");
+  return url;
+}
+
+const API_BASE_URL = getApiBaseUrl();
 
 export interface Project {
   id: string;

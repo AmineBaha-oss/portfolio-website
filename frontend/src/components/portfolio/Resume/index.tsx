@@ -5,6 +5,7 @@ import styles from "./style.module.scss";
 import { motion } from "framer-motion";
 import RoundedButton from "@/common/RoundedButton";
 import { useTranslations } from "@/lib/i18n/hooks";
+import { getApiBaseUrl } from "@/lib/api/client";
 
 interface ResumeData {
   filename: string;
@@ -23,7 +24,7 @@ export default function Resume() {
   const fetchResume = async () => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/public/resume?lang=${locale}`,
+        `${getApiBaseUrl()}/api/public/resume?lang=${locale}`,
       );
       if (response.ok) {
         const data = await response.json();
@@ -41,7 +42,7 @@ export default function Resume() {
       window.open(resumeData.file_url, "_blank");
       // Track the download
       fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/public/resume?lang=${locale}&track=true`,
+        `${getApiBaseUrl()}/api/public/resume?lang=${locale}&track=true`,
       ).catch((err) => console.error("Failed to track download:", err));
     } else {
       alert("Resume not available");

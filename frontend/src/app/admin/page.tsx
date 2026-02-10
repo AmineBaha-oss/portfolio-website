@@ -4,6 +4,7 @@ import { useAdminAccess } from "@/lib/hooks/useAdminAccess";
 import { useUserRole } from "@/lib/hooks/useUserRole";
 import { authClient } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { getApiBaseUrl } from "@/lib/api/client";
 
 export default function AdminPage() {
   const { authorized, loading: adminLoading } = useAdminAccess();
@@ -111,7 +112,7 @@ export default function AdminPage() {
                   return;
                 }
 
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+                const apiUrl = getApiBaseUrl();
                 const response = await fetch(`${apiUrl}/api/admin/example`, {
                   headers: {
                     Authorization: `Bearer ${token}`,

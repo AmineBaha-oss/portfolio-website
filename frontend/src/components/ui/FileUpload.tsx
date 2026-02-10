@@ -5,6 +5,7 @@
 "use client";
 
 import { useState, useRef, ChangeEvent } from "react";
+import { getApiBaseUrl } from "@/lib/api/client";
 
 interface FileUploadProps {
   accept?: string;
@@ -71,7 +72,7 @@ export function FileUpload({
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/upload`,
+        `${getApiBaseUrl()}/api/admin/upload`,
         {
           method: "POST",
           body: formData,
