@@ -41,41 +41,22 @@ export default function SlidingImages() {
                 const projects = projectsData.projects;
                 const hobbies = hobbiesData.hobbies;
 
-                // First 4 images: Projects 1-4
-                const firstFour = projects.slice(0, 4).map((project, index) => ({
-                    color: project.color || defaultColors[index],
-                    src: project.imageUrl || DEFAULT_BACKGROUND
-                }));
-
-                // Last 4 images: Alternate between projects and hobbies (Project 5, Hobby 1, Project 6, Hobby 2)
-                const lastFour = [];
-                const remainingProjects = projects.slice(4);
-                
-                for (let i = 0; i < 4; i++) {
+                // Build 8 slots alternating: P1, H1, P2, H2, P3, H3, P4, H4 (first 4 projects + first 4 hobbies)
+                const buildSlot = (i) => {
                     if (i % 2 === 0) {
-                        // Add project
-                        const projectIndex = Math.floor(i / 2);
-                        if (remainingProjects[projectIndex]) {
-                            lastFour.push({
-                                color: remainingProjects[projectIndex].color || defaultColors[4 + i],
-                                src: remainingProjects[projectIndex].imageUrl || DEFAULT_BACKGROUND
-                            });
-                        } else {
-                            lastFour.push({ color: defaultColors[4 + i], src: DEFAULT_BACKGROUND });
-                        }
+                        const p = projects[i / 2];
+                        return p
+                            ? { color: p.color || defaultColors[i], src: p.imageUrl || DEFAULT_BACKGROUND }
+                            : { color: defaultColors[i], src: DEFAULT_BACKGROUND };
                     } else {
-                        // Add hobby
-                        const hobbyIndex = Math.floor(i / 2);
-                        if (hobbies[hobbyIndex]) {
-                            lastFour.push({
-                                color: hobbies[hobbyIndex].color || defaultColors[4 + i],
-                                src: hobbies[hobbyIndex].imageUrl || DEFAULT_BACKGROUND
-                            });
-                        } else {
-                            lastFour.push({ color: defaultColors[4 + i], src: DEFAULT_BACKGROUND });
-                        }
+                        const h = hobbies[(i - 1) / 2];
+                        return h
+                            ? { color: h.color || defaultColors[i], src: h.imageUrl || DEFAULT_BACKGROUND }
+                            : { color: defaultColors[i], src: DEFAULT_BACKGROUND };
                     }
-                }
+                };
+                const firstFour = [buildSlot(0), buildSlot(1), buildSlot(2), buildSlot(3)];
+                const lastFour = [buildSlot(4), buildSlot(5), buildSlot(6), buildSlot(7)];
 
                 setSlider1(firstFour);
                 setSlider2(lastFour);
