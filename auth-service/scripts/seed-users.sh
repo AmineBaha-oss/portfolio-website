@@ -5,12 +5,35 @@
 
 echo "Seeding admin user..."
 
-# Validate required environment variables (check raw variables, apply defaults when using)
-if [ -z "${POSTGRES_USER}" ] || [ -z "${POSTGRES_DB}" ] || [ -z "${POSTGRES_PASSWORD}" ]; then
-  echo "Warning: Some database environment variables are not set, using defaults"
-  echo "   POSTGRES_USER=${POSTGRES_USER:-auth_user}"
-  echo "   POSTGRES_DB=${POSTGRES_DB:-auth_db}"
-  echo "   POSTGRES_PASSWORD is set: $([ -n "${POSTGRES_PASSWORD}" ] && echo "yes" || echo "no")"
+# Use DATABASE_URL; on DigitalOcean App Platform the attached DB may expose a different name (e.g. portfolio-auth-db.DATABASE_URL).
+# Use that if DATABASE_URL is not set.
+if [ -z "$DATABASE_URL" ]; then
+  for _var in PORTFOLIO_AUTH_DB_DATABASE_URL AUTH_DB_DATABASE_URL; do
+    eval "_val=\$$_var"
+    if [ -n "$_val" ]; then
+      DATABASE_URL="$_val"
+      export DATABASE_URL
+      break
+    fi
+  done
+fi
+
+# Run psql: use DATABASE_URL (App Platform) or Docker Compose host (auth-db)
+run_psql() {
+  if [ -n "$DATABASE_URL" ]; then
+    psql "$DATABASE_URL" "$@"
+  else
+    PGPASSWORD=${POSTGRES_PASSWORD:-auth_pass} psql -h auth-db -U ${POSTGRES_USER:-auth_user} -d ${POSTGRES_DB:-auth_db} "$@"
+  fi
+}
+
+# Validate: on App Platform / production we need DATABASE_URL (no auth-db host)
+if [ -z "$DATABASE_URL" ]; then
+  echo "Warning: DATABASE_URL is not set; will try auth-db (Docker Compose only)."
+  echo "   On DigitalOcean App Platform: attach the auth DB to this component and set DATABASE_URL to its connection string (e.g. \${portfolio-auth-db.DATABASE_URL})."
+  if [ -z "${POSTGRES_PASSWORD}" ]; then
+    echo "   POSTGRES_USER=${POSTGRES_USER:-auth_user}, POSTGRES_DB=${POSTGRES_DB:-auth_db}, POSTGRES_PASSWORD is unset"
+  fi
 fi
 
 # Wait for auth-service to be ready
@@ -61,12 +84,10 @@ update_user_in_db() {
   local email_lower="$1"
   local role_escaped="$2"
   
-  PGPASSWORD=${POSTGRES_PASSWORD:-auth_pass} psql -h auth-db -U ${POSTGRES_USER:-auth_user} -d ${POSTGRES_DB:-auth_db} \
-    -c "UPDATE \"user\" SET role = '$role_escaped', \"emailVerified\" = true, \"updatedAt\" = NOW() WHERE LOWER(email) = LOWER('$email_lower');" \
+  run_psql -c "UPDATE \"user\" SET role = '$role_escaped', \"emailVerified\" = true, \"updatedAt\" = NOW() WHERE LOWER(email) = LOWER('$email_lower');" \
     || { echo "   Failed to update user in database" >&2; return 1; }
   
-  PGPASSWORD=${POSTGRES_PASSWORD:-auth_pass} psql -h auth-db -U ${POSTGRES_USER:-auth_user} -d ${POSTGRES_DB:-auth_db} \
-    -c "DELETE FROM login_attempt WHERE LOWER(email) = LOWER('$email_lower') AND success = false;" \
+  run_psql -c "DELETE FROM login_attempt WHERE LOWER(email) = LOWER('$email_lower') AND success = false;" \
     || { echo "   Failed to clear login attempts" >&2; return 1; }
 }
 
@@ -85,8 +106,7 @@ create_user() {
   role_escaped=$(escape_sql_string_preserve_case "$role")
   
   # Check if user already exists (using psql with proper escaping)
-  psql_output=$(PGPASSWORD=${POSTGRES_PASSWORD:-auth_pass} psql -h auth-db -U ${POSTGRES_USER:-auth_user} -d ${POSTGRES_DB:-auth_db} \
-    -t -c "SELECT id FROM \"user\" WHERE LOWER(email) = LOWER('$email_lower');" 2>&1)
+  psql_output=$(run_psql -t -c "SELECT id FROM \"user\" WHERE LOWER(email) = LOWER('$email_lower');" 2>&1)
   psql_exit_code=$?
   if [ $psql_exit_code -ne 0 ]; then
     echo "   Failed to check if user exists: $psql_output" >&2
