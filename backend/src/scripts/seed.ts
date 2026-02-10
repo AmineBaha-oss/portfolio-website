@@ -300,4 +300,9 @@ async function seed() {
   }
 }
 
-seed();
+seed()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error(err);
+    process.exit(0); // still exit 0 so container starts
+  });

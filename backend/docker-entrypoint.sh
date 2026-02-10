@@ -43,11 +43,11 @@ else
 fi
 
 echo "Seeding database..."
-# Run seed in background and wait with timeout
+# Run seed in background and wait with timeout (90s so full seed can complete on cold DB)
 npm run seed &
 SEED_PID=$!
-# Wait up to 30 seconds for seed to complete
-for i in $(seq 1 30); do
+# Wait up to 90 seconds for seed to complete
+for i in $(seq 1 90); do
   if ! kill -0 $SEED_PID 2>/dev/null; then
     # Process finished
     wait $SEED_PID
