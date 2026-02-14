@@ -16,7 +16,8 @@ export default function Skills() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
-  const isHoveringNavRef = useRef(false);
+  const isHoveringRef = useRef(false);
+  const isSectionInViewRef = useRef(false);
 
   useEffect(() => {
     const fetchSkills = async () => {
@@ -76,8 +77,22 @@ export default function Skills() {
   }, [skillsData.length, activeIndex]);
 
   useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || skillsData.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isSectionInViewRef.current = entry.isIntersecting && (entry.intersectionRatio ?? 0) >= 0.9;
+      },
+      { threshold: [0, 0.5, 0.9, 1] }
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, [skillsData.length]);
+
+  useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      if (!isHoveringNavRef.current || skillsData.length === 0) return;
+      if (!isHoveringRef.current || !isSectionInViewRef.current || skillsData.length === 0) return;
 
       const isScrollDown = e.deltaY > 0;
 
@@ -124,7 +139,11 @@ export default function Skills() {
 
   return (
     <section ref={sectionRef} id="skills" className={styles.skills}>
-      <div className={styles.viewport}>
+      <div
+        className={styles.viewport}
+        onMouseEnter={() => { isHoveringRef.current = true; }}
+        onMouseLeave={() => { isHoveringRef.current = false; }}
+      >
         <div className={styles.header}>
           <h2 className={styles.title}>{t('skills.title')}</h2>
           <p className={styles.subtitle}>{t('skills.subtitle')}</p>
@@ -132,12 +151,7 @@ export default function Skills() {
 
         {skillsData.length > 0 ? (
           <>
-            <nav
-              className={styles.categoryNav}
-              aria-label="Skill categories"
-              onMouseEnter={() => { isHoveringNavRef.current = true; }}
-              onMouseLeave={() => { isHoveringNavRef.current = false; }}
-            >
+            <nav className={styles.categoryNav} aria-label="Skill categories">
               {skillsData.map(({ category }, i) => (
                 <button
                   key={category}
@@ -150,12 +164,7 @@ export default function Skills() {
               ))}
             </nav>
 
-            <div
-              className={styles.scrollIndicator}
-              aria-hidden
-              onMouseEnter={() => { isHoveringNavRef.current = true; }}
-              onMouseLeave={() => { isHoveringNavRef.current = false; }}
-            >
+            <div className={styles.scrollIndicator} aria-hidden>
               {skillsData.map((_, i) => (
                 <button
                   key={i}

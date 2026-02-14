@@ -225,17 +225,17 @@ export default function SkillsManagementPage() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 + index * 0.05 }}
                   >
-                    <td>
+                    <td data-label={t("dashboardSkills.icon") || "Icon"}>
                       {IconComponent ? (
                         <IconComponent size={20} />
                       ) : (
                         <span style={{ color: "rgba(255,255,255,0.3)" }}>—</span>
                       )}
                     </td>
-                    <td style={{ fontWeight: 500 }}>{name}</td>
-                    <td>{getCategoryTranslation(skill.category)}</td>
-                    <td>{skill.order}</td>
-                    <td>
+                    <td data-label={t("dashboardSkills.name")} style={{ fontWeight: 500 }}>{name}</td>
+                    <td data-label={t("dashboardSkills.category")}>{getCategoryTranslation(skill.category)}</td>
+                    <td data-label={t("dashboardSkills.order")}>{skill.order}</td>
+                    <td data-label={t("dashboard.actions")}>
                       <div className={styles.cardActions}>
                         <button
                           className={`${styles.button} ${styles.secondary}`}

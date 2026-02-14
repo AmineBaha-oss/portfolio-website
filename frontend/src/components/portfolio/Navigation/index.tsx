@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import styles from './style.module.scss';
 import LanguageToggle from '../LanguageToggle';
 import { useTranslations } from '@/lib/i18n/hooks';
+import { MdMenu, MdClose } from 'react-icons/md';
 
 export default function Navigation() {
   const { t } = useTranslations();
   const [activeSection, setActiveSection] = useState('home');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
     { name: t('nav.home'), href: '#home' },
@@ -57,6 +59,7 @@ export default function Navigation() {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setActiveSection(sectionId);
+      setMobileMenuOpen(false);
     }
   };
 
@@ -67,7 +70,16 @@ export default function Navigation() {
           <h2>Portfolio</h2>
         </a>
       </div>
-      <ul className={styles.navList}>
+      <button
+        type="button"
+        className={styles.mobileMenuToggle}
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+        aria-expanded={mobileMenuOpen}
+      >
+        {mobileMenuOpen ? <MdClose size={24} /> : <MdMenu size={24} />}
+      </button>
+      <ul className={`${styles.navList} ${mobileMenuOpen ? styles.mobileOpen : ''}`}>
         {navItems.map((item) => (
           <li key={item.name}>
             <a
@@ -86,6 +98,13 @@ export default function Navigation() {
           <a href="/login">{t('nav.login')}</a>
         </div>
       </div>
+      {mobileMenuOpen && (
+        <div
+          className={styles.mobileOverlay}
+          onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
     </nav>
   );
 }

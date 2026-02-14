@@ -11,9 +11,9 @@ import { useTranslations } from '@/lib/i18n/hooks';
 import { DEFAULT_BACKGROUND } from '@/lib/utils/cdn-url';
 
 const scaleAnimation = {
-    initial: {scale: 0, x:"-50%", y:"-50%"},
-    enter: {scale: 1, x:"-50%", y:"-50%", transition: {duration: 0.4, ease: [0.76, 0, 0.24, 1] as any} as any},
-    closed: {scale: 0, x:"-50%", y:"-50%", transition: {duration: 0.4, ease: [0.32, 0, 0.67, 0] as any} as any}
+    initial: {scale: 0, opacity: 0, x:"-50%", y:"-50%"},
+    enter: {scale: 1, opacity: 1, x:"-50%", y:"-50%", transition: {duration: 0.3, ease: [0.76, 0, 0.24, 1] as any} as any},
+    closed: {scale: 0, opacity: 0, x:"-50%", y:"-50%", transition: {duration: 0.25, ease: [0.32, 0, 0.67, 0] as any} as any}
 } as any
 
 export default function Home() {
@@ -66,8 +66,15 @@ export default function Home() {
     if (yMoveContainer.current) yMoveContainer.current(y);
   }
   const manageModal = (active: boolean, index: number, x: number, y: number) => {
-    moveItems(x, y)
-    setModal({active, index})
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    if (isMobile) {
+      if (modalContainer.current) {
+        gsap.set(modalContainer.current, { left: '50%', top: '50%' });
+      }
+    } else {
+      moveItems(x, y);
+    }
+    setModal({active, index});
   }
 
   if (loading) {
@@ -108,6 +115,13 @@ export default function Home() {
       }
     </div>
     <>
+        {active && (
+          <div
+            className={styles.modalBackdrop}
+            onClick={() => manageModal(false, index, 0, 0)}
+            aria-label="Close preview"
+          />
+        )}
         <motion.div ref={modalContainer} variants={scaleAnimation} initial="initial" animate={active ? "enter" : "closed"} className={styles.modalContainer}>
             <div style={{top: index * -100 + "%"}} className={styles.modalSlider}>
             {
@@ -117,8 +131,10 @@ export default function Home() {
                     <Image 
                     src={src}
                     width={300}
-                    height={0}
-                    alt="image"
+                    height={300}
+                    alt={project.title || "hobby image"}
+                    style={{ objectFit: 'cover' }}
+                    unoptimized
                     />
                 </div>
                 })

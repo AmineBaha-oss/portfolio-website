@@ -2,6 +2,7 @@
   min-height: 100vh;
   background-color: white;
   padding-top: 80px;
+  padding-bottom: env(safe-area-inset-bottom, 0);
 
   .container {
     max-width: 1200px;
@@ -10,6 +11,7 @@
 
     @media (max-width: 768px) {
       padding: 0 20px 60px;
+      padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 80px); // Extra space to avoid fixed elements overlaying text
     }
   }
 
@@ -56,9 +58,15 @@
       color: #141516;
       margin-bottom: 1.5rem;
       line-height: 1.2;
+      word-break: break-word;
+      overflow-wrap: break-word;
 
       @media (max-width: 768px) {
         font-size: 2.5rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1.75rem;
       }
     }
 
@@ -78,6 +86,10 @@
       color: #444;
       line-height: 1.8;
       margin-bottom: 3rem;
+
+      @media (max-width: 768px) {
+        padding-bottom: 2rem; // Prevent fixed elements from overlaying text on small screens
+      }
 
       p {
         margin-bottom: 1rem;

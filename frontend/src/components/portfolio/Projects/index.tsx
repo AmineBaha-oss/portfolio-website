@@ -13,9 +13,9 @@ import Link from 'next/link';
 import { DEFAULT_BACKGROUND } from '@/lib/utils/cdn-url';
 
 const scaleAnimation = {
-    initial: {scale: 0, x:"-50%", y:"-50%"},
-    enter: {scale: 1, x:"-50%", y:"-50%", transition: {duration: 0.4, ease: [0.76, 0, 0.24, 1] as any} as any},
-    closed: {scale: 0, x:"-50%", y:"-50%", transition: {duration: 0.4, ease: [0.32, 0, 0.67, 0] as any} as any}
+    initial: {scale: 0, opacity: 0, x:"-50%", y:"-50%"},
+    enter: {scale: 1, opacity: 1, x:"-50%", y:"-50%", transition: {duration: 0.3, ease: [0.76, 0, 0.24, 1] as any} as any},
+    closed: {scale: 0, opacity: 0, x:"-50%", y:"-50%", transition: {duration: 0.25, ease: [0.32, 0, 0.67, 0] as any} as any}
 } as any
 
 export default function Home() {
@@ -90,8 +90,16 @@ export default function Home() {
     if (yMoveCursorLabel.current) yMoveCursorLabel.current(y);
   }
   const manageModal = (active: boolean, index: number, x: number, y: number) => {
-    moveItems(x, y)
-    setModal({active, index})
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    if (isMobile) {
+      // On mobile: keep modal centered, no position animation – just pop in place
+      if (modalContainer.current) {
+        gsap.set(modalContainer.current, { left: '50%', top: '50%' });
+      }
+    } else {
+      moveItems(x, y);
+    }
+    setModal({active, index});
   }
 
   if (loading) {
@@ -148,12 +156,19 @@ export default function Home() {
       </Rounded>
     </Link>
     <>
+        {active && (
+          <div
+            className={styles.modalBackdrop}
+            onClick={() => manageModal(false, index, 0, 0)}
+            aria-label="Close preview"
+          />
+        )}
         <motion.div ref={modalContainer} variants={scaleAnimation} initial="initial" animate={active ? "enter" : "closed"} className={styles.modalContainer}>
             <div style={{top: index * -100 + "%"}} className={styles.modalSlider}>
             {
-                projects.map( (project, index) => {
+                projects.map( (project, idx) => {
                 const { src, color } = project
-                return <div className={styles.modal} style={{backgroundColor: color}} key={`modal_${index}`}>
+                return <div className={styles.modal} style={{backgroundColor: color}} key={`modal_${idx}`}>
                     <Image 
                     src={src}
                     width={300}
@@ -166,6 +181,18 @@ export default function Home() {
                 })
             }
             </div>
+            <Link
+              href={`/projects/${projects[index]?.id ?? ''}`}
+              className={styles.modalViewLink}
+              scroll={false}
+              onClick={() => {
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+                window.scroll(0, 0);
+              }}
+            >
+              {t('projects.viewProject')}
+            </Link>
         </motion.div>
         <motion.div ref={cursor} className={styles.cursor} variants={scaleAnimation} initial="initial" animate={active ? "enter" : "closed"}></motion.div>
         <motion.div ref={cursorLabel} className={styles.cursorLabel} variants={scaleAnimation} initial="initial" animate={active ? "enter" : "closed"}>View</motion.div>

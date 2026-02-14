@@ -76,13 +76,16 @@
         position: fixed;
         top: 50%;
         left: 50%;
+        transform: translate(-50%, -50%);
         background-color: white;
         pointer-events: none;
         overflow: hidden;
         z-index: 3;
 
         @media (max-width: 768px) {
-            display: none;
+            height: 280px;
+            width: 320px;
+            pointer-events: auto;
         }
     }
     
@@ -104,6 +107,27 @@
     .modal img{
         height: auto;
     }
+
+    .modalViewLink{
+        display: none;
+
+        @media (max-width: 768px) {
+            display: flex;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+        }
+    }
     
     .cursor, .cursorLabel{
         width: 80px;
@@ -122,6 +146,19 @@
 
         @media (max-width: 768px) {
             display: none;
+        }
+    }
+
+    .modalBackdrop{
+        display: none;
+
+        @media (max-width: 768px) {
+            display: block;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 2;
+            pointer-events: auto;
         }
     }
     

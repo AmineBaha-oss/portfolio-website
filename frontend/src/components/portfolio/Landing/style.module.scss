@@ -162,7 +162,7 @@
         margin-bottom: 100px;
 
         @media (max-width: 768px) {
-          transform: scale(1.5);
+          transform: scale(1.5) rotate(45deg);
           margin-bottom: 50px;
           display: block;
           margin-left: auto;

@@ -475,12 +475,30 @@
           display: flex;
           justify-content: space-between;
           align-items: center;
+          gap: 0.75rem;
+          flex-wrap: wrap;
 
           &::before {
             content: attr(data-label);
             font-weight: 600;
             color: rgba(255, 255, 255, 0.5);
             margin-right: 1rem;
+            flex-shrink: 0;
+          }
+
+          &:first-child {
+            align-items: center;
+          }
+
+          &:last-child {
+            flex-direction: column;
+            align-items: stretch;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+            &::before {
+              margin-bottom: 0.25rem;
+            }
           }
         }
       }
