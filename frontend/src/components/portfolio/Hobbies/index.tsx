@@ -26,15 +26,9 @@ export default function Home() {
   const [modal, setModal] = useState({active: false, index: 0})
   const { active, index } = modal;
   const modalContainer = useRef(null);
-  const cursor = useRef(null);
-  const cursorLabel = useRef(null);
 
   const xMoveContainer = useRef<any>(null);
   const yMoveContainer = useRef<any>(null);
-  const xMoveCursor = useRef<any>(null);
-  const yMoveCursor = useRef<any>(null);
-  const xMoveCursorLabel = useRef<any>(null);
-  const yMoveCursorLabel = useRef<any>(null);
 
   useEffect(() => {
     const fetchHobbies = async () => {
@@ -62,29 +56,14 @@ export default function Home() {
   }, [locale]);
 
   useEffect( () => {
-    // Wait for refs to be available
-    if (!modalContainer.current || !cursor.current || !cursorLabel.current) {
-      return;
-    }
-    
-    //Move Container
+    if (!modalContainer.current) return;
     xMoveContainer.current = gsap.quickTo(modalContainer.current, "left", {duration: 0.8, ease: "power3"})
     yMoveContainer.current = gsap.quickTo(modalContainer.current, "top", {duration: 0.8, ease: "power3"})
-    //Move cursor
-    xMoveCursor.current = gsap.quickTo(cursor.current, "left", {duration: 0.5, ease: "power3"})
-    yMoveCursor.current = gsap.quickTo(cursor.current, "top", {duration: 0.5, ease: "power3"})
-    //Move cursor label
-    xMoveCursorLabel.current = gsap.quickTo(cursorLabel.current, "left", {duration: 0.45, ease: "power3"})
-    yMoveCursorLabel.current = gsap.quickTo(cursorLabel.current, "top", {duration: 0.45, ease: "power3"})
-  }, [hobbies]) // Re-run when hobbies are loaded
+  }, [hobbies])
 
   const moveItems = (x: number, y: number) => {
     if (xMoveContainer.current) xMoveContainer.current(x);
     if (yMoveContainer.current) yMoveContainer.current(y);
-    if (xMoveCursor.current) xMoveCursor.current(x);
-    if (yMoveCursor.current) yMoveCursor.current(y);
-    if (xMoveCursorLabel.current) xMoveCursorLabel.current(x);
-    if (yMoveCursorLabel.current) yMoveCursorLabel.current(y);
   }
   const manageModal = (active: boolean, index: number, x: number, y: number) => {
     moveItems(x, y)
@@ -146,8 +125,6 @@ export default function Home() {
             }
             </div>
         </motion.div>
-        <motion.div ref={cursor} className={styles.cursor} variants={scaleAnimation} initial="initial" animate={active ? "enter" : "closed"}></motion.div>
-        <motion.div ref={cursorLabel} className={styles.cursorLabel} variants={scaleAnimation} initial="initial" animate={active ? "enter" : "closed"}>View</motion.div>
     </>
   </main>
   )
