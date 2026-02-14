@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, category, order } = body;
+    const { name, category, order, icon } = body;
 
     // Validation
     if (!name || typeof name !== "object" || !name.en || !name.fr) {
@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
       .values({
         name: sanitizedName,
         category: sanitizedCategory,
+        icon: icon ? sanitizeText(icon) : null,
         order: orderValue,
       })
       .returning();

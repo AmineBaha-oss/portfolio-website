@@ -14,6 +14,7 @@ export const skills = pgTable("skills", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: jsonb("name").$type<{ en: string; fr: string }>().notNull(),
   category: text("category").notNull(),
+  icon: text("icon"), // react-icons Simple Icons identifier, e.g. "SiReact"
   order: integer("order").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

@@ -94,7 +94,7 @@ export default function HomePage() {
         <Landing />
       </div>
       <Description />
-      <div id="skills">
+      <div id="skills" style={{ overflow: 'hidden', minHeight: '100vh' }}>
         <Skills />
       </div>
       <div id="projects">

@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
       id: skill.id,
       name: extractLanguageFromJsonb(skill.name, lang),
       category: skill.category,
+      icon: skill.icon,
       order: skill.order,
       createdAt: skill.createdAt,
       updatedAt: skill.updatedAt,

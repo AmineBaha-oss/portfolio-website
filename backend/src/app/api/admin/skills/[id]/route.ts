@@ -21,7 +21,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { name, category, order } = body;
+    const { name, category, order, icon } = body;
 
     // Check if skill exists
     const [existingSkill] = await db
@@ -62,6 +62,10 @@ export async function PUT(
 
     if (order !== undefined) {
       updateData.order = parseInt(order, 10);
+    }
+
+    if (icon !== undefined) {
+      updateData.icon = icon ? sanitizeText(icon) : null;
     }
 
     updateData.updatedAt = new Date();

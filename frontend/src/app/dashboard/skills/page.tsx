@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import styles from "../shared.module.scss";
 import {
@@ -12,6 +12,7 @@ import {
 import { useTranslations } from "@/lib/i18n/hooks";
 import { triggerDataRefresh } from "@/lib/hooks/useDataRefresh";
 import { useDialog } from "@/components/ui/ConfirmDialog";
+import { getSkillIcon, getAvailableIcons, getIconForSkillName } from "@/lib/utils/skill-icons";
 
 export default function SkillsManagementPage() {
   const { t, locale } = useTranslations();
@@ -74,6 +75,62 @@ export default function SkillsManagementPage() {
     setShowAddModal(true);
   };
 
+  const handleClearAllIcons = async () => {
+    const confirmed = await showConfirm({
+      message: "Remove icons from all skills?",
+      title: "Clear all icons",
+    });
+    if (!confirmed) return;
+    try {
+      for (const skill of skills) {
+        const name = typeof skill.name === "object" && skill.name && locale in skill.name
+          ? skill.name[locale]
+          : String(skill.name ?? "");
+        await updateSkill(skill.id, {
+          name: skill.name,
+          category: skill.category,
+          order: skill.order ?? 0,
+          icon: null,
+        });
+      }
+      await fetchSkills();
+      triggerDataRefresh();
+      await showAlert("All icons cleared", "info");
+    } catch (err: unknown) {
+      await showAlert((err as Error).message || "Failed to clear icons", "error");
+    }
+  };
+
+  const handleApplyIconsFromText = async () => {
+    const confirmed = await showConfirm({
+      message: "Auto-assign icons based on skill names? Existing icons will be overwritten.",
+      title: "Apply icons from text",
+    });
+    if (!confirmed) return;
+    try {
+      let updated = 0;
+      for (const skill of skills) {
+        const nameEn = typeof skill.name === "object" && skill.name?.en ? skill.name.en : String(skill.name ?? "");
+        const nameFr = typeof skill.name === "object" && skill.name?.fr ? skill.name.fr : "";
+        const iconKey = getIconForSkillName(nameEn) ?? getIconForSkillName(nameFr);
+        if (iconKey) {
+          await updateSkill(skill.id, {
+            name: skill.name,
+            category: skill.category,
+            order: skill.order ?? 0,
+            icon: iconKey,
+          });
+          updated++;
+        }
+      }
+      await fetchSkills();
+      triggerDataRefresh();
+      await showAlert(`${updated} skill(s) updated with icons`, "info");
+    } catch (err: unknown) {
+      await showAlert((err as Error).message || "Failed to apply icons", "error");
+    }
+  };
+
   if (loading) {
     return (
       <div className={styles.pageContainer}>
@@ -101,7 +158,23 @@ export default function SkillsManagementPage() {
               <span>/</span>
               <span>{t("skills.title")}</span>
             </div>
-            <div className={styles.actions}>
+            <div className={styles.actions} style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+              <button
+                className={`${styles.button} ${styles.secondary}`}
+                onClick={handleApplyIconsFromText}
+                disabled={skills.length === 0}
+                title="Auto-assign icons based on skill names"
+              >
+                Apply icons from text
+              </button>
+              <button
+                className={`${styles.button} ${styles.secondary}`}
+                onClick={handleClearAllIcons}
+                disabled={skills.length === 0}
+                title="Remove icons from all skills"
+              >
+                Clear all icons
+              </button>
               <button
                 className={`${styles.button} ${styles.primary}`}
                 onClick={() => {
@@ -129,6 +202,7 @@ export default function SkillsManagementPage() {
           <table className={styles.table}>
             <thead>
               <tr>
+                <th>Icon</th>
                 <th>{t("dashboardSkills.name")}</th>
                 <th>{t("dashboardSkills.category")}</th>
                 <th>{t("dashboardSkills.order")}</th>
@@ -143,6 +217,7 @@ export default function SkillsManagementPage() {
                   locale in skill.name
                     ? skill.name[locale]
                     : String(skill.name ?? "");
+                const IconComponent = getSkillIcon(skill.icon);
                 return (
                   <motion.tr
                     key={skill.id}
@@ -150,6 +225,13 @@ export default function SkillsManagementPage() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 + index * 0.05 }}
                   >
+                    <td>
+                      {IconComponent ? (
+                        <IconComponent size={20} />
+                      ) : (
+                        <span style={{ color: "rgba(255,255,255,0.3)" }}>—</span>
+                      )}
+                    </td>
                     <td style={{ fontWeight: 500 }}>{name}</td>
                     <td>{getCategoryTranslation(skill.category)}</td>
                     <td>{skill.order}</td>
@@ -217,10 +299,24 @@ function SkillModal({
   const [formData, setFormData] = useState({
     name: { en: "", fr: "" },
     category: "",
+    icon: "" as string,
     order: 0,
   });
   const [orderInput, setOrderInput] = useState("0");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [iconSearch, setIconSearch] = useState("");
+  const [showIconPicker, setShowIconPicker] = useState(false);
+
+  const allIcons = useMemo(() => getAvailableIcons(), []);
+  const filteredIcons = useMemo(
+    () =>
+      iconSearch.trim()
+        ? allIcons.filter((i) =>
+            i.searchTerms.includes(iconSearch.toLowerCase())
+          )
+        : allIcons,
+    [allIcons, iconSearch]
+  );
 
   useEffect(() => {
     if (skill) {
@@ -231,6 +327,7 @@ function SkillModal({
       setFormData({
         name,
         category: skill.category || "",
+        icon: skill.icon || "",
         order: skill.order ?? 0,
       });
       setOrderInput(String(skill.order ?? 0));
@@ -245,7 +342,7 @@ function SkillModal({
     e.preventDefault();
     setIsSubmitting(true);
     const order = parseInt(orderInput, 10) || 0;
-    const payload = { ...formData, order };
+    const payload = { ...formData, order, icon: formData.icon || null };
 
     try {
       if (isEditing) {
@@ -292,12 +389,15 @@ function SkillModal({
               type="text"
               placeholder="e.g. React"
               value={formData.name.en}
-              onChange={(e) =>
+              onChange={(e) => {
+                const en = e.target.value;
+                const matchedIcon = getIconForSkillName(en);
                 setFormData({
                   ...formData,
-                  name: { ...formData.name, en: e.target.value },
-                })
-              }
+                  name: { ...formData.name, en },
+                  icon: matchedIcon ?? formData.icon,
+                });
+              }}
               required
             />
           </div>
@@ -308,12 +408,15 @@ function SkillModal({
               type="text"
               placeholder="e.g. React"
               value={formData.name.fr}
-              onChange={(e) =>
+              onChange={(e) => {
+                const fr = e.target.value;
+                const matchedIcon = getIconForSkillName(fr) ?? getIconForSkillName(formData.name.en);
                 setFormData({
                   ...formData,
-                  name: { ...formData.name, fr: e.target.value },
-                })
-              }
+                  name: { ...formData.name, fr },
+                  icon: matchedIcon ?? formData.icon,
+                });
+              }}
               required
             />
           </div>
@@ -343,6 +446,179 @@ function SkillModal({
               </option>
               <option value="AI & Data">{t("skills.categories.ai")}</option>
             </select>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>Icon</label>
+            <div style={{ position: "relative" }}>
+              <div
+                onClick={() => setShowIconPicker(!showIconPicker)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  padding: "0.75rem 1rem",
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  color: "white",
+                  minHeight: "44px",
+                }}
+              >
+                {formData.icon ? (
+                  (() => {
+                    const Icon = getSkillIcon(formData.icon);
+                    const label = allIcons.find((i) => i.key === formData.icon)?.label || formData.icon;
+                    return (
+                      <>
+                        {Icon && <Icon size={20} />}
+                        <span>{label}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setFormData({ ...formData, icon: "" });
+                          }}
+                          style={{
+                            marginLeft: "auto",
+                            background: "rgba(255,255,255,0.1)",
+                            border: "none",
+                            borderRadius: "50%",
+                            width: "22px",
+                            height: "22px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                            color: "white",
+                            fontSize: "12px",
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </>
+                    );
+                  })()
+                ) : (
+                  <span style={{ opacity: 0.5 }}>Select an icon...</span>
+                )}
+              </div>
+
+              {showIconPicker && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 4px)",
+                    left: 0,
+                    right: 0,
+                    background: "#1e1f22",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    borderRadius: "8px",
+                    zIndex: 100,
+                    maxHeight: "280px",
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div style={{ padding: "0.5rem" }}>
+                    <input
+                      type="text"
+                      placeholder="Search icons..."
+                      value={iconSearch}
+                      onChange={(e) => setIconSearch(e.target.value)}
+                      autoFocus
+                      style={{
+                        width: "100%",
+                        padding: "0.5rem 0.75rem",
+                        background: "rgba(255,255,255,0.07)",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        borderRadius: "6px",
+                        color: "white",
+                        fontSize: "0.875rem",
+                        outline: "none",
+                      }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      overflowY: "auto",
+                      padding: "0.25rem 0.5rem 0.5rem",
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+                      gap: "4px",
+                    }}
+                  >
+                    {filteredIcons.map(({ key, label }) => {
+                      const Icon = getSkillIcon(key);
+                      const isSelected = formData.icon === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, icon: key });
+                            setShowIconPicker(false);
+                            setIconSearch("");
+                          }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
+                            padding: "0.4rem 0.6rem",
+                            background: isSelected
+                              ? "rgba(255,255,255,0.15)"
+                              : "transparent",
+                            border: "none",
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                            color: "white",
+                            fontSize: "0.8rem",
+                            textAlign: "left",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.background =
+                              "rgba(255,255,255,0.1)")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.background = isSelected
+                              ? "rgba(255,255,255,0.15)"
+                              : "transparent")
+                          }
+                        >
+                          {Icon && <Icon size={16} />}
+                          <span
+                            style={{
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                    {filteredIcons.length === 0 && (
+                      <div
+                        style={{
+                          gridColumn: "1 / -1",
+                          padding: "1rem",
+                          textAlign: "center",
+                          color: "rgba(255,255,255,0.4)",
+                          fontSize: "0.875rem",
+                        }}
+                      >
+                        No icons found
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className={styles.formGroup}>
