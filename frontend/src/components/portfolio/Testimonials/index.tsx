@@ -4,7 +4,7 @@ import styles from './style.module.scss';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/lib/i18n/context';
-import { getTestimonials, submitTestimonial, type Testimonial } from '@/lib/api/client';
+import { getTestimonials, submitTestimonial, ApiError, type Testimonial } from '@/lib/api/client';
 import { useTranslations } from '@/lib/i18n/hooks';
 
 export default function Testimonials() {
@@ -23,6 +23,7 @@ export default function Testimonials() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitErrorMessage, setSubmitErrorMessage] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -99,6 +100,7 @@ export default function Testimonials() {
     
     setIsSubmitting(true);
     setSubmitSuccess(false);
+    setSubmitErrorMessage(null);
 
     try {
       await submitTestimonial({
@@ -116,9 +118,14 @@ export default function Testimonials() {
         setShowForm(false);
         setSubmitSuccess(false);
       }, 3000);
-    } catch (error: any) {
-      console.error('Error submitting testimonial:', error);
-      alert('Error submitting testimonial. Please try again.');
+    } catch (err: unknown) {
+      console.error('Error submitting testimonial:', err);
+      const isRateLimit = err instanceof ApiError
+        ? err.status === 429
+        : (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 429);
+      const message = isRateLimit ? t('testimonials.rateLimit') : t('testimonials.error');
+      setSubmitErrorMessage(message);
+      setTimeout(() => setSubmitErrorMessage(null), 6000);
     } finally {
       setIsSubmitting(false);
     }
@@ -213,6 +220,18 @@ export default function Testimonials() {
                     color: '#22c55e'
                   }}>
                     {t('testimonials.successMessage')}
+                  </div>
+                )}
+                {submitErrorMessage && (
+                  <div style={{ 
+                    padding: '1rem', 
+                    background: 'rgba(239, 68, 68, 0.1)', 
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    borderRadius: '8px',
+                    marginBottom: '1rem',
+                    color: '#ef4444'
+                  }}>
+                    {submitErrorMessage}
                   </div>
                 )}
                 <form className={styles.testimonialForm} onSubmit={handleSubmit}>

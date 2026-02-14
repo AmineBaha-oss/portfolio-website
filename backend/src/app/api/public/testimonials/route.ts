@@ -9,6 +9,7 @@ import {
   validateNotEmpty,
   validateRating,
 } from "@/lib/utils/validation";
+import { checkRateLimit, getClientIdentifier } from "@/lib/utils/rate-limit";
 
 export async function GET(request: NextRequest) {
   try {
@@ -34,6 +35,23 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const clientId = getClientIdentifier(request);
+    const { allowed, retryAfterSeconds } = checkRateLimit(`testimonials:${clientId}`);
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          error: "Too many testimonial submissions. Please try again later.",
+          retryAfterSeconds,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(retryAfterSeconds ?? 60),
+          },
+        }
+      );
+    }
+
     const body = await request.json();
     const { name, position, company, email, message, rating } = body;
 

@@ -101,7 +101,7 @@ export const translations = {
     // Testimonials
     testimonials: {
       title: "Testimonials",
-      subtitle: "What people say about me",
+      subtitle: "My experience working with people",
       author: "Author",
       role: "Role",
       company: "Company",
@@ -125,6 +125,9 @@ export const translations = {
       testimonialPlaceholder: "Share your experience working with me...",
       submitting: "Submitting...",
       noTestimonials: "No testimonials available yet.",
+      error: "Error submitting testimonial. Please try again.",
+      rateLimit:
+        "You've submitted too many testimonials. Please wait a few minutes before trying again.",
     },
     // Contact
     contact: {
@@ -138,6 +141,8 @@ export const translations = {
       sending: "Sending...",
       success: "Message sent successfully!",
       error: "Failed to send message. Please try again.",
+      rateLimit:
+        "You've sent too many messages. Please wait a few minutes before trying again.",
       namePlaceholder: "Your name",
       emailPlaceholder: "your.email@example.com",
       subjectPlaceholder: "Subject of your message",
@@ -557,7 +562,7 @@ export const translations = {
     // Testimonials
     testimonials: {
       title: "Témoignages",
-      subtitle: "Ce que les gens disent de moi",
+      subtitle: "Mon expérience de travail avec les gens",
       author: "Auteur",
       role: "Rôle",
       company: "Entreprise",

@@ -86,6 +86,18 @@ export interface ContactMessage {
   createdAt: string;
 }
 
+/** Thrown when the API returns an error (e.g. 400, 429, 500). Use status to detect rate limiting (429). */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+    public retryAfterSeconds?: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 async function fetchAPI<T>(
   endpoint: string,
   options?: RequestInit,
@@ -102,14 +114,15 @@ async function fetchAPI<T>(
     });
 
     if (!response.ok) {
-      const error = await response
-        .json()
-        .catch(() => ({ error: "Request failed" }));
-      throw new Error(error.error || `HTTP error! status: ${response.status}`);
+      const body = await response.json().catch(() => ({ error: "Request failed" }));
+      const message = body.error || `HTTP error! status: ${response.status}`;
+      const retryAfter = body.retryAfterSeconds ?? undefined;
+      throw new ApiError(message, response.status, retryAfter);
     }
 
     return await response.json();
   } catch (error) {
+    if (error instanceof ApiError) throw error;
     console.error(`API Error (${endpoint}):`, error);
     throw error;
   }

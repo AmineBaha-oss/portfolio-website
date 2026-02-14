@@ -99,6 +99,7 @@ export default function Contact() {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | null>(null);
+    const [submitErrorMessage, setSubmitErrorMessage] = useState<string | null>(null);
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
     const validateContactForm = () => {
@@ -145,16 +146,24 @@ export default function Contact() {
         setSubmitStatus(null);
         
         try {
-            const { submitMessage } = await import('@/lib/api/client');
+            const { submitMessage, ApiError } = await import('@/lib/api/client');
             await submitMessage(formData);
             
             setSubmitStatus('success');
+            setSubmitErrorMessage(null);
             setFormData({ name: '', email: '', subject: '', message: '' });
             setTimeout(() => setSubmitStatus(null), 5000);
-        } catch (error) {
+        } catch (error: unknown) {
             console.error('Error submitting message:', error);
             setSubmitStatus('error');
-            setTimeout(() => setSubmitStatus(null), 5000);
+            const status = error && typeof error === 'object' && 'status' in error ? (error as { status: number }).status : undefined;
+            const message = error instanceof Error ? error.message : String(error ?? '');
+            const isRateLimit = status === 429 || message.includes('Too many');
+            setSubmitErrorMessage(isRateLimit ? t('contact.rateLimit') : t('contact.error'));
+            setTimeout(() => {
+                setSubmitStatus(null);
+                setSubmitErrorMessage(null);
+            }, 6000);
         } finally {
             setIsSubmitting(false);
         }
@@ -214,7 +223,7 @@ export default function Contact() {
                             <div className={styles.successMessage}>{t('contact.success')}</div>
                         )}
                         {submitStatus === 'error' && (
-                            <div className={styles.errorMessage}>{t('contact.error')}</div>
+                            <div className={styles.errorMessage}>{submitErrorMessage ?? t('contact.error')}</div>
                         )}
                         <div className={styles.formRow}>
                             <div className={styles.formGroup}>

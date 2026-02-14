@@ -1,9 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, contactMessages } from "@/lib/db";
 import { validateEmail, sanitizeText, validateNotEmpty } from "@/lib/utils/validation";
+import { checkRateLimit, getClientIdentifier } from "@/lib/utils/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
+    const clientId = getClientIdentifier(request);
+    const { allowed, retryAfterSeconds } = checkRateLimit(`messages:${clientId}`);
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          error: "Too many messages sent. Please try again later.",
+          retryAfterSeconds,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(retryAfterSeconds ?? 60),
+          },
+        }
+      );
+    }
+
     const body = await request.json();
     const { name, email, subject, message } = body;
 
