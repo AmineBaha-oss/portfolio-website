@@ -1,6 +1,8 @@
-# Portfolio Website
+# Amine Baha — Portfolio
 
-A modern portfolio website with authentication, built with Next.js, Better Auth, and PostgreSQL.
+A personal portfolio website built with Next.js, Better Auth, and PostgreSQL. Features authentication, a modern microservices architecture, and a polished UI.
+
+**Live site:** [aminebaha.dev](https://aminebaha.dev)
 
 ## Architecture
 
@@ -62,11 +64,7 @@ This application follows a microservices architecture with three main services:
 
 ### Initial Setup
 
-On first run, the auth-service will:
-- Create database tables
-- Seed test users:
-  - **Admin**: `admin@test.com` / `password123` (ADMIN role)
-  - **Customer**: `customer@test.com` / `password123` (CUSTOMER role)
+
 
 ## Services
 
@@ -77,14 +75,13 @@ On first run, the auth-service will:
 | Auth Service | 3001 | Better Auth authentication service |
 | app-db | 5433 | PostgreSQL database for application data |
 | auth-db | 5434 | PostgreSQL database for authentication |
-| pgAdmin | 5050 | Database admin UI (optional, use profile) |
 
 ### Accessing Services
 
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:8080/api
-- **Auth Service**: http://localhost:3001
-- **pgAdmin** (if enabled): http://localhost:5050
+- **Production**: [aminebaha.dev](https://aminebaha.dev)
+- **Frontend** (local): http://localhost:3000
+- **Backend API** (local): http://localhost:8080/api
+- **Auth Service** (local): http://localhost:3001
 
 ## Environment Variables
 
@@ -111,10 +108,6 @@ GOOGLE_CLIENT_SECRET=your-client-secret
 
 # CORS Origins (comma-separated)
 CORS_ORIGINS=http://localhost:3000,http://localhost:8080
-
-# pgAdmin (optional, for database management)
-PGADMIN_DEFAULT_EMAIL=admin@portfolio.com
-PGADMIN_DEFAULT_PASSWORD=admin123
 ```
 
 ## Project Structure
@@ -194,23 +187,6 @@ docker compose logs -f auth-service
 
 ### Database Access
 
-#### Using pgAdmin (Recommended)
-
-1. Start pgAdmin:
-   ```bash
-   docker compose --profile pgadmin up -d pgadmin
-   ```
-
-2. Access at http://localhost:5050
-   - Email: `admin@portfolio.com` (or from `.env`)
-   - Password: `admin123` (or from `.env`)
-
-3. Add servers:
-   - **app-db**: Host: `app-db`, Port: `5432`, User: `app_user`, Password: `app_pass`
-   - **auth-db**: Host: `auth-db`, Port: `5432`, User: `auth_user`, Password: `auth_pass`
-
-#### Using psql
-
 ```bash
 # Connect to app-db
 docker exec -it app-db psql -U app_user -d portfolio_app
@@ -249,8 +225,8 @@ See [OAUTH_SETUP.md](./OAUTH_SETUP.md) for detailed Google OAuth setup instructi
 
 **Quick Setup:**
 1. Create OAuth credentials in Google Cloud Console
-2. Add authorized origins: `http://localhost:3000`, `http://localhost:3001`
-3. Add redirect URIs: `http://localhost:3001/api/auth/callback/google`
+2. Add authorized origins: `http://localhost:3000`, `http://localhost:3001`, `https://aminebaha.dev`
+3. Add redirect URIs: `http://localhost:3001/api/auth/callback/google` (local), `https://[auth-domain]/api/auth/callback/google` (production)
 4. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env`
 
 ### Session Management
@@ -311,6 +287,8 @@ This is a known issue in development due to cross-origin cookies. The applicatio
 
 ## Production Deployment
 
+**Live deployment:** [https://aminebaha.dev](https://aminebaha.dev)
+
 For production deployment:
 
 1. Set all required environment variables
@@ -365,8 +343,7 @@ Workflows run automatically on:
 
 ## License
 
-[Add your license here]
-
+MIT
 
 ## Support
 
