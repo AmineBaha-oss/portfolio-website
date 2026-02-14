@@ -18,6 +18,7 @@ export default function Skills() {
   const sectionRef = useRef<HTMLElement>(null);
   const isHoveringRef = useRef(false);
   const isSectionInViewRef = useRef(false);
+  const [isMobileOrTouch, setIsMobileOrTouch] = useState(false);
 
   useEffect(() => {
     const fetchSkills = async () => {
@@ -77,6 +78,14 @@ export default function Skills() {
   }, [skillsData.length, activeIndex]);
 
   useEffect(() => {
+    const mql = window.matchMedia('(max-width: 768px)');
+    const update = () => setIsMobileOrTouch(mql.matches);
+    update();
+    mql.addEventListener('change', update);
+    return () => mql.removeEventListener('change', update);
+  }, []);
+
+  useEffect(() => {
     const section = sectionRef.current;
     if (!section || skillsData.length === 0) return;
 
@@ -91,6 +100,8 @@ export default function Skills() {
   }, [skillsData.length]);
 
   useEffect(() => {
+    if (isMobileOrTouch) return;
+
     const handleWheel = (e: WheelEvent) => {
       if (!isHoveringRef.current || !isSectionInViewRef.current || skillsData.length === 0) return;
 
@@ -113,7 +124,7 @@ export default function Skills() {
 
     window.addEventListener('wheel', handleWheel, { passive: false, capture: true });
     return () => window.removeEventListener('wheel', handleWheel, { capture: true });
-  }, [activeIndex, skillsData.length, goToIndex]);
+  }, [activeIndex, skillsData.length, goToIndex, isMobileOrTouch]);
 
   if (loading) {
     return (

@@ -8,6 +8,13 @@
   overflow: hidden;
   position: relative;
   z-index: 1;
+
+  @media (max-width: 768px) {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+  }
 }
 
 .viewport {
@@ -30,6 +37,10 @@
 
   @media (max-width: 768px) {
     padding: 70px 24px 20px;
+    height: auto;
+    min-height: 100%;
+    overflow: visible;
+    grid-template-rows: auto auto auto;
   }
 }
 
@@ -169,6 +180,11 @@
     grid-row: 3;
     grid-column: 1;
   }
+
+  @media (max-width: 768px) {
+    min-height: unset;
+    overflow: visible;
+  }
 }
 
 .slide {
@@ -180,6 +196,11 @@
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
+
+  @media (max-width: 768px) {
+    height: auto;
+    overflow: visible;
+  }
 }
 
 
