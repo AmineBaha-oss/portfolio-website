@@ -54,6 +54,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const MESSAGE_MAX_LENGTH = 500;
+    if (message.length > MESSAGE_MAX_LENGTH) {
+      return NextResponse.json(
+        { error: `Message must be at most ${MESSAGE_MAX_LENGTH} characters` },
+        { status: 400 }
+      );
+    }
+
     // Sanitize inputs
     const sanitizedName = sanitizeText(name);
     const sanitizedSubject = sanitizeText(subject);

@@ -125,8 +125,8 @@ export default function Contact() {
         
         if (!formData.message.trim()) {
             errors.message = 'Message is required';
-        } else if (formData.message.length > 300) {
-            errors.message = 'Message must be less than 300 characters';
+        } else if (formData.message.length > 500) {
+            errors.message = 'Message must be less than 500 characters';
         }
         
         return errors;
@@ -271,7 +271,7 @@ export default function Contact() {
                         <div className={styles.formGroup}>
                             <div className={styles.labelRow}>
                                 <label>{t('contact.message')}</label>
-                                <span className={styles.charCount}>{formData.message.length}/300</span>
+                                <span className={styles.charCount}>{formData.message.length}/500</span>
                             </div>
                             <textarea
                                 placeholder={t('contact.messagePlaceholder')}
@@ -279,7 +279,7 @@ export default function Contact() {
                                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                                 required
                                 rows={5}
-                                maxLength={300}
+                                maxLength={500}
                                 className={validationErrors.message ? styles.errorInput : ''}
                             />
                             {validationErrors.message && (

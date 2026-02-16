@@ -81,8 +81,8 @@ export default function Testimonials() {
     
     if (!formData.testimonial.trim()) {
       errors.testimonial = 'Testimonial is required';
-    } else if (formData.testimonial.length > 150) {
-      errors.testimonial = 'Testimonial must be less than 150 characters';
+    } else if (formData.testimonial.length > 500) {
+      errors.testimonial = 'Testimonial must be less than 500 characters';
     }
     
     return errors;
@@ -302,7 +302,7 @@ export default function Testimonials() {
                   <div className={styles.formGroup}>
                     <div className={styles.labelRow}>
                       <label>{t('testimonials.yourTestimonial')} *</label>
-                      <span className={styles.charCount}>{formData.testimonial.length}/150</span>
+                      <span className={styles.charCount}>{formData.testimonial.length}/500</span>
                     </div>
                     <textarea
                       placeholder={t('testimonials.testimonialPlaceholder')}
@@ -310,7 +310,7 @@ export default function Testimonials() {
                       onChange={(e) => setFormData({ ...formData, testimonial: e.target.value })}
                       required
                       rows={5}
-                      maxLength={150}
+                      maxLength={500}
                       className={validationErrors.testimonial ? styles.errorInput : ''}
                     />
                     {validationErrors.testimonial && (
