@@ -282,6 +282,16 @@
                     }
                 }
                 
+                .turnstile {
+                    margin: 0.5rem 0;
+                }
+
+                .captchaHint {
+                    color: rgba(255, 255, 255, 0.7);
+                    font-size: 0.875rem;
+                    margin: 0.25rem 0 0;
+                }
+
                 .formGroup {
                     display: flex;
                     flex-direction: column;

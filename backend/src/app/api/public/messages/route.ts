@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, contactMessages } from "@/lib/db";
 import { validateEmail, sanitizeText, validateNotEmpty } from "@/lib/utils/validation";
 import { checkRateLimit, getClientIdentifier } from "@/lib/utils/rate-limit";
+import { sendContactMessageNotification } from "@/lib/utils/email";
+import { verifyTurnstileToken } from "@/lib/utils/turnstile";
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +25,18 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, email, subject, message } = body;
+    const { name, email, subject, message, captchaToken } = body;
+
+    // CAPTCHA (Turnstile) verification
+    if (process.env.TURNSTILE_SECRET_KEY) {
+      const { success } = await verifyTurnstileToken(captchaToken ?? "", getClientIdentifier(request));
+      if (!success) {
+        return NextResponse.json(
+          { error: "CAPTCHA verification failed. Please try again." },
+          { status: 400 }
+        );
+      }
+    }
 
     // Validation
     if (!validateNotEmpty(name)) {
@@ -78,6 +91,14 @@ export async function POST(request: NextRequest) {
         status: "unread",
       })
       .returning();
+
+    // Notify by email (fire-and-forget; don't fail the request if email fails)
+    sendContactMessageNotification({
+      name: sanitizedName,
+      email: email.trim().toLowerCase(),
+      subject: sanitizedSubject,
+      message: sanitizedMessage,
+    }).catch((err) => console.error("Contact message notification email failed:", err));
 
     return NextResponse.json({
       success: true,

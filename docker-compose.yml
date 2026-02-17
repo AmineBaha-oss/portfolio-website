@@ -82,6 +82,14 @@ services:
             
             # Port configuration
             PORT: 8080
+            
+            # Gmail SMTP for testimonial notification emails
+            GMAIL_USER: ${GMAIL_USER:-}
+            GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD:-}
+            TESTIMONIAL_NOTIFY_EMAIL: ${TESTIMONIAL_NOTIFY_EMAIL:-aminebaha115@gmail.com}
+            
+            # Turnstile CAPTCHA (optional; leave empty to disable)
+            TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
         depends_on:
             app-db:
                 condition: service_healthy
@@ -153,6 +161,7 @@ services:
                 # NEXT_PUBLIC_* variables must be available at build time for Next.js
                 NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
                 NEXT_PUBLIC_AUTH_SERVICE_URL: ${NEXT_PUBLIC_AUTH_SERVICE_URL:-http://localhost:3001}
+                NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}
         container_name: frontend
         restart: unless-stopped
         env_file:
@@ -163,6 +172,7 @@ services:
             # Client-side (browser) uses localhost to access host machine
             NEXT_PUBLIC_API_URL: http://localhost:8080
             NEXT_PUBLIC_AUTH_SERVICE_URL: http://localhost:3001
+            NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}
             
             # Server-side (SSR) uses service names for container-to-container communication
             API_URL: http://backend:8080

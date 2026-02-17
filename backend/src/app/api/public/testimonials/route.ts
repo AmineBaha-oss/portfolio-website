@@ -9,7 +9,9 @@ import {
   validateNotEmpty,
   validateRating,
 } from "@/lib/utils/validation";
-import { checkRateLimit, getClientIdentifier } from "@/lib/utils/rate-limit";
+import { checkDailyRateLimit, getClientIdentifier } from "@/lib/utils/rate-limit";
+import { sendTestimonialNotification } from "@/lib/utils/email";
+import { verifyTurnstileToken } from "@/lib/utils/turnstile";
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,11 +38,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const clientId = getClientIdentifier(request);
-    const { allowed, retryAfterSeconds } = checkRateLimit(`testimonials:${clientId}`);
+    const { allowed, retryAfterSeconds } = checkDailyRateLimit(`testimonials:${clientId}`);
     if (!allowed) {
       return NextResponse.json(
         {
-          error: "Too many testimonial submissions. Please try again later.",
+          error: "Daily limit for testimonial submissions reached. Please try again tomorrow.",
           retryAfterSeconds,
         },
         {
@@ -53,7 +55,18 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, position, company, email, message, rating } = body;
+    const { name, position, company, email, message, rating, captchaToken } = body;
+
+    // CAPTCHA (Turnstile) verification
+    if (process.env.TURNSTILE_SECRET_KEY) {
+      const { success } = await verifyTurnstileToken(captchaToken ?? "", getClientIdentifier(request));
+      if (!success) {
+        return NextResponse.json(
+          { error: "CAPTCHA verification failed. Please try again." },
+          { status: 400 }
+        );
+      }
+    }
 
     // Validation
     if (!validateNotEmpty(name)) {
@@ -118,6 +131,16 @@ export async function POST(request: NextRequest) {
         status: "pending",
       })
       .returning();
+
+    // Notify by email (fire-and-forget; don't fail the request if email fails)
+    sendTestimonialNotification({
+      name: sanitizedName,
+      position: sanitizedPosition,
+      company: sanitizedCompany,
+      email: email.trim().toLowerCase(),
+      message: sanitizedMessage,
+      rating: parseInt(rating, 10),
+    }).catch((err) => console.error("Testimonial notification email failed:", err));
 
     return NextResponse.json({
       success: true,

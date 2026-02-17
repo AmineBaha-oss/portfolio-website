@@ -128,6 +128,7 @@ export const translations = {
       error: "Error submitting testimonial. Please try again.",
       rateLimit:
         "You've submitted too many testimonials. Please wait a few minutes before trying again.",
+      captchaHint: "Complete the verification below, then click Submit again.",
     },
     // Contact
     contact: {
@@ -147,6 +148,7 @@ export const translations = {
       emailPlaceholder: "your.email@example.com",
       subjectPlaceholder: "Subject of your message",
       messagePlaceholder: "Your message here...",
+      captchaHint: "Complete the verification below, then click Send again.",
     },
     // Dashboard - Common
     dashboard: {
@@ -587,6 +589,7 @@ export const translations = {
         "Partagez votre expérience de travail avec moi...",
       submitting: "Envoi en cours...",
       noTestimonials: "Aucun témoignage disponible pour le moment.",
+      captchaHint: "Complétez la vérification ci-dessous, puis cliquez sur Soumettre.",
     },
     // Contact
     contact: {
@@ -604,6 +607,7 @@ export const translations = {
       emailPlaceholder: "votre.email@exemple.com",
       subjectPlaceholder: "Sujet de votre message",
       messagePlaceholder: "Votre message ici...",
+      captchaHint: "Complétez la vérification ci-dessous, puis cliquez sur Envoyer.",
     },
     // Dashboard - Common
     dashboard: {

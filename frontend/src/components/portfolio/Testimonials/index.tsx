@@ -2,10 +2,11 @@
 
 import styles from './style.module.scss';
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/lib/i18n/context';
 import { getTestimonials, submitTestimonial, ApiError, type Testimonial } from '@/lib/api/client';
 import { useTranslations } from '@/lib/i18n/hooks';
+import TurnstileWidget from '@/components/TurnstileWidget';
 
 export default function Testimonials() {
   const { locale } = useLanguage();
@@ -25,6 +26,19 @@ export default function Testimonials() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitErrorMessage, setSubmitErrorMessage] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const captchaContainerRef = useRef<HTMLDivElement>(null);
+  const captchaRequired = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+  useEffect(() => {
+    if (showCaptcha && captchaRequired) {
+      const t = setTimeout(() => {
+        captchaContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+      return () => clearTimeout(t);
+    }
+  }, [showCaptcha, captchaRequired]);
 
   useEffect(() => {
     const fetchTestimonials = async () => {
@@ -97,6 +111,14 @@ export default function Testimonials() {
       setValidationErrors(errors);
       return;
     }
+
+    if (captchaRequired && !showCaptcha) {
+      setShowCaptcha(true);
+      return;
+    }
+    if (captchaRequired && showCaptcha && !captchaToken) {
+      return;
+    }
     
     setIsSubmitting(true);
     setSubmitSuccess(false);
@@ -109,11 +131,14 @@ export default function Testimonials() {
         company: formData.company || undefined,
         email: formData.email,
         message: formData.testimonial,
-        rating: 5
+        rating: 5,
+        ...(captchaToken && { captchaToken }),
       });
       
       setSubmitSuccess(true);
       setFormData({ name: '', role: '', company: '', testimonial: '', email: '' });
+      setShowCaptcha(false);
+      setCaptchaToken('');
       setTimeout(() => {
         setShowForm(false);
         setSubmitSuccess(false);
@@ -317,6 +342,23 @@ export default function Testimonials() {
                       <span className={styles.errorText}>{validationErrors.testimonial}</span>
                     )}
                   </div>
+
+                  {showCaptcha && (
+                    <div
+                      ref={captchaContainerRef}
+                      className={styles.captchaWrapper}
+                      style={{ isolation: 'isolate', transform: 'none' }}
+                    >
+                      <TurnstileWidget
+                        key="testimonials-turnstile"
+                        onTokenChange={setCaptchaToken}
+                        className={styles.turnstile}
+                      />
+                      {!captchaToken && (
+                        <p className={styles.captchaHint}>{t('testimonials.captchaHint')}</p>
+                      )}
+                    </div>
+                  )}
 
                   <div className={styles.formActions}>
                     <button

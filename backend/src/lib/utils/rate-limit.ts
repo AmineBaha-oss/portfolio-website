@@ -53,6 +53,51 @@ export function checkRateLimit(identifier: string): {
   return { allowed: true };
 }
 
+/** Daily limit store: key -> timestamps in the last 24h */
+const dailyStore = new Map<string, number[]>();
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Max testimonial submissions per day (global or per identifier) */
+export const TESTIMONIALS_DAILY_LIMIT = 150;
+
+function pruneDaily(key: string): void {
+  const timestamps = dailyStore.get(key);
+  if (!timestamps) return;
+  const now = Date.now();
+  const valid = timestamps.filter((t) => now - t < ONE_DAY_MS);
+  if (valid.length === 0) {
+    dailyStore.delete(key);
+  } else {
+    dailyStore.set(key, valid);
+  }
+}
+
+/**
+ * Check daily rate limit (e.g. 150 submissions per day per identifier).
+ * @param identifier - Unique key (e.g. testimonials:ip)
+ * @param maxPerDay - Max requests per 24h (default 150)
+ */
+export function checkDailyRateLimit(
+  identifier: string,
+  maxPerDay: number = TESTIMONIALS_DAILY_LIMIT
+): { allowed: boolean; retryAfterSeconds?: number } {
+  const now = Date.now();
+  pruneDaily(identifier);
+
+  const timestamps = dailyStore.get(identifier) ?? [];
+  const inWindow = timestamps.filter((t) => now - t < ONE_DAY_MS);
+
+  if (inWindow.length >= maxPerDay) {
+    const oldestInWindow = Math.min(...inWindow);
+    const retryAfterSeconds = Math.ceil((oldestInWindow + ONE_DAY_MS - now) / 1000);
+    return { allowed: false, retryAfterSeconds: Math.max(1, retryAfterSeconds) };
+  }
+
+  inWindow.push(now);
+  dailyStore.set(identifier, inWindow);
+  return { allowed: true };
+}
+
 /**
  * Get client identifier from request (IP). Uses x-forwarded-for, x-real-ip, or a fallback.
  */

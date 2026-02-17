@@ -9,6 +9,7 @@ import Magnetic from '@/common/Magnetic';
 import { useTranslations } from '@/lib/i18n/hooks';
 import { DEFAULT_PROFILE_PICTURE, getCdnUrl } from '@/lib/utils/cdn-url';
 import { getApiBaseUrl } from '@/lib/api/client';
+import TurnstileWidget from '@/components/TurnstileWidget';
 
 interface ContactInfo {
     id: string;
@@ -101,6 +102,19 @@ export default function Contact() {
     const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | null>(null);
     const [submitErrorMessage, setSubmitErrorMessage] = useState<string | null>(null);
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+    const [captchaToken, setCaptchaToken] = useState('');
+    const [showCaptcha, setShowCaptcha] = useState(false);
+    const captchaContainerRef = useRef<HTMLDivElement>(null);
+    const captchaRequired = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+    useEffect(() => {
+        if (showCaptcha && captchaRequired) {
+            const t = setTimeout(() => {
+                captchaContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+            return () => clearTimeout(t);
+        }
+    }, [showCaptcha, captchaRequired]);
 
     const validateContactForm = () => {
         const errors: Record<string, string> = {};
@@ -141,17 +155,30 @@ export default function Contact() {
             setValidationErrors(errors);
             return;
         }
+
+        if (captchaRequired && !showCaptcha) {
+            setShowCaptcha(true);
+            return;
+        }
+        if (captchaRequired && showCaptcha && !captchaToken) {
+            return;
+        }
         
         setIsSubmitting(true);
         setSubmitStatus(null);
         
         try {
-            const { submitMessage, ApiError } = await import('@/lib/api/client');
-            await submitMessage(formData);
+            const { submitMessage } = await import('@/lib/api/client');
+            await submitMessage({
+              ...formData,
+              ...(captchaToken && { captchaToken }),
+            });
             
             setSubmitStatus('success');
             setSubmitErrorMessage(null);
             setFormData({ name: '', email: '', subject: '', message: '' });
+            setShowCaptcha(false);
+            setCaptchaToken('');
             setTimeout(() => setSubmitStatus(null), 5000);
         } catch (error: unknown) {
             console.error('Error submitting message:', error);
@@ -286,6 +313,18 @@ export default function Contact() {
                                 <span className={styles.errorText}>{validationErrors.message}</span>
                             )}
                         </div>
+                        {showCaptcha && (
+                            <div ref={captchaContainerRef}>
+                                <TurnstileWidget
+                                    key="contact-turnstile"
+                                    onTokenChange={setCaptchaToken}
+                                    className={styles.turnstile}
+                                />
+                                {!captchaToken && (
+                                    <p className={styles.captchaHint}>{t('contact.captchaHint')}</p>
+                                )}
+                            </div>
+                        )}
                         <button type="submit" disabled={isSubmitting}>
                             {isSubmitting ? t('contact.sending') : t('contact.send')}
                         </button>

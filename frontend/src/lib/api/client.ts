@@ -195,6 +195,7 @@ export async function submitTestimonial(data: {
   email: string;
   message: string;
   rating: number;
+  captchaToken?: string;
 }): Promise<{ success: boolean; message: string; id?: string }> {
   return fetchAPI<{ success: boolean; message: string; id?: string }>(
     "/api/public/testimonials",
@@ -210,6 +211,7 @@ export async function submitMessage(data: {
   email: string;
   subject: string;
   message: string;
+  captchaToken?: string;
 }): Promise<{ success: boolean; message: string; id?: string }> {
   return fetchAPI<{ success: boolean; message: string; id?: string }>(
     "/api/public/messages",
