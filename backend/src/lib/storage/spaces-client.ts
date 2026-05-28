@@ -1,138 +1,57 @@
-/**
- * DigitalOcean Spaces client configuration and utilities
- * Spaces is S3-compatible, so we use AWS SDK
- */
+import { createClient } from "@supabase/supabase-js";
 
-import {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-  HeadObjectCommand,
-  GetObjectCommand,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+const getSupabase = () =>
+  createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 
-// Environment variable getters (only validated at runtime, not at import time)
-const getEnvVar = (key: string): string => {
-  const value = process.env[key];
-  if (!value && process.env.NODE_ENV !== "production") {
-    console.warn(`Warning: Missing environment variable: ${key}`);
-    return "";
-  }
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${key}`);
-  }
-  return value;
-};
+function getBucketAndPath(key: string): { bucket: string; path: string } {
+  if (key.startsWith("resumes/")) return { bucket: "resumes", path: key.slice("resumes/".length) };
+  if (key.startsWith("images/")) return { bucket: "images", path: key.slice("images/".length) };
+  return { bucket: "images", path: key };
+}
 
-// Lazy initialization - only create client when actually needed
-let _spacesClient: S3Client | null = null;
-
-const getSpacesClient = (): S3Client => {
-  if (!_spacesClient) {
-    _spacesClient = new S3Client({
-      endpoint: getEnvVar("DO_SPACES_ENDPOINT"),
-      region: getEnvVar("DO_SPACES_REGION"),
-      credentials: {
-        accessKeyId: getEnvVar("DO_SPACES_ACCESS_KEY_ID"),
-        secretAccessKey: getEnvVar("DO_SPACES_SECRET_ACCESS_KEY"),
-      },
-      forcePathStyle: false, // Required for DigitalOcean Spaces
-    });
-  }
-  return _spacesClient;
-};
-
-export const spacesClient = getSpacesClient;
-
-export const SPACES_BUCKET = () => getEnvVar("DO_SPACES_BUCKET");
-
-/**
- * Upload a file to DigitalOcean Spaces
- */
 export async function uploadFile(params: {
   key: string;
   body: Buffer;
   contentType: string;
-  isPublic?: boolean;
 }): Promise<string> {
-  const { key, body, contentType, isPublic = true } = params;
-
-  const command = new PutObjectCommand({
-    Bucket: SPACES_BUCKET(),
-    Key: key,
-    Body: body,
-    ContentType: contentType,
-    ACL: isPublic ? "public-read" : "private",
+  const { key, body, contentType } = params;
+  const { bucket, path } = getBucketAndPath(key);
+  const { error } = await getSupabase().storage.from(bucket).upload(path, body, {
+    contentType,
+    upsert: true,
   });
-
-  await spacesClient().send(command);
-
-  // Return the file key (will be converted to pre-signed URL when needed)
+  if (error) throw new Error(`Upload failed: ${error.message}`);
   return key;
 }
 
-/**
- * Delete a file from DigitalOcean Spaces
- */
 export async function deleteFile(key: string): Promise<void> {
-  const command = new DeleteObjectCommand({
-    Bucket: SPACES_BUCKET(),
-    Key: key,
-  });
-
-  await spacesClient().send(command);
+  const { bucket, path } = getBucketAndPath(key);
+  const { error } = await getSupabase().storage.from(bucket).remove([path]);
+  if (error) throw new Error(`Delete failed: ${error.message}`);
 }
 
-/**
- * Check if a file exists in DigitalOcean Spaces
- */
 export async function fileExists(key: string): Promise<boolean> {
-  try {
-    const command = new HeadObjectCommand({
-      Bucket: SPACES_BUCKET(),
-      Key: key,
-    });
-
-    await spacesClient().send(command);
-    return true;
-  } catch (error) {
-    return false;
-  }
+  const { bucket, path } = getBucketAndPath(key);
+  const { data } = await getSupabase().storage.from(bucket).list("", { search: path });
+  return (data ?? []).some((f) => f.name === path);
 }
 
-/**
- * Generate a pre-signed URL for temporary access to a private file
- * Default expiration: 7 days (604800 seconds)
- */
-export async function getPresignedUrl(
-  key: string,
-  expiresIn: number = 604800,
-): Promise<string> {
-  const command = new GetObjectCommand({
-    Bucket: SPACES_BUCKET(),
-    Key: key,
-  });
-
-  return await getSignedUrl(spacesClient(), command, { expiresIn });
-}
-
-/**
- * Get public URL for a file (for files uploaded with public-read ACL)
- */
 export function getPublicUrl(key: string): string {
-  const bucket = SPACES_BUCKET();
-  const region = getEnvVar("DO_SPACES_REGION");
-  return `https://${bucket}.${region}.digitaloceanspaces.com/${key}`;
+  const { bucket, path } = getBucketAndPath(key);
+  const { data } = getSupabase().storage.from(bucket).getPublicUrl(path);
+  return data.publicUrl;
 }
 
-/**
- * Extract key from full URL
- */
+export async function getPresignedUrl(key: string): Promise<string> {
+  return getPublicUrl(key);
+}
+
 export function extractKeyFromUrl(url: string): string | null {
   try {
     const urlObj = new URL(url);
-    // Remove leading slash
     return urlObj.pathname.substring(1);
   } catch {
     return null;

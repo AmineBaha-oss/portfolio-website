@@ -1,58 +1,55 @@
-import { authClient } from '@/lib/auth/auth-client';
 import { getApiBaseUrl } from './client';
 
 const API_BASE_URL = getApiBaseUrl();
 
+let cachedToken: string | null = null;
+
 async function getAuthToken(): Promise<string | null> {
+  if (cachedToken) return cachedToken;
   try {
-    const tokenResult = await authClient.token();
-    return tokenResult.data?.token || null;
-  } catch (error) {
-    console.error('Error getting auth token:', error);
+    const response = await fetch('/api/admin-auth');
+    if (!response.ok) {
+      if (typeof window !== 'undefined') window.location.href = '/login';
+      return null;
+    }
+    const { token } = await response.json();
+    cachedToken = token;
+    return token;
+  } catch {
     return null;
   }
 }
 
-async function fetchAdminAPI<T>(
-  endpoint: string,
-  options?: RequestInit
-): Promise<T> {
+async function fetchAdminAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const token = await getAuthToken();
-  
+
   if (!token) {
     throw new Error('Not authenticated. Please log in.');
   }
 
   const url = `${API_BASE_URL}${endpoint}`;
-  
-  try {
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        ...options?.headers,
-      },
-    });
 
-    if (response.status === 401 || response.status === 403) {
-      // Redirect to login if unauthorized
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-      throw new Error('Unauthorized. Please log in.');
-    }
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      ...options?.headers,
+    },
+  });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Request failed' }));
-      throw new Error(error.error || `HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error(`Admin API Error (${endpoint}):`, error);
-    throw error;
+  if (response.status === 401 || response.status === 403) {
+    cachedToken = null;
+    if (typeof window !== 'undefined') window.location.href = '/login';
+    throw new Error('Unauthorized. Please log in.');
   }
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Request failed' }));
+    throw new Error(error.error || `HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
 }
 
 // Projects
@@ -259,7 +256,7 @@ export async function getResume(language?: string) {
 
 export async function uploadResume(file: File, language: string = 'en') {
   const token = await getAuthToken();
-  
+
   if (!token) {
     throw new Error('Not authenticated. Please log in.');
   }
@@ -268,34 +265,24 @@ export async function uploadResume(file: File, language: string = 'en') {
   formData.append('file', file);
   formData.append('language', language);
 
-  const url = `${API_BASE_URL}/api/admin/resume`;
-  
-  try {
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
+  const response = await fetch(`${API_BASE_URL}/api/admin/resume`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
 
-    if (response.status === 401 || response.status === 403) {
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-      throw new Error('Unauthorized. Please log in.');
-    }
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Request failed' }));
-      throw new Error(error.error || `HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Resume upload error:', error);
-    throw error;
+  if (response.status === 401 || response.status === 403) {
+    cachedToken = null;
+    if (typeof window !== 'undefined') window.location.href = '/login';
+    throw new Error('Unauthorized. Please log in.');
   }
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Request failed' }));
+    throw new Error(error.error || `HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
 }
 
 export async function deleteResume(id: string) {
@@ -307,9 +294,10 @@ export async function deleteResume(id: string) {
 export async function getResumeStats() {
   return fetchAdminAPI<{ total: number; thisMonth: number; today: number }>('/api/admin/resume/stats');
 }
+
 export async function uploadImage(file: File): Promise<{ key: string; message: string }> {
   const token = await getAuthToken();
-  
+
   if (!token) {
     throw new Error('Not authenticated. Please log in.');
   }
@@ -317,32 +305,22 @@ export async function uploadImage(file: File): Promise<{ key: string; message: s
   const formData = new FormData();
   formData.append('file', file);
 
-  const url = `${API_BASE_URL}/api/admin/upload-image`;
-  
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
+  const response = await fetch(`${API_BASE_URL}/api/admin/upload-image`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
 
-    if (response.status === 401 || response.status === 403) {
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-      throw new Error('Unauthorized. Please log in.');
-    }
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Upload failed' }));
-      throw new Error(error.error || `HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Image upload error:', error);
-    throw error;
+  if (response.status === 401 || response.status === 403) {
+    cachedToken = null;
+    if (typeof window !== 'undefined') window.location.href = '/login';
+    throw new Error('Unauthorized. Please log in.');
   }
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Upload failed' }));
+    throw new Error(error.error || `HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
 }

@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { authClient } from "@/lib/auth";
 import styles from "./shared.module.scss";
 import { useTranslations } from "@/lib/i18n/hooks";
 import LanguageToggle from "@/components/portfolio/LanguageToggle";
@@ -34,7 +33,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { t } = useTranslations();
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<{ email?: string } | null>(null);
+  const [user] = useState<{ email?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -71,28 +70,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }, []);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const sessionResult = await authClient.getSession();
-        if (!sessionResult?.data?.session) {
-          router.push("/login");
-          return;
-        }
-        setUser(sessionResult.data.user);
-      } catch (error) {
-        console.error("Auth error:", error);
-        router.push("/login");
-      } finally {
+    fetch('/api/admin-auth')
+      .then((r) => {
+        if (!r.ok) router.push('/login');
         setLoading(false);
-      }
-    };
-
-    checkAuth();
+      })
+      .catch(() => {
+        router.push('/login');
+        setLoading(false);
+      });
   }, [router]);
 
   const handleSignOut = async () => {
-    await authClient.signOut();
-    router.push("/");
+    await fetch('/api/admin-auth', { method: 'DELETE' });
+    window.location.href = '/login';
   };
 
   if (loading) {

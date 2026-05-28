@@ -2,7 +2,6 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth";
 import { motion } from "framer-motion";
 import styles from "./shared.module.scss";
 import { useTranslations } from "@/lib/i18n/hooks";
@@ -28,13 +27,12 @@ function DashboardContent() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const sessionResult = await authClient.getSession();
-        
-        if (!sessionResult?.data?.session) {
-          router.push("/login?redirect=/dashboard");
+        const authResponse = await fetch('/api/admin-auth');
+        if (!authResponse.ok) {
+          router.push('/login');
           return;
         }
-        
+
         // Fetch stats
         try {
           const [projectsRes, skillsRes, experienceRes, testimonialsRes, messagesRes, hobbiesRes, educationRes, resumeEnRes, resumeFrRes] = await Promise.all([
@@ -211,8 +209,8 @@ function DashboardContent() {
         }
         setLoading(false);
       } catch (error) {
-        console.error("Session error:", error);
-        router.push("/login?redirect=/dashboard");
+        console.error("Auth error:", error);
+        router.push('/login');
       }
     };
 

@@ -1,6 +1,6 @@
 services:
     # --------------------
-    # Databases
+    # Database
     # --------------------
     app-db:
         image: postgres:17
@@ -11,34 +11,13 @@ services:
             POSTGRES_USER: app_user
             POSTGRES_PASSWORD: app_pass
         ports:
-            - "5433:5432" # host:container (optional for direct DB access)
+            - "5433:5432"
         volumes:
             - app_db_data:/var/lib/postgresql/data
         networks:
             - portfolio-net
         healthcheck:
             test: ["CMD-SHELL", "pg_isready -U app_user -d portfolio_app"]
-            interval: 5s
-            timeout: 5s
-            retries: 10
-            start_period: 10s
-
-    auth-db:
-        image: postgres:17
-        container_name: auth-db
-        restart: unless-stopped
-        environment:
-            POSTGRES_DB: auth_db
-            POSTGRES_USER: auth_user
-            POSTGRES_PASSWORD: auth_pass
-        ports:
-            - "5434:5432" # optional
-        volumes:
-            - auth_db_data:/var/lib/postgresql/data
-        networks:
-            - portfolio-net
-        healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
             interval: 5s
             timeout: 5s
             retries: 10
@@ -57,95 +36,25 @@ services:
             - .env
         environment:
             NODE_ENV: development
-            
-            # Database connection
-            DATABASE_URL: postgres://app_user:app_pass@app-db:5432/portfolio_app
-            
-            # JWT validation (must match auth-service)
-            AUTH_JWT_SECRET: ${AUTH_JWT_SECRET}
-            AUTH_JWT_ISS: portfolio-auth
-            AUTH_JWT_AUD: portfolio-api
-            
-            # CORS configuration (comma-separated list of allowed origins)
+            DATABASE_URL: ${DATABASE_URL}
+            ADMIN_PASSCODE: ${ADMIN_PASSCODE}
             CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:8080}
-            
-            # Auth service URL for token validation
-            AUTH_SERVICE_URL: http://auth-service:3001
-            
-            # DigitalOcean Spaces configuration
             DO_SPACES_ENDPOINT: https://nyc3.digitaloceanspaces.com
             DO_SPACES_REGION: nyc3
             DO_SPACES_BUCKET: portfolio-app
             DO_SPACES_ACCESS_KEY_ID: ${DO_SPACES_ACCESS_KEY_ID}
             DO_SPACES_SECRET_ACCESS_KEY: ${DO_SPACES_SECRET_ACCESS_KEY}
             DO_SPACES_CDN_ENDPOINT: https://portfolio-app.nyc3.cdn.digitaloceanspaces.com
-            
-            # Port configuration
             PORT: 8080
-            
-            # Gmail SMTP for testimonial notification emails
             GMAIL_USER: ${GMAIL_USER:-}
             GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD:-}
             TESTIMONIAL_NOTIFY_EMAIL: ${TESTIMONIAL_NOTIFY_EMAIL:-aminebaha115@gmail.com}
-            
-            # Turnstile CAPTCHA (optional; leave empty to disable)
             TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
         depends_on:
             app-db:
                 condition: service_healthy
-            auth-service:
-                condition: service_started
         ports:
             - "8080:8080"
-        networks:
-            - portfolio-net
-
-    # --------------------
-    # Auth service (Better Auth, Node/Next)
-    # --------------------
-    auth-service:
-        build:
-            context: ./auth-service
-            dockerfile: Dockerfile
-        container_name: auth-service
-        restart: unless-stopped
-        env_file:
-            - .env
-        environment:
-            NODE_ENV: development
-            
-            # DB for auth / Better Auth
-            DATABASE_URL: postgres://auth_user:auth_pass@auth-db:5432/auth_db
-            POSTGRES_USER: auth_user
-            POSTGRES_PASSWORD: auth_pass
-            POSTGRES_DB: auth_db
-
-            # Better Auth configuration
-            BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-            BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3001}
-
-            # JWT issuing (shared secret + claims)
-            BETTER_AUTH_JWT_SECRET: ${AUTH_JWT_SECRET}
-            BETTER_AUTH_JWT_ISS: portfolio-auth
-            BETTER_AUTH_JWT_AUD: portfolio-api
-
-            # CORS configuration (comma-separated list of allowed origins)
-            CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
-
-            # Google OAuth (optional)
-            GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
-            GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
-
-            # Frontend URL for OAuth redirects
-            FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
-            
-            # Port configuration
-            PORT: 3001
-        depends_on:
-            auth-db:
-                condition: service_healthy
-        ports:
-            - "3001:3001"
         networks:
             - portfolio-net
 
@@ -157,10 +66,7 @@ services:
             context: ./frontend
             dockerfile: Dockerfile
             args:
-                # Pass public environment variables as build arguments
-                # NEXT_PUBLIC_* variables must be available at build time for Next.js
                 NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
-                NEXT_PUBLIC_AUTH_SERVICE_URL: ${NEXT_PUBLIC_AUTH_SERVICE_URL:-http://localhost:3001}
                 NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}
         container_name: frontend
         restart: unless-stopped
@@ -168,21 +74,13 @@ services:
             - .env
         environment:
             NODE_ENV: development
-            
-            # Client-side (browser) uses localhost to access host machine
             NEXT_PUBLIC_API_URL: http://localhost:8080
-            NEXT_PUBLIC_AUTH_SERVICE_URL: http://localhost:3001
             NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}
-            
-            # Server-side (SSR) uses service names for container-to-container communication
             API_URL: http://backend:8080
-            AUTH_SERVICE_URL: http://auth-service:3001
-            
-            # Port configuration
+            ADMIN_PASSCODE: ${ADMIN_PASSCODE}
             PORT: 3000
         depends_on:
             - backend
-            - auth-service
         ports:
             - "3000:3000"
         networks:
@@ -191,7 +89,6 @@ services:
     # --------------------
     # Database Admin (pgAdmin) - Development Only
     # Use profile to start: docker compose --profile pgadmin up -d
-    # Requires PGADMIN_DEFAULT_EMAIL and PGADMIN_DEFAULT_PASSWORD in .env file
     # --------------------
     pgadmin:
         profiles: ["pgadmin"]
@@ -212,12 +109,10 @@ services:
             - portfolio-net
         depends_on:
             - app-db
-            - auth-db
 
 networks:
     portfolio-net:
 
 volumes:
     app_db_data:
-    auth_db_data:
     pgadmin_data:

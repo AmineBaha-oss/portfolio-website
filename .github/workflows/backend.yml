@@ -51,11 +51,8 @@ jobs:
         env:
           NODE_ENV: production
           DATABASE_URL: postgres://test:test@localhost:5432/test
-          AUTH_JWT_SECRET: test-secret-for-ci-build-only-min-32-chars
-          AUTH_JWT_ISS: test-issuer
-          AUTH_JWT_AUD: test-audience
+          ADMIN_PASSCODE: ci-test-passcode
           CORS_ORIGINS: http://localhost:3000
-          AUTH_SERVICE_URL: http://localhost:3001
 
       - name: Check build output
         run: |
