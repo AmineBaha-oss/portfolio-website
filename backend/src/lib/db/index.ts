@@ -18,7 +18,7 @@ function getDb() {
       const dummyClient = postgres("postgres://dummy:dummy@localhost:5432/dummy");
       _db = drizzle(dummyClient, { schema });
     } else {
-      const client = postgres(connectionString);
+      const client = postgres(connectionString, { ssl: 'require', prepare: false });
       _db = drizzle(client, { schema });
     }
   }
