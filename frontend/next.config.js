@@ -47,6 +47,11 @@ const nextConfig = {
         hostname: 'portfolio-app.nyc3.digitaloceanspaces.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'pmapjzgntrpwjvyimxzz.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
     ],
   },
 }

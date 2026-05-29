@@ -7,7 +7,7 @@
 import { useState, useRef, ChangeEvent, RefObject } from "react";
 import { uploadImage } from "@/lib/api/admin-client";
 import { useTranslations } from "@/lib/i18n/hooks";
-import { getCdnUrl } from "@/lib/utils/cdn-url";
+import { getCdnUrl, extractKeyFromUrl } from "@/lib/utils/cdn-url";
 
 interface ImageUploadProps {
   onUploadSuccess: (imageKey: string) => void;
@@ -92,19 +92,7 @@ export function ImageUpload({
       return;
     }
     
-    // Extract the key from the URL or use the full URL
-    // If it's a DO Spaces URL, extract the key part
-    let key = imageUrl;
-    if (imageUrl.includes("digitaloceanspaces.com/")) {
-      const parts = imageUrl.split("digitaloceanspaces.com/");
-      if (parts[1]) {
-        key = parts[1];
-        // Remove any query parameters (for pre-signed URLs)
-        key = key.split("?")[0];
-      }
-    }
-    
-    // Set preview to show the image
+    const key = extractKeyFromUrl(imageUrl.trim());
     const fullUrl = getCdnUrl(key);
     setLocalPreview(fullUrl);
     onUploadSuccess(key);
@@ -195,7 +183,7 @@ export function ImageUpload({
               type="text"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://portfolio-app.nyc3.digitaloceanspaces.com/images/..."
+              placeholder="https://pmapjzgntrpwjvyimxzz.supabase.co/storage/v1/object/public/images/..."
               className="url-input"
             />
             <button
