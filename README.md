@@ -289,6 +289,18 @@ This is a known issue in development due to cross-origin cookies. The applicatio
 
 **Live deployment:** [https://aminebaha.dev](https://aminebaha.dev)
 
+### Vercel frontend
+
+The repository-root `vercel.json` directs Vercel's Next.js builder to
+`frontend/package.json`. Keep the Vercel project's Root Directory at the
+repository root when using this configuration. Dependencies and the build
+script are defined in `frontend/`; the repository root is not a Next.js app.
+Without this configuration, Git-triggered deployments from the repository
+root fail with "No Next.js version detected".
+
+To verify the frontend build locally, run `npm ci` and `npm run build` from
+`frontend/`.
+
 For production deployment:
 
 1. Set all required environment variables
