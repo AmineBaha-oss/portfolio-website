@@ -298,6 +298,10 @@ script are defined in `frontend/`; the repository root is not a Next.js app.
 Without this configuration, Git-triggered deployments from the repository
 root fail with "No Next.js version detected".
 
+The routing rule maps public URLs to the builder's `frontend/` output,
+including Next.js assets and API routes. Keep it alongside the build entry:
+without it, the app is served under `/frontend` and the homepage returns 404.
+
 To verify the frontend build locally, run `npm ci` and `npm run build` from
 `frontend/`.
 
