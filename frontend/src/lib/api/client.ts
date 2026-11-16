@@ -1,5 +1,3 @@
-import { featuredProjects, isFeaturedProject, profileSkills, profileEducation, profileExperience } from "../content/profile";
-
 /** Base URL for API (origin only, no trailing /api). Prevents double /api when env includes /api. */
 export function getApiBaseUrl(): string {
   const url = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").trim().replace(/\/api\/?$/, "");
@@ -134,24 +132,20 @@ export async function getProjects(
   lang: string = "en",
   featured?: boolean,
 ): Promise<{ projects: Project[] }> {
-  const pinned = featuredProjects(lang);
-  if (featured) return { projects: pinned };
-  const params = new URLSearchParams({ lang, t: Date.now().toString() });
-  try {
-    const response = await fetchAPI<{ projects: Project[] }>(`/api/public/projects?${params}`);
-    return { projects: [...pinned, ...response.projects.filter(p => !isFeaturedProject(p)).map(p => ({ ...p, featured: false }))] };
-  } catch (error) {
-    console.error("Additional projects could not be loaded:", error);
-    return { projects: pinned };
+  const timestamp = new Date().getTime();
+  const params = new URLSearchParams({ lang, t: timestamp.toString() });
+  if (featured) {
+    params.append("featured", "true");
   }
+  return fetchAPI<{ projects: Project[] }>(
+    `/api/public/projects?${params.toString()}`,
+  );
 }
 
 export async function getProjectById(
   id: string,
   lang: string = "en",
 ): Promise<{ project: Project }> {
-  const pinned = featuredProjects(lang).find(project => project.id === id);
-  if (pinned) return { project: pinned };
   const timestamp = new Date().getTime();
   return fetchAPI<{ project: Project }>(
     `/api/public/projects/${id}?lang=${lang}&t=${timestamp}`,
@@ -161,19 +155,23 @@ export async function getProjectById(
 export async function getSkills(
   lang: string = "en",
 ): Promise<{ skills: Skill[] }> {
-  return { skills: profileSkills(lang) };
+  return fetchAPI<{ skills: Skill[] }>(`/api/public/skills?lang=${lang}`);
 }
 
 export async function getExperience(
   lang: string = "en",
 ): Promise<{ experiences: WorkExperience[] }> {
-  return { experiences: profileExperience(lang) };
+  return fetchAPI<{ experiences: WorkExperience[] }>(
+    `/api/public/experience?lang=${lang}`,
+  );
 }
 
 export async function getEducation(
   lang: string = "en",
 ): Promise<{ education: Education[] }> {
-  return { education: profileEducation(lang) };
+  return fetchAPI<{ education: Education[] }>(
+    `/api/public/education?lang=${lang}`,
+  );
 }
 
 export async function getHobbies(

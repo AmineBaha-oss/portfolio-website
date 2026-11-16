@@ -301,9 +301,6 @@ root fail with "No Next.js version detected".
 The routing rule maps public URLs to the builder's `frontend/` output,
 including Next.js assets and API routes. Keep it alongside the build entry:
 without it, the app is served under `/frontend` and the homepage returns 404.
-The rule must use `continue: true` so the rewritten path reaches the builder's
-generated dynamic routes. Otherwise static pages such as `/projects` work,
-but project detail URLs such as `/projects/<id>` return Vercel's `NOT_FOUND`.
 
 To verify the frontend build locally, run `npm ci` and `npm run build` from
 `frontend/`.
@@ -367,14 +364,3 @@ MIT
 ## Support
 
 For issues and questions, please open an issue in the repository.
-
-## Public profile content
-
-The November 2026 bilingual CV is reflected in
-`frontend/src/lib/content/profile.ts`: the four pinned projects (in display
-order), skills, education, experience, and hackathon activities. Public profile
-sections read this curated content; dashboard/database edits to those fields
-do not override it. Other published database projects remain in the full
-projects listing. Project detail pages for the pinned entries use stable slugs.
-Update this module when the CV changes. Resume PDF downloads are managed
-separately in the existing dashboard.

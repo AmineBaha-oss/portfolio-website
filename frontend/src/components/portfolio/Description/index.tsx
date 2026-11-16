@@ -10,12 +10,13 @@ export default function Description() {
     const description = useRef(null);
     const isInView = useInView(description);
 
-    const mainPhrase = locale === 'fr'
-        ? "Développeur full-stack et étudiant en informatique et science des données à Concordia. Je crée des applications web, des outils de bureau et des expériences interactives fondées sur les données."
-        : "Full-stack developer studying computer science and data science at Concordia. I build web applications, desktop tools and interactive experiences grounded in data.";
+    const mainPhrase = locale === 'fr' 
+        ? "Étudiant en informatique motivé avec une solide base en développement logiciel et en travail d'équipe. Reconnu pour une communication claire, une exécution fiable et un état d'esprit axé sur les résultats."
+        : "Motivated Computer Science student with a strong foundation in software development and teamwork. Known for clear communication, dependable execution, and a results-first mindset.";
+
     const secondaryPhrase = locale === 'fr'
-        ? "De paiements Stripe et pipelines Gemini AI en production à la recherche locale en Rust et à une simulation lunaire 3D, mes projets relient logiciel, données et besoins concrets."
-        : "From production Stripe payments and Gemini AI pipelines to local search in Rust and a 3D lunar simulation, my work connects software, data and practical needs.";
+        ? "Rapide à apprendre et prêt à contribuer à des projets complexes dès le premier jour, avec une expérience en Spring Boot, React, Docker et des pratiques de développement modernes."
+        : "Quick to learn and ready to contribute to complex projects from day one, with experience in Spring Boot, React, Docker, and modern development practices.";
 
     return (
         <div ref={description} className={styles.description}>
