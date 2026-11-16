@@ -9,7 +9,7 @@ import { useTranslations } from '@/lib/i18n/hooks';
 
 function formatDate(dateString: string, locale: string): string {
   if (!dateString) return '';
-  const date = new Date(dateString);
+  const date = new Date(`${dateString}T12:00:00`);
   return date.toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US', { 
     month: 'short', 
     year: 'numeric' 
