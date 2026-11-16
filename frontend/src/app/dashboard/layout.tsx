@@ -11,7 +11,8 @@ import { DialogProvider } from "@/components/ui/ConfirmDialog";
 import { 
   MdDashboard, 
   MdWork, 
-  MdStars, 
+  MdStars,
+  MdEmojiEvents,
   MdBusinessCenter, 
   MdSchool, 
   MdDescription, 
@@ -42,6 +43,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigationItems = [
     { path: "/dashboard", label: t('dashboard.overview') },
     { path: "/dashboard/projects", label: t('projects.title') },
+    { path: "/dashboard/activities", label: t('activities.title') },
     { path: "/dashboard/skills", label: t('skills.title') },
     { path: "/dashboard/experience", label: t('experience.title') },
     { path: "/dashboard/education", label: t('education.title') },
@@ -113,6 +115,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const icons: { [key: string]: JSX.Element } = {
       "/dashboard": <MdDashboard size={iconSize} />,
       "/dashboard/projects": <MdWork size={iconSize} />,
+      "/dashboard/activities": <MdEmojiEvents size={iconSize} />,
       "/dashboard/skills": <MdStars size={iconSize} />,
       "/dashboard/experience": <MdBusinessCenter size={iconSize} />,
       "/dashboard/education": <MdSchool size={iconSize} />,

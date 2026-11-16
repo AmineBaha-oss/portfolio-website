@@ -40,7 +40,7 @@
     padding: 0.5rem;
     margin-left: auto;
 
-    @media (max-width: 768px) {
+    @media (max-width: 1200px) {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -58,14 +58,14 @@
     background: rgba(0, 0, 0, 0.5);
     z-index: 98;
 
-    @media (max-width: 768px) {
+    @media (max-width: 1200px) {
       display: block;
     }
   }
 
   .navList {
     display: flex;
-    gap: 2rem;
+    gap: clamp(.7rem, 1.3vw, 1.5rem);
     list-style: none;
     margin: 0;
     padding: 0;
@@ -100,7 +100,7 @@
       }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 1200px) {
       position: fixed;
       top: 0;
       left: 0;
@@ -110,6 +110,8 @@
       backdrop-filter: blur(10px);
       flex-direction: column;
       padding: 5rem 2rem 2rem;
+      max-height: 100dvh;
+      overflow-y: auto;
       gap: 0;
       z-index: 101;
       transform: translateY(-100%);

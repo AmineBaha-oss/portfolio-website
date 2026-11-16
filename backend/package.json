@@ -11,7 +11,8 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:migrate": "tsx src/scripts/run-education-migration.ts",
-    "seed": "tsx src/scripts/seed.ts"
+    "seed": "tsx src/scripts/seed.ts",
+    "test": "node --test tests/*.test.cjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.709.0",
@@ -26,6 +27,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.16",
     "@types/multer": "^1.4.12",
     "@types/node": "^20.11.0",
     "@types/nodemailer": "^6.4.14",

@@ -1,5 +1,9 @@
+import { sql } from "drizzle-orm";
+
 import {
   pgTable,
+  check,
+  index,
   uuid,
   text,
   integer,
@@ -184,3 +188,31 @@ export type NewResume = typeof resumes.$inferInsert;
 
 export type ContactInfo = typeof contactInfo.$inferSelect;
 export type NewContactInfo = typeof contactInfo.$inferInsert;
+
+// Hackathons and other community activities, managed through the dashboard.
+export const activities = pgTable("activities", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: jsonb("title").$type<{ en: string; fr: string }>().notNull(),
+  description: jsonb("description").$type<{ en: string; fr: string }>().notNull(),
+  organization: jsonb("organization").$type<{ en: string; fr: string }>(),
+  period: jsonb("period").$type<{ en: string; fr: string }>().notNull(),
+  location: jsonb("location").$type<{ en: string; fr: string }>(),
+  category: text("category").notNull().default("hackathon"),
+  technologies: text("technologies").array().notNull().default([]),
+  projectId: uuid("project_id").references(() => projects.id, { onDelete: "set null" }),
+  eventUrl: text("event_url"),
+  order: integer("order").notNull().default(0),
+  published: boolean("published").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, table => [
+  index("activities_published_order_idx").on(table.order, table.createdAt).where(sql`${table.published} = true`),
+  index("activities_project_id_idx").on(table.projectId),
+  check("activities_category_check", sql`${table.category} IN ('hackathon', 'community', 'competition', 'volunteering', 'other')`),
+  check("activities_order_check", sql`${table.order} >= 0`),
+  check("activities_title_check", sql`jsonb_typeof(${table.title}) = 'object' AND length(trim(coalesce(${table.title}->>'en',''))) > 0 AND length(trim(coalesce(${table.title}->>'fr',''))) > 0`),
+  check("activities_description_check", sql`jsonb_typeof(${table.description}) = 'object' AND length(trim(coalesce(${table.description}->>'en',''))) > 0 AND length(trim(coalesce(${table.description}->>'fr',''))) > 0`),
+  check("activities_period_check", sql`jsonb_typeof(${table.period}) = 'object' AND length(trim(coalesce(${table.period}->>'en',''))) > 0 AND length(trim(coalesce(${table.period}->>'fr',''))) > 0`),
+]);
+export type Activity = typeof activities.$inferSelect;
+export type NewActivity = typeof activities.$inferInsert;

@@ -8,6 +8,7 @@ import Navigation from '../components/portfolio/Navigation';
 import Landing from '../components/portfolio/Landing';
 import Skills from '../components/portfolio/Skills';
 import Projects from '../components/portfolio/Projects';
+import Activities from '../components/portfolio/Activities';
 import WorkExperience from '../components/portfolio/WorkExperience';
 import Education from '../components/portfolio/Education';
 import Resume from '../components/portfolio/Resume';
@@ -100,6 +101,7 @@ export default function HomePage() {
       <div id="projects">
         <Projects />
       </div>
+      <Activities />
       <div id="experience">
         <WorkExperience />
       </div>

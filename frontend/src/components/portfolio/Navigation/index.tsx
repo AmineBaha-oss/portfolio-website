@@ -15,6 +15,7 @@ export default function Navigation() {
     { name: t('nav.home'), href: '#home' },
     { name: t('nav.skills'), href: '#skills' },
     { name: t('nav.projects'), href: '#projects' },
+    { name: t('activities.nav'), href: '#activities' },
     { name: t('nav.experience'), href: '#experience' },
     { name: t('nav.education'), href: '#education' },
     { name: 'Resume', href: '#resume' },

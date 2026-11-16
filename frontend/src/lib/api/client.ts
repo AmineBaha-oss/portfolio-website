@@ -221,3 +221,11 @@ export async function submitMessage(data: {
     },
   );
 }
+
+// Hackathons and community activities are served from the database.
+export async function getActivities(lang: string = 'en') {
+  return fetchAPI<{ activities: import('./activity-types').Activity[] }>(
+    `/api/public/activities?${new URLSearchParams({ lang })}`,
+    { cache: 'no-store' },
+  );
+}

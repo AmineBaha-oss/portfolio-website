@@ -91,6 +91,14 @@ export const translations = {
         ai: "AI & Data",
       },
     },
+    activities: {
+      title: "Hackathons & Community", nav: "Activities", eyebrow: "Beyond the classroom",
+      subtitle: "Building with teams, testing ideas, and contributing to the community.",
+      viewProject: "Explore project", eventLink: "Event website", retry: "Try again",
+      loadError: "Activities could not be loaded. Please try again.",
+      categories: { hackathon: "Hackathon", community: "Community", competition: "Competition", volunteering: "Volunteering", other: "Other" },
+      admin: { subtitle: "Manage the activities shown on your portfolio.", add: "Add activity", edit: "Edit activity", empty: "No activities yet.", title: "Title", description: "Description", organization: "Event / organization", period: "Date or period", location: "Location", category: "Category", technologies: "Technologies (comma-separated)", project: "Linked project", noProject: "No linked project", eventUrl: "Event website URL", order: "Display order (lowest first)", published: "Published on the portfolio", draft: "Draft", live: "Published", save: "Save activity", saved: "Activity saved.", deleted: "Activity deleted.", cancel: "Cancel", deleteConfirm: "Delete this activity? This cannot be undone.", english: "English", french: "French", loading: "Loading activities…", error: "Could not load activities.", saveError: "Could not save activity.", deleteError: "Could not delete activity.", required: "Required in both languages", optional: "Optional" },
+    },
     // Hobbies
     hobbies: {
       title: "Hobbies & Interests",
@@ -553,6 +561,14 @@ export const translations = {
         devops: "DevOps & Outils",
         ai: "IA & Données",
       },
+    },
+    activities: {
+      title: "Hackathons & communauté", nav: "Activités", eyebrow: "Au-delà des cours",
+      subtitle: "Construire en équipe, tester des idées et contribuer à la communauté.",
+      viewProject: "Découvrir le projet", eventLink: "Site de l’événement", retry: "Réessayer",
+      loadError: "Impossible de charger les activités. Veuillez réessayer.",
+      categories: { hackathon: "Hackathon", community: "Communauté", competition: "Compétition", volunteering: "Bénévolat", other: "Autre" },
+      admin: { subtitle: "Gérez les activités affichées sur votre portfolio.", add: "Ajouter une activité", edit: "Modifier l’activité", empty: "Aucune activité pour le moment.", title: "Titre", description: "Description", organization: "Événement / organisation", period: "Date ou période", location: "Lieu", category: "Catégorie", technologies: "Technologies (séparées par des virgules)", project: "Projet associé", noProject: "Aucun projet associé", eventUrl: "URL du site de l’événement", order: "Ordre d’affichage (croissant)", published: "Publiée sur le portfolio", draft: "Brouillon", live: "Publiée", save: "Enregistrer l’activité", saved: "Activité enregistrée.", deleted: "Activité supprimée.", cancel: "Annuler", deleteConfirm: "Supprimer cette activité ? Cette action est irréversible.", english: "Anglais", french: "Français", loading: "Chargement des activités…", error: "Impossible de charger les activités.", saveError: "Impossible d’enregistrer l’activité.", deleteError: "Impossible de supprimer l’activité.", required: "Obligatoire dans les deux langues", optional: "Facultatif" },
     },
     // Hobbies
     hobbies: {

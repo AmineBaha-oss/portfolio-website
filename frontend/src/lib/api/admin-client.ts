@@ -324,3 +324,17 @@ export async function uploadImage(file: File): Promise<{ key: string; message: s
 
   return response.json();
 }
+
+// Hackathons and community activities
+export async function getActivities() {
+  return fetchAdminAPI<{ activities: import('./activity-types').AdminActivity[] }>('/api/admin/activities', { cache: 'no-store' });
+}
+export async function createActivity(data: import('./activity-types').ActivityInput) {
+  return fetchAdminAPI<{ activity: import('./activity-types').AdminActivity }>('/api/admin/activities', { method: 'POST', body: JSON.stringify(data) });
+}
+export async function updateActivity(id: string, data: import('./activity-types').ActivityInput) {
+  return fetchAdminAPI<{ activity: import('./activity-types').AdminActivity }>(`/api/admin/activities/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+}
+export async function deleteActivity(id: string) {
+  return fetchAdminAPI<{ success: boolean }>(`/api/admin/activities/${id}`, { method: 'DELETE' });
+}

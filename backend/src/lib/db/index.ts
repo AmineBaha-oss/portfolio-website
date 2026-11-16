@@ -35,6 +35,7 @@ export const db = new Proxy({} as ReturnType<typeof drizzle>, {
 // Export schema and all tables for use in other files
 export { schema };
 export {
+  activities,
   skills,
   projects,
   workExperience,
