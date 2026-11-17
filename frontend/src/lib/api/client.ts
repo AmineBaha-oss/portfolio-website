@@ -102,6 +102,11 @@ async function fetchAPI<T>(
   endpoint: string,
   options?: RequestInit,
 ): Promise<T> {
+  if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true' && (!options?.method || options.method === 'GET')) {
+    const { mockPublicResponse } = await import('./mock-data');
+    const mock = mockPublicResponse(endpoint);
+    if (mock !== undefined) return mock as T;
+  }
   const url = `${API_BASE_URL}${endpoint}`;
 
   try {
