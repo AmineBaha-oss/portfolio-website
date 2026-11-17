@@ -1,127 +1,36 @@
 .experience {
-  min-height: 100vh;
   background: #141516;
-  padding: 120px 2rem 80px;
-  color: white;
-
-  .container {
-    max-width: 1000px;
-    margin: 0 auto;
-  }
-
-  .title {
-    font-size: 3.5rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    text-align: center;
-
-    @media (max-width: 768px) {
-      font-size: 2.5rem;
-    }
-  }
-
-  .subtitle {
-    font-size: 1.2rem;
-    color: rgba(255, 255, 255, 0.7);
-    text-align: center;
-    margin-bottom: 4rem;
-  }
-
-  .timeline {
-    position: relative;
-    padding: 2rem 0;
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: rgba(255, 255, 255, 0.2);
-
-      @media (max-width: 768px) {
-        left: 20px;
-      }
-    }
-  }
-
-  .timelineItem {
-    position: relative;
-    padding-left: 4rem;
-    margin-bottom: 3rem;
-
-    @media (max-width: 768px) {
-      padding-left: 3rem;
-    }
-
-    .timelineDot {
-      position: absolute;
-      left: -6px;
-      top: 0;
-      width: 14px;
-      height: 14px;
-      background: white;
-      border-radius: 50%;
-      border: 3px solid #141516;
-
-      @media (max-width: 768px) {
-        left: 14px;
-      }
-    }
-
-    .content {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 2rem;
-      border-radius: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-
-      .period {
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 0.9rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-
-      h3 {
-        font-size: 1.8rem;
-        margin: 0.5rem 0;
-        font-weight: 600;
-      }
-
-      h4 {
-        font-size: 1.2rem;
-        color: rgba(255, 255, 255, 0.7);
-        margin-bottom: 1rem;
-        font-weight: 400;
-      }
-
-      p {
-        color: rgba(255, 255, 255, 0.8);
-        line-height: 1.6;
-        margin-bottom: 1rem;
-      }
-
-      ul {
-        list-style: none;
-        padding: 0;
-
-        li {
-          padding-left: 1.5rem;
-          position: relative;
-          margin-bottom: 0.5rem;
-          color: rgba(255, 255, 255, 0.7);
-
-          &::before {
-            content: '▹';
-            position: absolute;
-            left: 0;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 1.2rem;
-          }
-        }
-      }
-    }
+  color: #fff;
+  padding: 120px 2rem;
+  .container { max-width: 1240px; margin: 0 auto; }
+  .title { font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 600; letter-spacing: -0.035em; text-align: center; margin-bottom: 1rem; }
+  .subtitle { font-size: 1.1rem; color: #a6a8ab; line-height: 1.6; text-align: center; margin-bottom: 7rem; }
+  .chapters { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr); gap: clamp(3rem, 8vw, 8rem); align-items: start; }
+  .chapterPanel { position: sticky; top: 18vh; padding-bottom: 3rem; }
+  .counterFrame { position: relative; display: flex; align-items: baseline; overflow: hidden; height: clamp(150px, 17vw, 240px); }
+  .chapterNumber { display: block; font-size: clamp(140px, 17vw, 230px); font-weight: 300; line-height: 1; letter-spacing: -0.08em; font-variant-numeric: tabular-nums; }
+  .chapterTotal { font-size: 0.85rem; color: #767b81; margin-left: 1.5rem; letter-spacing: 0.1em; }
+  .chapterBars { display: flex; gap: 8px; margin: 2rem 0 2.5rem; }
+  .chapterBars span { flex: 1; height: 2px; background: #34373a; transition: background 0.5s; }
+  .chapterBars .barFilled { background: #fff; }
+  .panelCompany { font-size: 1.3rem; letter-spacing: -0.025em; margin-bottom: 0.6rem; }
+  .panelRole { font-size: 0.95rem; color: #979ba0; line-height: 1.6; margin-bottom: 1.5rem; }
+  .panelPeriod { color: #747a80; font-size: 0.8rem; }
+  .chapter { min-height: 80vh; padding: 2.5rem 0 6rem; border-top: 1px solid #ffffff26; }
+  .chapter:last-child { min-height: 65vh; padding-bottom: 3rem; }
+  .chapterMeta { display: flex; justify-content: space-between; gap: 1rem; color: #969ba1; font-size: 0.75rem; letter-spacing: 0.06em; margin-bottom: 3rem; }
+  .chapter h3 { font-size: clamp(2rem, 3.7vw, 3.5rem); font-weight: 500; line-height: 1.12; letter-spacing: -0.045em; margin-bottom: 1.25rem; text-wrap: balance; }
+  .chapter h4 { font-size: 1.1rem; font-weight: 400; color: #969ba1; margin-bottom: 3rem; }
+  .chapter p { font-size: 1.1rem; line-height: 1.8; color: #d2d4d7; }
+  .chapter ul { list-style: none; padding: 0; margin: 2.5rem 0 0; }
+  .chapter li { display: flex; align-items: baseline; gap: 1rem; padding: 1.1rem 0; border-top: 1px solid #ffffff16; font-size: 0.95rem; line-height: 1.75; color: #b5b9bd; }
+  .chapter li span { color: #fff; }
+  @media (max-width: 768px) {
+    padding: 80px 1.25rem;
+    .subtitle { margin-bottom: 3rem; }
+    .chapters { grid-template-columns: 1fr; gap: 1rem; }
+    .chapterPanel { display: none; }
+    .chapter { min-height: 65vh; padding-bottom: 4rem; }
+    .chapter h3 { font-size: 2.4rem; }
   }
 }

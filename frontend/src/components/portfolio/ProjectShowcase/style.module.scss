@@ -1,0 +1,45 @@
+.showcase { background: #fff; color: #141516; padding: 120px max(24px, calc((100vw - 1240px) / 2)); }
+.heading { text-align: center; margin-bottom: 5rem; }
+.heading h1, .heading h2 { font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 600; letter-spacing: -0.035em; margin-bottom: 1rem; }
+.heading p { color: #777; font-size: 1.1rem; }
+.back { display: inline-block; color: #777; text-decoration: none; margin-bottom: 2rem; }
+.project { border-top: 1px solid #d6d8da; }
+.project:last-child { border-bottom: 1px solid #d6d8da; }
+.row { display: flex; align-items: center; gap: 2rem; padding: 2rem 0; }
+.number { font-size: 0.75rem; color: #92969b; font-variant-numeric: tabular-nums; }
+.title { flex: 1; min-width: 0; color: #72777c; font-size: clamp(1.7rem, 3.6vw, 3.2rem); font-weight: 400; letter-spacing: -0.045em; text-decoration: none; line-height: 1.2; transition: color 0.3s; }
+.open .title, .title:hover { color: #141516; }
+.toggle { flex-shrink: 0; border: 1px solid #d6d8da; border-radius: 50%; width: 42px; height: 42px; background: transparent; color: #141516; font-size: 1.3rem; cursor: pointer; transition: background 0.3s, color 0.3s; }
+.open .toggle { background: #141516; border-color: #141516; color: white; }
+.reveal { overflow: hidden; }
+.preview { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 5rem); padding: 0 0 3rem 3rem; }
+.visual { position: relative; display: block; min-height: 340px; aspect-ratio: 16/10; overflow: hidden; border-radius: 3px; }
+.artwork { position: absolute; inset: 0; }
+.imageArrow { position: absolute; right: 20px; bottom: 20px; width: 54px; height: 54px; display: grid; place-items: center; border-radius: 50%; background: #fff; color: #141516; font-size: 1.5rem; transition: transform 0.3s; }
+.visual:hover .imageArrow { transform: rotate(45deg); }
+.details { display: flex; flex-direction: column; align-items: flex-start; padding: 1rem 0; }
+.label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.15em; color: #979b9e; margin-bottom: 1.5rem; }
+.details p { font-size: clamp(1.1rem, 1.65vw, 1.4rem); line-height: 1.65; letter-spacing: -0.015em; margin: 0 0 2rem; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 2rem; }
+.tags span { color: #6c7176; font-size: 0.72rem; border: 1px solid #e0e2e4; border-radius: 30px; padding: 6px 10px; }
+.explore { margin-top: auto; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #141516; color: #141516; text-decoration: none; font-size: 0.9rem; }
+.explore span { font-size: 1.4rem; transition: transform 0.3s; }
+.explore:hover span { transform: translate(3px, -3px); }
+.all { display: flex; align-items: center; justify-content: center; gap: 2rem; width: fit-content; margin: 4rem auto 0; padding: 1.2rem 2rem; border: 1px solid #d6d8da; border-radius: 50px; text-decoration: none; color: #141516; }
+@media (max-width: 768px) { .showcase { padding: 80px 20px; } .row { gap: 1rem; } .preview { grid-template-columns: 1fr; padding-left: 0; gap: 1.5rem; } .visual { min-height: 0; } .heading { margin-bottom: 3rem; } }
+@media (prefers-reduced-motion: reduce) { .showcase * { transition: none !important; } }
+
+// Keep every preview in document flow so scrolling never changes the page height.
+.project { padding-bottom: clamp(2rem, 6vh, 5rem); }
+.row { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+.preview { align-items: center; }
+.visual { min-height: 380px; }
+.toggle { display: grid; place-items: center; text-decoration: none; }
+.details { min-height: 300px; }
+@media (max-width: 768px) { .visual { min-height: 0; } .details { min-height: 0; } .project { padding-bottom: 2rem; } }
+
+.artwork { inset: -30px 0; }
+.imageZoom { position: absolute; inset: 0; }
+.imageCurtain { position: absolute; inset: -1px; background: #141516; pointer-events: none; }
+.exploreWrap { width: 100%; margin-top: auto; }
+.visual:focus-visible, .title:focus-visible, .explore:focus-visible { outline: 2px solid #777; outline-offset: 5px; }

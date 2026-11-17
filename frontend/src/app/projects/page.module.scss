@@ -190,3 +190,9 @@
     }
   }
 }
+
+.projects {
+  .modalContainer { width: 440px; height: 400px; border-radius: 12px; box-shadow: 0 28px 80px #0004, 0 0 0 1px #ffffff18; z-index: 20; }
+  .cursor, .cursorLabel { width: 56px; height: 56px; z-index: 21; font-size: 24px; }
+  .cursor { background: #141516; border: 1px solid #ffffff40; }
+}

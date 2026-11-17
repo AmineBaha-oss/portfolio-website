@@ -85,3 +85,11 @@
         }
     }
 }
+.project {
+  padding: 42px 24px;
+  gap: 2rem;
+  h2 { width: auto; flex: 1.6; min-width: 0; font-size: clamp(2rem, 3.7vw, 3.5rem); letter-spacing: -0.035em; }
+  p { flex: 1; color: #666; }
+  &:hover { opacity: 1; }
+  @media (max-width: 768px) { h2, p { flex: auto; } }
+}

@@ -74,7 +74,11 @@ export default function ProjectDetailPage() {
     return (
       <main className={styles.projectDetail}>
         <div className={styles.container}>
-          <Link href={referrer} className={styles.backLink} onClick={handleBack}>
+          <Link
+            href={referrer}
+            className={styles.backLink}
+            onClick={handleBack}
+          >
             ← {t("projects.allProjects")}
           </Link>
           <p style={{ color: "#666", textAlign: "center" }}>
@@ -93,7 +97,11 @@ export default function ProjectDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <Link href={referrer} className={styles.backLink} onClick={handleBack}>
+          <Link
+            href={referrer}
+            className={styles.backLink}
+            onClick={handleBack}
+          >
             ← {t("projects.allProjects")}
           </Link>
 
@@ -108,10 +116,7 @@ export default function ProjectDetailPage() {
               transition={{ duration: 0.8, delay: 0.2 }}
             >
               <Image
-                src={
-                  project.imageUrl ||
-                  DEFAULT_BACKGROUND
-                }
+                src={project.imageUrl || DEFAULT_BACKGROUND}
                 alt={project.title}
                 fill
                 style={{ objectFit: "cover" }}

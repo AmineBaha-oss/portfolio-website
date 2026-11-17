@@ -17,7 +17,10 @@ export default function Project({index, title, description, projectId, manageMod
     };
 
     return (
-        <Link href={`/projects/${projectId}`} style={{ textDecoration: 'none', color: 'inherit' }} onClick={handleClick}>
+        <Link href={`/projects/${projectId}`} style={{ textDecoration: 'none', color: 'inherit' }} onClick={handleClick}
+          onFocus={(e) => { const rect = e.currentTarget.getBoundingClientRect(); manageModal(true, index, rect.right - 200, rect.top + rect.height / 2); }}
+          onBlur={() => manageModal(false, index, 0, 0)}>
+
             <div
                 onMouseEnter={(e) => { if (typeof window !== 'undefined' && window.innerWidth > 768) manageModal(true, index, e.clientX, e.clientY); }}
                 onMouseLeave={(e) => { if (typeof window !== 'undefined' && window.innerWidth > 768) manageModal(false, index, e.clientX, e.clientY); }}
