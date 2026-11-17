@@ -102,24 +102,29 @@ export default function Education() {
 
         <div className={styles.educationGrid}>
           {educationData.length > 0 ? educationData.map((edu, index) => (
-            <motion.div
+            <motion.article
               key={index}
               className={styles.educationCard}
-              initial={hasVisitedHome ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: index * 0.2 }}
+              initial={hasVisitedHome ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: index * 0.1 }}
               viewport={{ once: true }}
             >
-              <span className={styles.period}>{edu.period}</span>
+              <div className={styles.cardTop}>
+                <span className={styles.cardNumber}>{String(index + 1).padStart(2, '0')}</span>
+                <span className={styles.period}>{edu.period}</span>
+              </div>
+              <div className={styles.cardBody}>
               <h3>{edu.degree}</h3>
               <h4>{edu.institution}</h4>
-              <p>{edu.description}</p>
-              <ul>
+              {edu.description && <p>{edu.description}</p>}
+              {edu.achievements.length > 0 && <ul>
                 {edu.achievements.map((achievement, idx) => (
                   <li key={idx}>{achievement}</li>
                 ))}
-              </ul>
-            </motion.div>
+              </ul>}
+              </div>
+            </motion.article>
           )) : (
             <p style={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center', padding: '2rem' }}>
               No education information available.
