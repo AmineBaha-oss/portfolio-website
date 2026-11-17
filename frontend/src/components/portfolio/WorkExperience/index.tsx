@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useLanguage } from '@/lib/i18n/context';
 import { getExperience, type WorkExperience } from '@/lib/api/client';
 import { useTranslations } from '@/lib/i18n/hooks';
+import { usePortfolioVisit } from '@/components/providers';
 
 function formatDate(dateString: string, locale: string): string {
   if (!dateString) return '';
@@ -17,6 +18,7 @@ function formatDate(dateString: string, locale: string): string {
 }
 
 export default function WorkExperience() {
+  const { hasVisitedHome } = usePortfolioVisit();
   const { locale } = useLanguage();
   const { t } = useTranslations();
   const [experiences, setExperiences] = useState<WorkExperience[]>([]);
@@ -88,7 +90,7 @@ export default function WorkExperience() {
     <section id="experience" className={styles.experience}>
       <div className={styles.container}>
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={hasVisitedHome ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
@@ -104,7 +106,7 @@ export default function WorkExperience() {
             <motion.div
               key={index}
               className={styles.timelineItem}
-              initial={{ opacity: 0, x: -50 }}
+              initial={hasVisitedHome ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: index * 0.2 }}
               viewport={{ once: true }}

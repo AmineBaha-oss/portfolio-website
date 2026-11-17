@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import styles from "./page.module.scss";
 import { useLanguage } from "@/lib/i18n/context";
 import { getProjectById, type Project } from "@/lib/api/client";
@@ -13,7 +13,6 @@ import { DEFAULT_BACKGROUND } from "@/lib/utils/cdn-url";
 
 export default function ProjectDetailPage() {
   const params = useParams();
-  const pathname = usePathname();
   const router = useRouter();
   const { locale } = useLanguage();
   const { t } = useTranslations();
@@ -21,6 +20,12 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [referrer, setReferrer] = useState<string>("/projects");
+
+  const handleBack = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    if (window.history.state?.idx > 0) router.back();
+    else router.push(referrer);
+  };
 
   useEffect(() => {
     // Check if user came from the homepage with hash
@@ -31,30 +36,6 @@ export default function ProjectDetailPage() {
       }
     }
   }, []);
-
-  // Force scroll to top on pathname change
-  useEffect(() => {
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    window.scroll(0, 0);
-
-    const timeout1 = setTimeout(() => {
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      window.scroll(0, 0);
-    }, 10);
-
-    const timeout2 = setTimeout(() => {
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      window.scroll(0, 0);
-    }, 50);
-
-    return () => {
-      clearTimeout(timeout1);
-      clearTimeout(timeout2);
-    };
-  }, [pathname]);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -93,7 +74,7 @@ export default function ProjectDetailPage() {
     return (
       <main className={styles.projectDetail}>
         <div className={styles.container}>
-          <Link href={referrer} scroll={false} className={styles.backLink}>
+          <Link href={referrer} className={styles.backLink} onClick={handleBack}>
             ← {t("projects.allProjects")}
           </Link>
           <p style={{ color: "#666", textAlign: "center" }}>
@@ -112,7 +93,7 @@ export default function ProjectDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <Link href={referrer} scroll={false} className={styles.backLink}>
+          <Link href={referrer} className={styles.backLink} onClick={handleBack}>
             ← {t("projects.allProjects")}
           </Link>
 

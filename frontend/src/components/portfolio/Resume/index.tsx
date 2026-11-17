@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import RoundedButton from "@/common/RoundedButton";
 import { useTranslations } from "@/lib/i18n/hooks";
 import { getApiBaseUrl } from "@/lib/api/client";
+import { usePortfolioVisit } from "@/components/providers";
 
 interface ResumeData {
   filename: string;
@@ -13,6 +14,7 @@ interface ResumeData {
 }
 
 export default function Resume() {
+  const { hasVisitedHome } = usePortfolioVisit();
   const { t, locale } = useTranslations();
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,7 +55,7 @@ export default function Resume() {
     <section id="resume" className={styles.resume}>
       <div className={styles.container}>
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={hasVisitedHome ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}

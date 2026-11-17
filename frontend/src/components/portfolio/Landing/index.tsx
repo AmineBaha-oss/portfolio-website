@@ -8,46 +8,54 @@ import { slideUp } from './animation';
 import { motion } from 'framer-motion';
 import { useTranslations } from '@/lib/i18n/hooks';
 import { DEFAULT_BACKGROUND } from '@/lib/utils/cdn-url';
+import { usePortfolioVisit } from '@/components/providers';
+
+let lastMarqueeXPercent = 0;
+let lastMarqueeDirection = -1;
 
 export default function Home() {
   const { t, locale } = useTranslations();
   const firstText = useRef(null);
   const secondText = useRef(null);
   const slider = useRef(null);
-  let xPercent = 0;
-  let direction = -1;
+  const xPercent = useRef(lastMarqueeXPercent);
+  const direction = useRef(lastMarqueeDirection);
+  const animationFrame = useRef<number | null>(null);
+  const { hasVisitedHome } = usePortfolioVisit();
 
   useLayoutEffect( () => {
     gsap.registerPlugin(ScrollTrigger);
-    gsap.to(slider.current, {
+    const context = gsap.context(() => gsap.to(slider.current, {
       scrollTrigger: {
         trigger: document.documentElement,
         scrub: 0.25,
         start: 0,
         end: window.innerHeight,
-        onUpdate: e => direction = e.direction * -1
+        onUpdate: e => direction.current = e.direction * -1
       },
       x: "-500px",
-    })
+    }));
 
-    requestAnimationFrame(animate);
+    const animate = () => {
+      if (xPercent.current < -100) xPercent.current = 0;
+      else if (xPercent.current > 0) xPercent.current = -100;
+      gsap.set(firstText.current, { xPercent: xPercent.current });
+      gsap.set(secondText.current, { xPercent: xPercent.current });
+      xPercent.current += 0.1 * direction.current;
+      lastMarqueeXPercent = xPercent.current;
+      lastMarqueeDirection = direction.current;
+      animationFrame.current = requestAnimationFrame(animate);
+    };
+    animationFrame.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationFrame.current !== null) cancelAnimationFrame(animationFrame.current);
+      context.revert();
+    };
   }, [])
 
-  const animate = () => {
-    if(xPercent < -100){
-      xPercent = 0;
-    }
-    else if(xPercent > 0){
-      xPercent = -100;
-    }
-    gsap.set(firstText.current, {xPercent: xPercent})
-    gsap.set(secondText.current, {xPercent: xPercent})
-    requestAnimationFrame(animate);
-    xPercent += 0.1 * direction;
-  }
-
   return (
-    <motion.main variants={slideUp} initial="initial" animate="enter" className={styles.landing}>
+    <motion.main variants={slideUp} initial={hasVisitedHome ? 'enter' : 'initial'} animate="enter" className={styles.landing}>
       <Image 
         src={DEFAULT_BACKGROUND}
         fill={true}
@@ -57,7 +65,7 @@ export default function Home() {
       {/* Animated Name at Top */}
       <motion.div 
         className={styles.nameContainer}
-        initial="hidden"
+        initial={hasVisitedHome ? 'visible' : 'hidden'}
         whileInView="visible"
         viewport={{ once: true, amount: 0.5 }}
       >
@@ -71,7 +79,7 @@ export default function Home() {
               }}
               transition={{
                 duration: 0.5,
-                delay: 3.5 + index * 0.08,
+                delay: hasVisitedHome ? 0 : 3.5 + index * 0.08,
                 ease: [0.6, -0.05, 0.01, 0.99]
               }}
             >

@@ -13,15 +13,11 @@ export default function Project({index, title, description, projectId, manageMod
             const centerX = window.innerWidth / 2;
             const centerY = window.innerHeight / 2;
             manageModal(true, index, centerX, centerY);
-        } else {
-            document.documentElement.scrollTop = 0;
-            document.body.scrollTop = 0;
-            window.scroll(0, 0);
         }
     };
 
     return (
-        <Link href={`/projects/${projectId}`} scroll={false} style={{ textDecoration: 'none', color: 'inherit' }} onClick={handleClick}>
+        <Link href={`/projects/${projectId}`} style={{ textDecoration: 'none', color: 'inherit' }} onClick={handleClick}>
             <div
                 onMouseEnter={(e) => { if (typeof window !== 'undefined' && window.innerWidth > 768) manageModal(true, index, e.clientX, e.clientY); }}
                 onMouseLeave={(e) => { if (typeof window !== 'undefined' && window.innerWidth > 768) manageModal(false, index, e.clientX, e.clientY); }}

@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useLanguage } from '@/lib/i18n/context';
 import { getEducation, type Education } from '@/lib/api/client';
 import { useTranslations } from '@/lib/i18n/hooks';
+import { usePortfolioVisit } from '@/components/providers';
 
 function formatDate(dateString: string, locale: string): string {
   if (!dateString) return '';
@@ -62,6 +63,7 @@ export default function Education() {
     });
   }, [education, locale]);
   const { t } = useTranslations();
+  const { hasVisitedHome } = usePortfolioVisit();
 
   if (loading) {
     return (
@@ -89,7 +91,7 @@ export default function Education() {
     <section id="education" className={styles.education}>
       <div className={styles.container}>
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={hasVisitedHome ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
@@ -103,7 +105,7 @@ export default function Education() {
             <motion.div
               key={index}
               className={styles.educationCard}
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={hasVisitedHome ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: index * 0.2 }}
               viewport={{ once: true }}

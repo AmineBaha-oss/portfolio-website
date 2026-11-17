@@ -10,6 +10,7 @@ import { useLanguage } from '@/lib/i18n/context';
 import { getProjects, type Project } from '@/lib/api/client';
 import { useTranslations } from '@/lib/i18n/hooks';
 import { DEFAULT_BACKGROUND } from '@/lib/utils/cdn-url';
+import { usePortfolioVisit } from '@/components/providers';
 
 const scaleAnimation = {
   initial: { scale: 0, x: "-50%", y: "-50%" },
@@ -18,6 +19,7 @@ const scaleAnimation = {
 };
 
 export default function ProjectsPage() {
+  const { hasVisitedHome } = usePortfolioVisit();
   const { locale } = useLanguage();
   const { t } = useTranslations();
   const [projects, setProjects] = useState<Project[]>([]);
@@ -36,30 +38,6 @@ export default function ProjectsPage() {
   const yMoveCursor = useRef<((value: number) => void) | null>(null);
   const xMoveCursorLabel = useRef<((value: number) => void) | null>(null);
   const yMoveCursorLabel = useRef<((value: number) => void) | null>(null);
-
-  // Force scroll to top on mount/navigation
-  useEffect(() => {
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    window.scroll(0, 0);
-    
-    const timeout1 = setTimeout(() => {
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      window.scroll(0, 0);
-    }, 10);
-
-    const timeout2 = setTimeout(() => {
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      window.scroll(0, 0);
-    }, 50);
-    
-    return () => {
-      clearTimeout(timeout1);
-      clearTimeout(timeout2);
-    };
-  }, []);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -133,11 +111,11 @@ export default function ProjectsPage() {
     <main onMouseMove={(e) => { moveItems(e.clientX, e.clientY) }} className={styles.projects}>
       <div className={styles.header}>
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={hasVisitedHome ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <Link href="/#projects" scroll={false} className={styles.backLink}>← {t('common.back')}</Link>
+          <Link href="/#projects" className={styles.backLink}>← {t('common.back')}</Link>
           <h1 className={styles.title}>{t('projects.allProjects')}</h1>
           <p className={styles.subtitle}>{t('projects.allProjectsSubtitle')}</p>
         </motion.div>
@@ -145,14 +123,10 @@ export default function ProjectsPage() {
 
       <div className={styles.body}>
         {projects.length > 0 ? projects.map((project, index) => (
-          <Link href={`/projects/${project.id}`} key={project.id} scroll={false} onClick={() => {
-            document.documentElement.scrollTop = 0;
-            document.body.scrollTop = 0;
-            window.scroll(0, 0);
-          }}>
+          <Link href={`/projects/${project.id}`} key={project.id}>
             <motion.div
               className={styles.project}
-              initial={{ opacity: 0, y: 30 }}
+              initial={hasVisitedHome ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               onMouseEnter={(e) => { manageModal(true, index, e.clientX, e.clientY) }}

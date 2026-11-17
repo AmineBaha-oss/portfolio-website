@@ -7,8 +7,10 @@ import { useLanguage } from '@/lib/i18n/context';
 import { getTestimonials, submitTestimonial, ApiError, type Testimonial } from '@/lib/api/client';
 import { useTranslations } from '@/lib/i18n/hooks';
 import TurnstileWidget from '@/components/TurnstileWidget';
+import { usePortfolioVisit } from '@/components/providers';
 
 export default function Testimonials() {
+  const { hasVisitedHome } = usePortfolioVisit();
   const { locale } = useLanguage();
   const { t } = useTranslations();
   const [testimonialsData, setTestimonialsData] = useState<Array<{ id: string; name: string; role: string; company: string; testimonial: string; rating: number; status: string }>>([]);
@@ -161,7 +163,7 @@ export default function Testimonials() {
       <div className={styles.container}>
         <motion.div
           className={styles.header}
-          initial={{ opacity: 0, y: 50 }}
+          initial={hasVisitedHome ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
@@ -185,7 +187,7 @@ export default function Testimonials() {
               <motion.div
                 key={testimonial.id}
                 className={styles.testimonialCard}
-                initial={{ opacity: 0, y: 30 }}
+                initial={hasVisitedHome ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
@@ -214,7 +216,7 @@ export default function Testimonials() {
 
           <motion.div
             className={styles.submitSection}
-            initial={{ opacity: 0 }}
+            initial={hasVisitedHome ? { opacity: 1 } : { opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}

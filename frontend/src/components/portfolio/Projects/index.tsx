@@ -141,16 +141,7 @@ export default function Home() {
         )
       }
     </div>
-    <Link href="/projects" scroll={false} onClick={(e) => {
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      window.scroll(0, 0);
-      setTimeout(() => {
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
-        window.scroll(0, 0);
-      }, 10);
-    }}>
+    <Link href="/projects">
       <Rounded backgroundColor="#2a2b2c">
         <p>{t('projects.moreWork')}</p>
       </Rounded>

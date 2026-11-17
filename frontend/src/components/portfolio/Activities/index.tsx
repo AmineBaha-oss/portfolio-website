@@ -6,9 +6,11 @@ import { motion } from 'framer-motion';
 import { getActivities } from '@/lib/api/client';
 import type { Activity } from '@/lib/api/activity-types';
 import { useTranslations } from '@/lib/i18n/hooks';
+import { usePortfolioVisit } from '@/components/providers';
 import styles from './style.module.scss';
 
 export default function Activities() {
+  const { hasVisitedHome } = usePortfolioVisit();
   const { locale, t } = useTranslations();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -36,7 +38,7 @@ export default function Activities() {
         {state === 'ready' && <div className={styles.list}>
           {activities.map((activity, index) => (
             <motion.article className={styles.card} key={activity.id}
-              initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+              initial={hasVisitedHome ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.4, delay: Math.min(index * 0.08, 0.3) }}>
               <div className={styles.meta}>
                 <span className={styles.category}>{t(`activities.categories.${activity.category}`)}</span>

@@ -1,7 +1,7 @@
 'use client';
 
 import styles from './page.module.scss';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import Preloader from '../components/portfolio/Preloader';
 import Navigation from '../components/portfolio/Navigation';
@@ -18,66 +18,41 @@ import Description from '../components/portfolio/Description';
 import SlidingImages from '../components/portfolio/SlidingImages';
 import Contact from '../components/portfolio/Contact';
 import { useDataRefresh } from '@/lib/hooks/useDataRefresh';
+import { usePortfolioVisit } from '@/components/providers';
 
 export default function HomePage() {
+  const { hasVisitedHome, markHomeVisited } = usePortfolioVisit();
+  const shouldPlayIntro = useRef(!hasVisitedHome);
   // Enable automatic data refresh
   useDataRefresh();
   
-  // Always initialize as true for consistent SSR/CSR
-  const [isLoading, setIsLoading] = useState(true);
-  const [showPreloader, setShowPreloader] = useState(true);
+  // Play the intro once per document; provider state survives route changes.
+  const [isLoading, setIsLoading] = useState(() => !hasVisitedHome);
+  const [showPreloader, setShowPreloader] = useState(() => !hasVisitedHome);
 
   useEffect(() => {
-    // Check if navigating to a hash (like #projects)
+    // Keep the intro for a fresh page load, but skip it when the App Router
+    // restores this page after visiting a project and pressing Back.
     const hasHash = window.location.hash;
-    
-    // Skip preloader if coming from a hash link
-    if (hasHash) {
+    if (!shouldPlayIntro.current || hasHash) {
+      markHomeVisited();
       setIsLoading(false);
       setShowPreloader(false);
       document.body.style.cursor = 'default';
-      
-      // Smooth scroll to the hash
-      setTimeout(() => {
-        const element = document.querySelector(hasHash);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }
-        // Clear the hash from URL after scrolling
-        window.history.replaceState(null, '', '/');
-      }, 50);
       return;
     }
 
-    (async () => {
-      const LocomotiveScroll = (await import('locomotive-scroll')).default;
-      
-      const locomotiveScroll = new LocomotiveScroll({
-        lenisOptions: {
-          wrapper: window,
-          content: document.documentElement,
-          lerp: 0.1,
-          duration: 1.2,
-          orientation: 'vertical',
-          gestureOrientation: 'vertical',
-          smoothWheel: true,
-          wheelMultiplier: 1,
-          touchMultiplier: 2,
-          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        },
-      });
+    markHomeVisited();
+    const timeout = window.setTimeout(() => {
+      setIsLoading(false);
+      document.body.style.cursor = 'default';
+      window.scrollTo(0, 0);
+    }, 2000);
 
-      setTimeout(() => {
-        setIsLoading(false);
-        document.body.style.cursor = 'default';
-        window.scrollTo(0, 0);
-      }, 2000);
-
-      return () => {
-        locomotiveScroll.destroy();
-      };
-    })();
-  }, []);
+    return () => window.clearTimeout(timeout);
+    // This runs once per document. Provider state survives client navigation,
+    // so a return visit does not restart the introduction timer.
+  }, [markHomeVisited]);
 
   return (
     <main className={styles.main}>
